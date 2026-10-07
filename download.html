@@ -75,7 +75,8 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.8);-webkit-bac
 .faq details[open]{border-color:var(--line-strong)}
 .faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.05rem 1.3rem;font-weight:700;font-size:.98rem}
 .faq summary::-webkit-details-marker{display:none}
-.faq summary .pm{flex:none;width:26px;height:26px;border:1px solid var(--line-strong);color:var(--tea);display:grid;place-items:center;font-size:1rem;transition:transform .25s,background .25s}
+.faq summary .pm{flex:none;width:26px;height:26px;border:1px solid var(--line-strong);color:var(--tea);display:grid;place-items:center;line-height:1;transition:transform .25s,background .25s}
+.faq summary .pm svg{display:block}
 .faq details[open] summary .pm{transform:rotate(45deg);background:rgba(240,179,92,.1)}
 .faq .ans{padding:0 1.3rem 1.2rem;color:var(--muted);font-size:.93rem}
 
@@ -199,7 +200,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
       <div class="step-card">
         <div class="no">STEP 01</div>
         <h4>下载整合包</h4>
-        <p>在抖音主页找到对应版本的整合包下载。</p>
+        <p>在官网内下载客户端整合包。</p>
       </div>
       <div class="step-card">
         <div class="no">STEP 02</div>
@@ -244,15 +245,15 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
     <h2 class="sec-title rv">装之前，先看两句</h2>
     <div class="faq rv">
       <details>
-        <summary>整合包在哪下载？<span class="pm">＋</span></summary>
+        <summary>整合包在哪下载？<span class="pm" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M12 5v14M5 12h14"/></svg></span></summary>
         <div class="ans">加入主播粉丝群获取，或直接在官网本页「文件下载区」下载安装即可。下载链接更新时也会第一时间发在主页。</div>
       </details>
       <details>
-        <summary>不会安装怎么办？<span class="pm">＋</span></summary>
+        <summary>不会安装怎么办？<span class="pm" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M12 5v14M5 12h14"/></svg></span></summary>
         <div class="ans">主页有分步教程，跟着装就行。遇到问题可以私信，或者在玩家群里喊一声，大家都会帮忙。</div>
       </details>
       <details>
-        <summary>PC 和 PE 有什么区别？<span class="pm">＋</span></summary>
+        <summary>PC 和 PE 有什么区别？<span class="pm" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M12 5v14M5 12h14"/></svg></span></summary>
         <div class="ans">PC 版是电脑端 Java 版 26.2 整合包；PE 版是手机端客户端。两个服务器是互通的，PC 和手机玩家可以一起进服游玩。</div>
       </details>
     </div>
@@ -293,7 +294,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
       </div>
       <div class="foot-links">
         <a href="index.html">返回首页</a>
-        <a href="https://www.douyin.com/search/27276177171?type=user" target="_blank" rel="noopener">抖音主页</a>
+        <a href="https://v.douyin.com/bYurGANvIxc/" target="_blank" rel="noopener">抖音主页</a>
       </div>
     </div>
     <div class="foot-copy">
