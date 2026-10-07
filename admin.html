@@ -355,14 +355,26 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       return fetch(giteeBase(encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd});
     });
   }
+  function ghPut(path, body){
+    return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,
+      {method:"PUT", headers:ghHeaders(), body:JSON.stringify(body)});
+  }
   function ghWriteB64(path, b64, msg){
-    return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,{headers:ghHeaders()})
+    var GET="https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path;
+    return fetch(GET,{headers:ghHeaders()})
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(cur){
         var body={message:msg, content:b64, branch:GH_BRANCH};
         if(cur && cur.sha) body.sha=cur.sha;
-        return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,
-          {method:"PUT", headers:ghHeaders(), body:JSON.stringify(body)});
+        return ghPut(path, body).then(function(r){
+          if(r.ok || (r.status!==409 && r.status!==422)) return r;   /* 成功或非 sha 冲突直接返回 */
+          return fetch(GET,{headers:ghHeaders()})                    /* sha 冲突：重取后再写一次 */
+            .then(function(r2){ return r2.ok ? r2.json() : null; })
+            .then(function(cur2){
+              if(!cur2 || !cur2.sha) return r;
+              return ghPut(path,{message:msg, content:b64, branch:GH_BRANCH, sha:cur2.sha});
+            });
+        });
       });
   }
   function ghWrite(path, content, msg){ return ghWriteB64(path, b64u(content), msg); }
@@ -391,9 +403,10 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         jobs.push(giteeWriteRoot(k,b64u(jsons[k]),"sync "+k));   /* Gitee 权威存储 */
         jobs.push(ghWrite(k,jsons[k],"sync "+k));                 /* 本站镜像供页面读取 */
       });
-      return Promise.all(jobs.map(function(p){
-        return p.then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); });
-      }));
+      /* 串行执行，避免并发 sha 竞态与接口限流 */
+      return jobs.reduce(function(p,j){
+        return p.then(function(){ return j.then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); }); });
+      }, Promise.resolve());
     }).then(function(){ toast("已同步各部分 JSON（Gitee 权威 + 本站镜像）"); })
       .catch(function(e){ toast("同步失败："+(e&&e.message||"未知错误")); });
   }
