@@ -835,8 +835,16 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
       holder.querySelectorAll(".rv").forEach(function(el){ el.classList.add("in"); });
     }
   }
-  fetch("https://judiao417.github.io/oolong-craft-site/memorial.json?t="+Date.now(),{cache:"no-store"})
-    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+  /* 数据实时读取：优先 GitHub raw（推送后即时生效），失败回退本站镜像 */
+  function rtJson(path){
+    return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path,{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .catch(function(){
+        return fetch("https://judiao417.github.io/oolong-craft-site/"+path+"?t="+Date.now(),{cache:"no-store"})
+          .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
+      });
+  }
+  rtJson("memorial.json")
     .then(function(m){ renderGal(m); })
     .catch(function(){ renderGal([]); });
 

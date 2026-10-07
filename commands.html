@@ -220,9 +220,17 @@ function render(){
 qEl.addEventListener("input",render);
 render();
 
-/* 数据优先从本站镜像实时读取，失败时使用内置示例 */
-fetch("https://judiao417.github.io/oolong-craft-site/commands.json?t="+Date.now(),{cache:"no-store"})
-  .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+/* 数据优先从 Gitee 权威仓库实时读取（写入立即生效），失败回退本站镜像；仍失败使用内置示例 */
+  /* 数据实时读取：优先 GitHub raw（推送后即时生效），失败回退本站镜像 */
+  function rtJson(path){
+    return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path,{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .catch(function(){
+        return fetch("https://judiao417.github.io/oolong-craft-site/"+path+"?t="+Date.now(),{cache:"no-store"})
+          .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
+      });
+  }
+rtJson("commands.json")
   .then(function(d){
     if(d && d.length){ ALL=d; render(); }
   })
