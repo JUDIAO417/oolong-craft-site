@@ -360,15 +360,15 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       {method:"PUT", headers:ghHeaders(), body:JSON.stringify(body)});
   }
   function ghWriteB64(path, b64, msg){
-    var GET="https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path;
-    return fetch(GET,{headers:ghHeaders()})
+    function getUrl(){ return "https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path+"?ts="+Date.now(); } /* ts 强制绕过 HTTP 缓存，取最新 sha */
+    return fetch(getUrl(),{headers:ghHeaders(),cache:"no-store"})
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(cur){
         var body={message:msg, content:b64, branch:GH_BRANCH};
         if(cur && cur.sha) body.sha=cur.sha;
         return ghPut(path, body).then(function(r){
           if(r.ok || (r.status!==409 && r.status!==422)) return r;   /* 成功或非 sha 冲突直接返回 */
-          return fetch(GET,{headers:ghHeaders()})                    /* sha 冲突：重取后再写一次 */
+          return fetch(getUrl(),{headers:ghHeaders(),cache:"no-store"}) /* sha 冲突：绕过缓存重取再写一次 */
             .then(function(r2){ return r2.ok ? r2.json() : null; })
             .then(function(cur2){
               if(!cur2 || !cur2.sha) return r;
@@ -379,7 +379,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   }
   function ghWrite(path, content, msg){ return ghWriteB64(path, b64u(content), msg); }
   function ghDelete(path){
-    return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,{headers:ghHeaders()})
+    return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path+"?ts="+Date.now(),{headers:ghHeaders(),cache:"no-store"})
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(cur){
         if(!cur || !cur.sha) return false;
