@@ -2,7 +2,10 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>文件管理 · 乌龙茶的地盘</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20fill='%230A110D'/%3E%3Crect%20x='5'%20y='10'%20width='20'%20height='14'%20fill='%23F0B35C'/%3E%3Crect%20x='5'%20y='10'%20width='20'%20height='4'%20fill='%23E0933A'/%3E%3Crect%20x='25'%20y='14'%20width='4'%20height='6'%20fill='%23F0B35C'/%3E%3Crect%20x='29'%20y='16'%20width='2'%20height='2'%20fill='%23E0933A'/%3E%3Cpath%20d='M9%206c2%201%202%203%200%204M15%206c2%201%202%203%200%204M21%206c2%201%202%203%200%204'%20stroke='%23EDE4CF'%20stroke-width='2'%20fill='none'%20stroke-linecap='square'/%3E%3C/svg%3E">
@@ -304,16 +307,25 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       .then(function(items){ return (items||[]).filter(function(i){ return i.type==="file"; }); });
   }
   function giteeWrite(cat, name, b64, message){
-    return giteeList(cat).then(function(items){
-      var found=(items||[]).filter(function(it){ return it.name===name; })[0];
-      var fd=new FormData();
-      fd.append("access_token",GITEE_TOKEN);
-      fd.append("content",b64);
-      fd.append("message",message);
-      fd.append("branch",GITEE_BRANCH);
-      if(found) fd.append("sha",found.sha);   /* 覆盖已有文件必须带 sha */
-      return fetch(giteeBase(cat+"/"+encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd});
-    });
+    function attempt(times){
+      return giteeList(cat).then(function(items){
+        var found=(items||[]).filter(function(it){ return it.name===name; })[0];
+        var fd=new FormData();
+        fd.append("access_token",GITEE_TOKEN);
+        fd.append("content",b64);
+        fd.append("message",message);
+        fd.append("branch",GITEE_BRANCH);
+        if(found) fd.append("sha",found.sha);   /* 覆盖已有文件必须带 sha */
+        return fetch(giteeBase(cat+"/"+encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd})
+          .then(function(r){
+            if(r.ok) return r;
+            if((r.status===409||r.status===422) && times<3)  /* sha 冲突：等待后重取最新 sha 再写 */
+              return new Promise(function(res){ setTimeout(res, 250*(times+1)); }).then(function(){ return attempt(times+1); });
+            return r;
+          });
+      });
+    }
+    return attempt(0);
   }
   function giteeDelete(cat, name){
     return giteeList(cat).then(function(items){
@@ -343,39 +355,49 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     })).then(function(){ return arr; });
   }
   function b64u(s){ return btoa(unescape(encodeURIComponent(s))); }
-  function giteeWriteRoot(name, b64, message){   /* 仓库根目录文件（JSON） */
-    return giteeList("").then(function(items){
-      var found=(items||[]).filter(function(it){ return it.name===name; })[0];
-      var fd=new FormData();
-      fd.append("access_token",GITEE_TOKEN);
-      fd.append("content",b64);
-      fd.append("message",message);
-      fd.append("branch",GITEE_BRANCH);
-      if(found) fd.append("sha",found.sha);
-      return fetch(giteeBase(encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd});
-    });
+  function giteeWriteRoot(name, b64, message){   /* 仓库根目录文件（JSON），409 冲突自动重试 */
+    function attempt(times){
+      return giteeList("").then(function(items){
+        var found=(items||[]).filter(function(it){ return it.name===name; })[0];
+        var fd=new FormData();
+        fd.append("access_token",GITEE_TOKEN);
+        fd.append("content",b64);
+        fd.append("message",message);
+        fd.append("branch",GITEE_BRANCH);
+        if(found) fd.append("sha",found.sha);
+        return fetch(giteeBase(encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd})
+          .then(function(r){
+            if(r.ok) return r;
+            if((r.status===409||r.status===422) && times<3)
+              return new Promise(function(res){ setTimeout(res, 250*(times+1)); }).then(function(){ return attempt(times+1); });
+            return r;
+          });
+      });
+    }
+    return attempt(0);
   }
   function ghPut(path, body){
     return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,
       {method:"PUT", headers:ghHeaders(), body:JSON.stringify(body)});
   }
   function ghWriteB64(path, b64, msg){
+    path=path.split("/").map(function(s){ return encodeURIComponent(s); }).join("/");   /* 文件名可能含中文/空格，必须编码 */
     function getUrl(){ return "https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path+"?ts="+Date.now(); } /* ts 强制绕过 HTTP 缓存，取最新 sha */
-    return fetch(getUrl(),{headers:ghHeaders(),cache:"no-store"})
-      .then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(cur){
-        var body={message:msg, content:b64, branch:GH_BRANCH};
-        if(cur && cur.sha) body.sha=cur.sha;
-        return ghPut(path, body).then(function(r){
-          if(r.ok || (r.status!==409 && r.status!==422)) return r;   /* 成功或非 sha 冲突直接返回 */
-          return fetch(getUrl(),{headers:ghHeaders(),cache:"no-store"}) /* sha 冲突：绕过缓存重取再写一次 */
-            .then(function(r2){ return r2.ok ? r2.json() : null; })
-            .then(function(cur2){
-              if(!cur2 || !cur2.sha) return r;
-              return ghPut(path,{message:msg, content:b64, branch:GH_BRANCH, sha:cur2.sha});
-            });
+    function attempt(times){
+      return fetch(getUrl(),{headers:ghHeaders(),cache:"no-store"})
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(cur){
+          var body={message:msg, content:b64, branch:GH_BRANCH};
+          if(cur && cur.sha) body.sha=cur.sha;
+          return ghPut(path, body).then(function(r){
+            if(r.ok) return r;
+            if((r.status===409||r.status===422) && times<3)  /* sha 冲突：等待后重取最新 sha 再写 */
+              return new Promise(function(res){ setTimeout(res, 250*(times+1)); }).then(function(){ return attempt(times+1); });
+            return r;
+          });
         });
-      });
+    }
+    return attempt(0);
   }
   function ghWrite(path, content, msg){ return ghWriteB64(path, b64u(content), msg); }
   function ghDelete(path){
@@ -387,7 +409,10 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
           {method:"DELETE", headers:ghHeaders(), body:JSON.stringify({message:"delete "+path, sha:cur.sha, branch:GH_BRANCH})});
       });
   }
+  var pubBusy=false;   /* 同步锁：防止快速连续操作并发写同一文件导致 sha 冲突 */
   function publishAll(){
+    if(pubBusy){ toast("正在同步中，请稍候…"); return Promise.resolve(); }
+    pubBusy=true;
     return Promise.all([giteeList("pc"),giteeList("pe")]).then(function(res){
       return Promise.all([fileMetaSmart("pc",res[0]),fileMetaSmart("pe",res[1])]);
     }).then(function(fm){
@@ -406,12 +431,21 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         jobs.push(giteeWriteRoot(k,b64u(jsons[k]),"sync "+k));   /* Gitee 权威存储 */
         jobs.push(ghWrite(k,jsons[k],"sync "+k));                 /* 本站镜像供页面读取 */
       });
-      /* 串行执行，避免并发 sha 竞态与接口限流 */
+      /* 串行执行，避免并发 sha 竞态与接口限流；单个文件失败不中断整体 */
       return jobs.reduce(function(p,j){
-        return p.then(function(){ return j.then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); }); });
-      }, Promise.resolve());
-    }).then(function(){ toast("已同步各部分 JSON（Gitee 权威 + 本站镜像）"); })
-      .catch(function(e){ toast("同步失败："+(e&&e.message||"未知错误")); });
+        return p.then(function(acc){
+          return j.then(function(r){
+            if(!r.ok) return r.json().then(function(d){ acc.fail.push((d&&d.message)||("HTTP "+r.status)); return acc; }, function(){ acc.fail.push("HTTP "+r.status); return acc; });
+            acc.ok++; return acc;
+          }, function(e){ acc.fail.push((e&&e.message)||"网络错误"); return acc; });
+        });
+      }, Promise.resolve({ok:0,fail:[]}));
+    }).then(function(acc){
+      if(acc.fail.length) toast("部分同步失败（"+acc.fail.length+" 个）："+acc.fail.join("；").slice(0,80));
+      else toast("已同步各部分 JSON（Gitee 权威 + 本站镜像）");
+    })
+      .catch(function(e){ toast("同步失败："+(e&&e.message||"未知错误")); })
+      .finally(function(){ pubBusy=false; });
   }
 
   /* ===== 列表渲染 ===== */
