@@ -241,7 +241,7 @@ footer{border-top:1px solid var(--glass-line);background:rgba(13,19,16,.55);-web
 
     <div class="note rv">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5L12 3z"/></svg>
-      <p><b>为什么地址不直接写在网页上？</b>为了挡掉无关打扰和恶意压测。整合包里已经内置好服务器链接，装完即达——也顺便通过抖音认识一下，进服不孤单。</p>
+      <p><b>为什么地址不直接写在网页上？</b>为了挡掉无关打扰和恶意压测。整合包里已经内置好服务器链接，装完即达——也顺便进粉丝群认识一下，进服不孤单。</p>
     </div>
   </div>
 </section>
@@ -372,27 +372,36 @@ footer{border-top:1px solid var(--glass-line);background:rgba(13,19,16,.55);-web
   mask.addEventListener("click",function(e){ if(e.target===mask) closeModal(); });
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeModal(); });
 
-  function copyText(txt){
-    function done(){ toast("已复制群号，正在打开抖音搜索…"); window.open("https://www.douyin.com/search/"+encodeURIComponent(txt)+"?type=user","_blank","noopener"); }
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(txt).then(done,function(){ fallbackCopy(txt); done(); });
-    } else { fallbackCopy(txt); done(); }
-  }
   function fallbackCopy(txt){
     var ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
     document.body.appendChild(ta); ta.select();
     try{ document.execCommand("copy"); }catch(e){}
     document.body.removeChild(ta);
   }
+  function joinQQ(gid){
+    var pc="tencent://groupwelcome/?p=1&oldSubtype=1&groupCode="+gid+"&subtype=0";      /* PC 端拉起 QQ 加群 */
+    var mb="mqqapi://card/show_psl_card?src_type=internal&version=1&uin="+gid+"&card_type=group&source=external"; /* 手机端拉起 QQ 加群 */
+    var used=false;
+    var probe=function(url){ if(used) return; used=true; var ifr=document.createElement("iframe");
+      ifr.style.display="none"; ifr.src=url; document.body.appendChild(ifr);
+      setTimeout(function(){ ifr.remove(); },2500);
+    };
+    probe(mb); probe(pc);
+    setTimeout(function(){                       /* 兜底：未弹出 QQ 则复制群号提示 */
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(gid).then(function(){ toast("已尝试拉起 QQ，如未弹出请在 QQ 内搜索群号加入（已复制）"); },function(){ fallbackCopy(gid); toast("已尝试拉起 QQ，如未弹出请复制群号到 QQ 搜索加入"); });
+      } else { fallbackCopy(gid); toast("已尝试拉起 QQ，如未弹出请复制群号到 QQ 搜索加入"); }
+    },1200);
+  }
 
   function renderGroups(){
     if(!groups.length){ mBody.innerHTML='<div class="modal-empty">粉丝群正在整理中，稍后再来。</div>'; return; }
     mBody.innerHTML='<div class="g-grid">'+groups.map(function(g){
       return '<div class="gcard"><div class="g-title">'+esc(g.title)+'</div>'+
-        '<div class="g-qq" role="button" tabindex="0" data-qq="'+esc(g.qq)+'">群号：'+esc(g.qq)+'</div></div>';
+        '<div class="g-qq" role="button" tabindex="0" data-gid="'+esc(g.qq)+'" title="点击一键加群">'+esc(g.qq)+'</div></div>';
     }).join('')+'</div>';
-    mBody.querySelectorAll("[data-qq]").forEach(function(el){
-      el.addEventListener("click",function(){ copyText(el.getAttribute("data-qq")); });
+    mBody.querySelectorAll("[data-gid]").forEach(function(el){
+      el.addEventListener("click",function(){ joinQQ(el.getAttribute("data-gid")); });
     });
   }
   function renderVideos(cat){
@@ -414,7 +423,7 @@ footer{border-top:1px solid var(--glass-line);background:rgba(13,19,16,.55);-web
     });
   }
   function openModal(kind,cat){
-    if(kind==="groups"){ mTitle.textContent="主播粉丝群 · 点群号直接进群"; renderGroups(); }
+    if(kind==="groups"){ mTitle.textContent="主播粉丝群 · 点击群号一键加群"; renderGroups(); }
     else { mTitle.textContent="安装教程 · "+(cat==="pc"?"PC 版":"PE 版")+"，点击播放"; renderVideos(cat||"pc"); }
     mask.hidden=false; document.body.style.overflow="hidden";
   }
