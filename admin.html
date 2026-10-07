@@ -301,6 +301,17 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   /* ===== 数据同步：各部分独立 JSON，Gitee 权威 + 本站镜像 ===== */
   function ghHeaders(){ return {"Authorization":"token "+GH_TOKEN,"Accept":"application/vnd.github+json"}; }
   function fileMeta(items){ return (items||[]).map(function(i){ return {name:i.name, size:i.size}; }); }
+  function fileMetaSmart(cat, items){   /* 列表缺 size 时逐个补查单文件 API */
+    var arr=(items||[]).map(function(i){ return {name:i.name, size:typeof i.size==="number"?i.size:null}; });
+    var need=arr.filter(function(x){ return x.size==null; });
+    if(!need.length) return Promise.resolve(arr);
+    return Promise.all(need.map(function(x){
+      return fetch(giteeBase(cat+"/"+encodeURIComponent(x.name))+"?access_token="+encodeURIComponent(GITEE_TOKEN))
+        .then(function(r){ return r.ok?r.json():null; })
+        .then(function(d){ if(d && typeof d.size==="number") x.size=d.size; return x; })
+        .catch(function(){ return x; });
+    })).then(function(){ return arr; });
+  }
   function b64u(s){ return btoa(unescape(encodeURIComponent(s))); }
   function giteeWriteRoot(name, b64, message){   /* 仓库根目录文件（JSON） */
     return giteeList("").then(function(items){
@@ -314,21 +325,33 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       return fetch(giteeBase(encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd});
     });
   }
-  function ghWrite(path, content, msg){
+  function ghWriteB64(path, b64, msg){
     return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,{headers:ghHeaders()})
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(cur){
-        var body={message:msg, content:b64u(content), branch:GH_BRANCH};
+        var body={message:msg, content:b64, branch:GH_BRANCH};
         if(cur && cur.sha) body.sha=cur.sha;
         return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,
           {method:"PUT", headers:ghHeaders(), body:JSON.stringify(body)});
       });
   }
+  function ghWrite(path, content, msg){ return ghWriteB64(path, b64u(content), msg); }
+  function ghDelete(path){
+    return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,{headers:ghHeaders()})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(cur){
+        if(!cur || !cur.sha) return false;
+        return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,
+          {method:"DELETE", headers:ghHeaders(), body:JSON.stringify({message:"delete "+path, sha:cur.sha, branch:GH_BRANCH})});
+      });
+  }
   function publishAll(){
     return Promise.all([giteeList("pc"),giteeList("pe")]).then(function(res){
+      return Promise.all([fileMetaSmart("pc",res[0]),fileMetaSmart("pe",res[1])]);
+    }).then(function(fm){
       var jsons={
-        "pc.json":JSON.stringify(fileMeta(res[0])),
-        "pe.json":JSON.stringify(fileMeta(res[1])),
+        "pc.json":JSON.stringify(fm[0]),
+        "pe.json":JSON.stringify(fm[1]),
         "groups.json":JSON.stringify(groups.slice(0,10)),
         "videos.json":JSON.stringify(videos.slice(0,50)),
         "memorial.json":JSON.stringify(memorial.slice(0,20))
@@ -539,9 +562,13 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   function delMem(i){
     var m=memorial[i]; if(!m) return;
     if(!confirm("删除纪念馆作品「"+m.title+"」？")) return;
-    if(m.img.indexOf("gitee.com/")>=0){
-      var tail=m.img.split("/raw/"+GITEE_BRANCH+"/")[1];
-      if(tail) giteeDelete("memorial",tail).catch(function(){});
+    if(m.img.indexOf("uploads/")===0){
+      var tail=m.img.slice(8);
+      giteeDelete("memorial",tail).catch(function(){});
+      ghDelete("uploads/"+tail).catch(function(){});
+    } else if(m.img.indexOf("gitee.com/")>=0){
+      var tail2=m.img.split("/raw/"+GITEE_BRANCH+"/")[1];
+      if(tail2) giteeDelete("memorial",tail2).catch(function(){});
     }
     memorial.splice(i,1); renderMem(); publishAll();
   }
@@ -552,14 +579,16 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     if(memorial.length>=20){ toast("纪念馆最多 20 个作品"); return; }
     if(f.size>5*1048576){ toast("截图请小于 5MB"); return; }
     addMemBtn.disabled=true; addMemBtn.textContent="上传中…";
-    var name=Date.now()+"-"+f.name;
+    var name=Date.now()+"-"+f.name, b64=null;
     var rd=new FileReader();
     rd.onload=function(){
-      giteeWrite("memorial",name,String(rd.result).split(",")[1],"upload memorial "+name)
+      b64=String(rd.result).split(",")[1];
+      giteeWrite("memorial",name,b64,"upload memorial "+name)
+        .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
+        .then(function(){ return ghWriteB64("uploads/"+name, b64, "sync img "+name); })
         .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
         .then(function(){
-          memorial.push({title:mTitle.value.trim(), desc:mDesc.value.trim(),
-            img:"https://gitee.com/"+GITEE_OWNER+"/"+GITEE_REPO+"/raw/"+GITEE_BRANCH+"/memorial/"+encodeURIComponent(name)});
+          memorial.push({title:mTitle.value.trim(), desc:mDesc.value.trim(), img:"uploads/"+name});
           mTitle.value=""; mDesc.value=""; mFile.value=""; mFileName.textContent="未选择图片";
           renderMem(); return publishAll();
         })
