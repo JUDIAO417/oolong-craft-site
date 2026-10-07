@@ -391,9 +391,12 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     return Promise.all([giteeList("pc"),giteeList("pe")]).then(function(res){
       return Promise.all([fileMetaSmart("pc",res[0]),fileMetaSmart("pe",res[1])]);
     }).then(function(fm){
+      /* 外链优先：Gitee 文件与同名外链重复时只保留外链（手机端下载更可靠） */
+      var pcItems=fm[0].filter(function(x){ return !extLinks.pc.some(function(e){ return e.name===x.name; }); }).concat(extLinks.pc);
+      var peItems=fm[1].filter(function(x){ return !extLinks.pe.some(function(e){ return e.name===x.name; }); }).concat(extLinks.pe);
       var jsons={
-        "pc.json":JSON.stringify(fm[0].concat(extLinks.pc)),
-        "pe.json":JSON.stringify(fm[1].concat(extLinks.pe)),
+        "pc.json":JSON.stringify(pcItems),
+        "pe.json":JSON.stringify(peItems),
         "groups.json":JSON.stringify(groups.slice(0,10)),
         "videos.json":JSON.stringify(videos.slice(0,50)),
         "memorial.json":JSON.stringify(memorial.slice(0,20))
