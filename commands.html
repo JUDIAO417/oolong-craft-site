@@ -102,6 +102,7 @@ footer a{color:var(--tea)}
   .hero-sub{font-size:.9rem}
   /* 手机端双列紧凑卡：一屏可看到多个模组，避免一屏只显示一张大卡 */
   .mod-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;align-items:stretch}  /* 双列等高：长短卡对齐更整齐 */
+  .mod-grid.single{grid-template-columns:1fr;max-width:none}  /* 选中单个分类：单列占满居中 */
   .mod-card{padding:.95rem .8rem .8rem}
   .mod-head h2{font-size:1rem}
   .mod-head .c{font-size:.45rem}
@@ -209,6 +210,7 @@ function render(){
   if(q||CAT){   /* 搜索或筛选时自动展开，避免内容被折叠挡住 */
     grid.querySelectorAll(".mod-card.collapsed").forEach(function(c){ c.classList.remove("collapsed"); });
   }
+  grid.classList.toggle("single", list.length===1 && !!CAT);  /* 手机端单分类占满整行 */
   cntEl.textContent=(list.length? n+" 条":"");
 }
 qEl.addEventListener("input",render);
