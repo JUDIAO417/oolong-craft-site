@@ -132,6 +132,17 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       <button class="btn btn-primary" id="uploadBtn">上传</button>
     </div>
 
+    <div class="up-row" style="margin-top:.8rem;align-items:center">
+      <span class="file-now">外链文件（不占仓库容量，下载页直接跳转）</span>
+    </div>
+    <div class="g-inputs">
+      <input type="text" id="linkName" placeholder="文件名，如：Fold Craft Launcher.apk">
+      <input type="text" id="linkUrl" placeholder="https://… 文件直链（网盘/其他直链）">
+    </div>
+    <div class="up-row">
+      <button class="btn btn-ghost btn-sm" id="addLink">添加外链文件</button>
+    </div>
+
     <div class="divider"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.8rem">
       <h2 style="font-size:1.2rem">仓库文件</h2>
@@ -225,6 +236,9 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       gQq=document.getElementById("gQq"),
       gList=document.getElementById("gList"),
       addGroupBtn=document.getElementById("addGroup"),
+      linkName=document.getElementById("linkName"),
+      linkUrl=document.getElementById("linkUrl"),
+      addLinkBtn=document.getElementById("addLink"),
       vSeg=document.getElementById("vSeg"),
       vCatSeg=document.getElementById("vCatSeg"),
       vTitle=document.getElementById("vTitle"),
@@ -242,6 +256,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       addMemBtn=document.getElementById("addMem");
 
   var CAT="pc";
+  var extLinks={pc:[],pe:[]};
   seg.addEventListener("click",function(e){
     var b=e.target.closest(".seg-btn"); if(!b) return;
     CAT=b.getAttribute("data-cat");
@@ -345,8 +360,8 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       return Promise.all([fileMetaSmart("pc",res[0]),fileMetaSmart("pe",res[1])]);
     }).then(function(fm){
       var jsons={
-        "pc.json":JSON.stringify(fm[0]),
-        "pe.json":JSON.stringify(fm[1]),
+        "pc.json":JSON.stringify(fm[0].concat(extLinks.pc)),
+        "pe.json":JSON.stringify(fm[1].concat(extLinks.pe)),
         "groups.json":JSON.stringify(groups.slice(0,10)),
         "videos.json":JSON.stringify(videos.slice(0,50)),
         "memorial.json":JSON.stringify(memorial.slice(0,20))
@@ -370,29 +385,43 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     if(!items.length){ el.innerHTML='<div class="empty">该分类暂无文件</div>'; return; }
     items=items.slice().sort(function(a,b){ return (b.size||0)-(a.size||0); });
     el.innerHTML=items.map(function(it){
-      return '<div class="file-row"><span class="nm">'+esc(it.name)+'</span><span class="sz">'+(it.size==null?"—":fmt(it.size))+'</span><button class="btn btn-danger btn-sm" data-del="'+esc(it.name)+'" data-cat="'+cat+'">删除</button></div>';
+      var tag=it.url?'<span class="sz" style="color:var(--tea)">[外链]</span>':'';
+      return '<div class="file-row"><span class="nm">'+esc(it.name)+'</span>'+tag+'<span class="sz">'+(it.size==null?"—":fmt(it.size))+'</span><button class="btn btn-danger btn-sm" data-del="'+esc(it.name)+'" data-cat="'+cat+'">删除</button></div>';
     }).join("");
     el.querySelectorAll("[data-del]").forEach(function(b){
       b.addEventListener("click",function(){
-        var n=b.getAttribute("data-del");
+        var n=b.getAttribute("data-del"), c=b.getAttribute("data-cat");
         if(!confirm("确定删除「"+n+"」？此操作不可恢复。")) return;
+        var hit=null, idx=-1;
+        extLinks[c].some(function(x,i){ if(x.name===n){ hit=x; idx=i; return true; } return false; });
+        if(hit){ extLinks[c].splice(idx,1); renderList(pcList, giteeCache.pc.concat(extLinks.pc), "pc"); renderList(peList, giteeCache.pe.concat(extLinks.pe), "pe"); publishAll(); return; }
         b.disabled=true;
-        giteeDelete(b.getAttribute("data-cat"),n)
+        giteeDelete(c,n)
           .then(function(){ toast("已删除 "+n); return refreshAll(); })
           .then(publishAll)
           .catch(function(e){ toast("删除失败："+(e&&e.message||"未知错误")); refreshAll(); });
       });
     });
   }
+  var giteeCache={pc:[],pe:[]};
   function refreshAll(){
     pcList.innerHTML='<div class="empty">正在读取…</div>';
     peList.innerHTML='<div class="empty">正在读取…</div>';
     giteeList("pc").then(function(items){ return fileMetaSmart("pc",items); })
-      .then(function(arr){ renderList(pcList,arr,"pc"); })
+      .then(function(arr){ giteeCache.pc=arr; renderList(pcList,arr.concat(extLinks.pc),"pc"); })
       .catch(function(){ pcList.innerHTML='<div class="empty">读取失败</div>'; });
     giteeList("pe").then(function(items){ return fileMetaSmart("pe",items); })
-      .then(function(arr){ renderList(peList,arr,"pe"); })
+      .then(function(arr){ giteeCache.pe=arr; renderList(peList,arr.concat(extLinks.pe),"pe"); })
       .catch(function(){ peList.innerHTML='<div class="empty">读取失败</div>'; });
+  }
+  function addLink(){
+    if(!linkName.value.trim() || !linkUrl.value.trim()){ toast("请填写文件名和直链地址"); return; }
+    var name=linkName.value.trim(), u=linkUrl.value.trim();
+    if(!/^https?:\/\/.+$/i.test(u)){ toast("直链地址必须以 http(s):// 开头"); return; }
+    if(extLinks[CAT].some(function(x){ return x.name===name; })){ toast("该分类已有同名外链文件"); return; }
+    extLinks[CAT].push({name:name, url:u});
+    linkName.value=""; linkUrl.value="";
+    refreshAll(); publishAll();
   }
 
   /* ===== 上传 ===== */
@@ -449,14 +478,16 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
         .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
         .then(function(d){ return JSON.parse(decodeURIComponent(escape(atob(d.content)))); });
     };
-    return Promise.all([ghGet("groups.json"),ghGet("videos.json"),ghGet("memorial.json")])
+    return Promise.all([ghGet("groups.json"),ghGet("videos.json"),ghGet("memorial.json"),ghGet("pc.json"),ghGet("pe.json")])
       .then(function(r){
         groups=(r[0]||[]).slice(0,10);
         videos=(r[1]||[]).slice(0,50);
         memorial=(r[2]||[]).slice(0,20);
-        renderGroups(); renderVideos(); renderMem();
+        extLinks.pc=(r[3]||[]).filter(function(x){ return x.url; });
+        extLinks.pe=(r[4]||[]).filter(function(x){ return x.url; });
+        renderGroups(); renderVideos(); renderMem(); refreshAll();
       })
-      .catch(function(){ groups=[]; videos=[]; memorial=[]; renderGroups(); renderVideos(); renderMem(); });
+      .catch(function(){ groups=[]; videos=[]; memorial=[]; renderGroups(); renderVideos(); renderMem(); refreshAll(); });
   }
   function renderGroups(){
     if(!groups.length){ gList.innerHTML='<div class="empty">暂无粉丝群</div>'; return; }
@@ -527,6 +558,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     rd.readAsDataURL(f);
   }
   addGroupBtn.addEventListener("click",addGroup);
+  addLinkBtn.addEventListener("click",addLink);
   addVideoBtn.addEventListener("click",addVideo);
 
   /* ===== 纪念馆 ===== */

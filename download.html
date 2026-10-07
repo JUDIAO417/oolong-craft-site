@@ -331,7 +331,9 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
     files=(files||[]).filter(function(f){ return f && f.name; });
     if(!files.length){ el.innerHTML='<div class="file-empty">'+cat+' 版文件暂未上传，稍后再来看看。</div>'; return; }
     el.innerHTML=files.map(function(it){
-      return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span><span class="file-size">'+(it.size==null?"—":fmt(it.size))+'</span><a class="btn btn-primary btn-sm" href="'+rawUrl(cat,it.name)+'" target="_blank" rel="noopener">下载</a></div>';
+      var href=it.url?it.url:rawUrl(cat,it.name);
+      var tag=it.url?'<span class="file-size" style="color:var(--tea)">[外链]</span>':'';
+      return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span>'+tag+'<span class="file-size">'+(it.size==null?"—":fmt(it.size))+'</span><a class="btn btn-primary btn-sm" href="'+esc(href)+'" target="_blank" rel="noopener">下载</a></div>';
     }).join("");
   }
 
