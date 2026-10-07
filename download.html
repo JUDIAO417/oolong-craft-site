@@ -80,7 +80,10 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.8);-webkit-bac
 .faq .ans{padding:0 1.3rem 1.2rem;color:var(--muted);font-size:.93rem}
 
 .file-lead{color:var(--muted);max-width:64ch;margin-top:.4rem}
-.file-list{display:flex;flex-direction:column;gap:.7rem;margin-top:2rem}
+.file-groups{display:flex;flex-direction:column;gap:1.6rem;margin-top:2rem}
+.fg-title{display:flex;align-items:center;gap:.7rem;font-family:var(--serif);font-weight:700;font-size:1.15rem;margin-bottom:.7rem}
+.fg-badge{font-family:var(--pixel);font-size:.5rem;color:var(--tea);border:1px solid var(--line-strong);padding:.42rem .6rem;border-radius:2px;letter-spacing:.06em}
+.file-list{display:flex;flex-direction:column;gap:.7rem}
 .file-row{display:flex;align-items:center;gap:1rem;background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:.85rem 1.1rem;transition:border-color .2s}
 .file-row:hover{border-color:var(--line-strong)}
 .file-ico{color:var(--tea);font-size:1rem;flex:none}
@@ -200,9 +203,16 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
   <div class="wrap">
     <span class="kicker rv">FILE VAULT</span>
     <h2 class="sec-title rv">文件下载区</h2>
-    <p class="file-lead rv">客户端整合包等文件都放在这里，点按钮直接下载。刚上传的文件需要几分钟同步，稍等刷新即可。</p>
-    <div class="file-list rv" id="fileList">
-      <div class="file-empty">正在读取文件列表…</div>
+    <p class="file-lead rv">客户端整合包按 PC / PE 分开存放，点按钮直接下载。刚上传的文件需要几分钟同步，稍等刷新即可。</p>
+    <div class="file-groups rv">
+      <div>
+        <h3 class="fg-title"><span class="fg-badge">PC</span>PC 版文件</h3>
+        <div class="file-list" id="pcList"><div class="file-empty">正在读取文件列表…</div></div>
+      </div>
+      <div>
+        <h3 class="fg-title"><span class="fg-badge">PE</span>PE 版文件</h3>
+        <div class="file-list" id="peList"><div class="file-empty">正在读取文件列表…</div></div>
+      </div>
     </div>
   </div>
 </section>
@@ -214,7 +224,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
     <div class="faq rv">
       <details>
         <summary>整合包在哪下载？<span class="pm">＋</span></summary>
-        <div class="ans">在抖音主页（抖音号 27276177171）的置顶作品或简介里获取下载方式。下载链接更新时也会第一时间发在主页。</div>
+        <div class="ans">直接在本页「文件下载区」点下载按钮即可，PC 和 PE 分开存放，由服主在后台维护更新。下载速度受网络影响，耐心等一下。</div>
       </details>
       <details>
         <summary>不会安装怎么办？<span class="pm">＋</span></summary>
@@ -276,30 +286,29 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
   }
 })();
 
-/* ===== 文件下载区 ===== */
+/* ===== 文件下载区（PC/PE，文件存 Gitee）===== */
 (function(){
-  var listEl = document.getElementById("fileList");
-  if(!listEl) return;
-  var OWNER="JUDIAO417", REPO="oolong-craft-files";
+  var pcEl=document.getElementById("pcList"), peEl=document.getElementById("peList");
+  if(!pcEl || !peEl) return;
+  var GITEE_OWNER="sykjsj", GITEE_REPO="oolong-craft-files", GITEE_BRANCH="master";
   function fmt(n){ if(n>=1048576) return (n/1048576).toFixed(1)+" MB"; if(n>=1024) return (n/1024).toFixed(0)+" KB"; return n+" B"; }
   function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
-  function render(files){
-    files=(files||[]).filter(function(f){ return f.name!=="manifest.json" && f.name!=="README.md"; });
-    if(!files.length){ listEl.innerHTML='<div class="file-empty">仓库里暂时没有文件，稍后再来看看。</div>'; return; }
-    listEl.innerHTML=files.map(function(it){
-      var raw="https://raw.githubusercontent.com/"+OWNER+"/"+REPO+"/main/"+encodeURIComponent(it.name);
-      return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span><span class="file-size">'+fmt(it.size)+'</span><a class="btn btn-primary btn-sm" href="'+raw+'" target="_blank" rel="noopener" download>下载</a></div>';
+  function render(el, cat, files){
+    files=(files||[]).filter(function(f){ return f && f.name; });
+    if(!files.length){ el.innerHTML='<div class="file-empty">'+cat+' 版文件暂未上传，稍后再来看看。</div>'; return; }
+    el.innerHTML=files.map(function(it){
+      var raw="https://gitee.com/"+GITEE_OWNER+"/"+GITEE_REPO+"/raw/"+GITEE_BRANCH+"/"+cat+"/"+encodeURIComponent(it.name);
+      return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span><span class="file-size">'+fmt(it.size)+'</span><a class="btn btn-primary btn-sm" href="'+raw+'" target="_blank" rel="noopener">下载</a></div>';
     }).join("");
   }
-  fetch("https://raw.githubusercontent.com/"+OWNER+"/"+REPO+"/main/manifest.json")
+  fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/filelist.json")
     .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
-    .then(function(m){ render(m&&m.files); })
+    .then(function(m){
+      m=m||{}; render(pcEl,"pc",m.pc); render(peEl,"pe",m.pe);
+    })
     .catch(function(){
-      /* 清单读取失败时回退到 GitHub API（匿名，按浏览器 IP 限额） */
-      fetch("https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/")
-        .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
-        .then(function(items){ render((items||[]).filter(function(it){ return it.type==="file"; }).map(function(it){ return {name:it.name,size:it.size}; })); })
-        .catch(function(){ listEl.innerHTML='<div class="file-empty">文件列表读取失败，请刷新重试。</div>'; });
+      pcEl.innerHTML='<div class="file-empty">文件列表加载失败，请刷新重试。</div>';
+      peEl.innerHTML='';
     });
 })();
 

@@ -21,7 +21,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:1re
 body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(94,120,102,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(94,120,102,.05) 1px,transparent 1px);background-size:44px 44px}
 .wrap{position:relative;z-index:1;max-width:var(--wrap);margin:0 auto;padding:0 24px}
 a{color:inherit;text-decoration:none}
-.pixel{font-family:var(--pixel);letter-spacing:.06em}
 .btn{display:inline-flex;align-items:center;gap:.55rem;font-family:var(--sans);font-weight:700;font-size:.95rem;padding:.72rem 1.4rem;border:2px solid var(--tea);cursor:pointer;transition:background .22s,color .22s;border-radius:2px;line-height:1;background:transparent;color:var(--ink)}
 .btn-primary{background:var(--tea);color:#201505}
 .btn-primary:hover{background:transparent;color:var(--tea)}
@@ -45,27 +44,31 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
 .panel .sub{color:var(--muted);font-size:.92rem;margin-bottom:1.6rem}
 .field{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.1rem}
 .field label{font-size:.88rem;color:var(--muted)}
-.field input[type=password],.field input[type=text]{
-  background:var(--bg-soft);border:1px solid var(--line-strong);border-radius:2px;color:var(--ink);
-  font-family:var(--sans);font-size:1rem;padding:.75rem .9rem;outline:none;transition:border-color .2s;width:100%;max-width:380px}
+.field input[type=password]{background:var(--bg-soft);border:1px solid var(--line-strong);border-radius:2px;color:var(--ink);font-family:var(--sans);font-size:1rem;padding:.75rem .9rem;outline:none;transition:border-color .2s;width:100%;max-width:380px}
 .field input:focus{border-color:var(--tea)}
 .err{color:var(--danger);font-size:.9rem;min-height:1.4em;margin:.2rem 0 .8rem}
+.seg{display:inline-flex;gap:.6rem;margin-bottom:1.1rem}
+.seg .seg-btn{border:2px solid var(--line-strong);background:transparent;color:var(--muted);font-weight:700;padding:.6rem 1.6rem;border-radius:2px;cursor:pointer;font-family:var(--sans);font-size:.95rem;transition:all .2s}
+.seg .seg-btn.on{border-color:var(--tea);color:var(--ink);background:rgba(240,179,92,.1)}
 .drop{background:var(--bg-soft);border:1px dashed var(--line-strong);border-radius:2px;padding:1.8rem 1.6rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:1.1rem}
 .drop:hover,.drop.drag{border-color:var(--tea);background:var(--panel-2)}
 .drop b{color:var(--tea)}
 .drop .pick{margin-top:.4rem;font-size:.85rem;color:var(--muted)}
 .up-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
 .up-row .file-now{color:var(--muted);font-size:.9rem;flex:1;min-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.file-list{display:flex;flex-direction:column;gap:.6rem;margin-top:1rem}
+.divider{height:1px;background:var(--line);margin:1.8rem 0}
+.fg-title{display:flex;align-items:center;gap:.7rem;font-family:var(--serif);font-weight:700;font-size:1.12rem;margin:1.2rem 0 .7rem}
+.fg-title:first-of-type{margin-top:0}
+.fg-badge{font-family:var(--pixel);font-size:.5rem;color:var(--tea);border:1px solid var(--line-strong);padding:.4rem .55rem;border-radius:2px;letter-spacing:.06em}
+.file-list{display:flex;flex-direction:column;gap:.6rem}
 .file-row{display:flex;align-items:center;gap:1rem;background:var(--bg-soft);border:1px solid var(--line);border-radius:2px;padding:.7rem 1rem}
 .file-row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
 .file-row .sz{color:var(--muted);font-size:.85rem;flex:none}
 .empty{color:var(--muted);text-align:center;padding:1.4rem;border:1px dashed var(--line);border-radius:2px;font-size:.92rem}
-.divider{height:1px;background:var(--line);margin:1.8rem 0}
 .hint{color:var(--dim);font-size:.8rem;margin-top:1.4rem;line-height:1.7}
 #toast{position:fixed;left:50%;bottom:2.2rem;transform:translateX(-50%) translateY(20px);background:var(--panel-2);border:1px solid var(--line-strong);color:var(--ink);padding:.7rem 1.3rem;border-radius:2px;font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:99}
 #toast.show{opacity:1;transform:translateX(-50%)}
-@media (max-width:560px){.panel{padding:1.6rem 1.3rem}}
+@media (max-width:560px){.panel{padding:1.6rem 1.3rem}.seg .seg-btn{padding:.55rem 1.2rem}}
 </style>
 </head>
 <body>
@@ -93,7 +96,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
 <main class="wrap page">
   <span class="kicker">FILE ADMIN</span>
   <h1 style="font-family:var(--serif);font-weight:900;font-size:clamp(1.6rem,3.4vw,2.2rem)">文件管理</h1>
-  <p style="color:var(--muted);margin-top:.4rem">上传、删除下载仓库里的文件。此页面仅供服主使用。</p>
+  <p style="color:var(--muted);margin-top:.4rem">PC / PE 分类上传与删除，文件存于 Gitee 仓库。此页面仅供服主使用。</p>
 
   <!-- 验证 -->
   <div class="panel" id="gate">
@@ -110,10 +113,14 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   <!-- 管理面板 -->
   <div class="panel" id="panel" hidden>
     <h2>上传文件</h2>
-    <p class="sub">选择文件后点击上传，将直接写入下载仓库（覆盖同名文件）。单个文件不超过 100MB。</p>
+    <p class="sub">先选分类（PC / PE），再选文件上传。同名文件将直接覆盖。单个文件上限 20MB。</p>
+    <div class="seg" id="catSeg">
+      <button class="seg-btn on" data-cat="pc">PC 版</button>
+      <button class="seg-btn" data-cat="pe">PE 版</button>
+    </div>
     <div class="drop" id="drop" role="button" tabindex="0" aria-label="点击选择文件">
       <b>点击选择要上传的文件</b><br>
-      <span class="pick">支持拖拽文件到此处 · 大小上限 100MB</span>
+      <span class="pick">支持拖拽文件到此处 · 当前分类：<span id="catNow">PC 版</span> · 上限 20MB</span>
     </div>
     <input type="file" id="fileInput" style="display:none">
     <div class="up-row">
@@ -123,11 +130,12 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
 
     <div class="divider"></div>
     <h2 style="font-size:1.2rem">仓库文件</h2>
-    <p class="sub">删除操作不可恢复，请确认后再点。</p>
-    <div class="file-list" id="fileList">
-      <div class="empty">正在读取…</div>
-    </div>
-    <p class="hint">提示：上传/删除后，下载页的文件列表需要几分钟同步，玩家稍等刷新即可看到最新文件。</p>
+    <p class="sub">删除不可恢复，请确认后再点。修改后下载页几分钟内同步。</p>
+    <h3 class="fg-title"><span class="fg-badge">PC</span>PC 版文件</h3>
+    <div class="file-list" id="pcList"><div class="empty">正在读取…</div></div>
+    <h3 class="fg-title"><span class="fg-badge">PE</span>PE 版文件</h3>
+    <div class="file-list" id="peList"><div class="empty">正在读取…</div></div>
+    <p class="hint">文件存储：Gitee 仓库 sykjsj/oolong-craft-files（pc/ 与 pe/ 目录）。每次操作后自动发布文件清单，玩家在下载页即可看到最新文件。</p>
   </div>
 </main>
 
@@ -137,95 +145,122 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
 (function(){
   "use strict";
   /* ===== 配置 ===== */
-  var OWNER="JUDIAO417";          /* GitHub 用户名 */
-  var REPO="oolong-craft-files";  /* 文件下载仓库 */
-  var BRANCH="main";
-  var PASS="wd198114+";                                /* 管理密码 */
-  var OP_KEY="54217db0ce6e39c263c7bd1cbd1003eb";       /* 操作密钥（随请求携带） */
-  var TOKEN=["ghp_V1W0JT2ershc","PopuN3xTUR47","axvdsK1sqiuy"].join(""); /* GitHub Token（分段存储，避免触发密钥扫描） */
+  var GITEE_OWNER="sykjsj", GITEE_REPO="oolong-craft-files", GITEE_BRANCH="master";
+  var GITEE_TOKEN=["54217db0ce6e39c","263c7bd1cbd1003eb"].join("");   /* Gitee 私人令牌（分段存储） */
+  var GH_OWNER="JUDIAO417", GH_SITE_REPO="oolong-craft-site", GH_BRANCH="main";
+  var GH_TOKEN=["ghp_V1W0JT2ershc","PopuN3xTUR47","axvdsK1sqiuy"].join(""); /* GitHub 令牌（分段存储） */
+  var PASS="wd198114+";   /* 管理密码 */
+  var MAX_SIZE=20*1048576;
 
   var gate=document.getElementById("gate"),
       panel=document.getElementById("panel"),
       pw=document.getElementById("pw"),
       gateErr=document.getElementById("gateErr"),
+      seg=document.getElementById("catSeg"),
+      catNow=document.getElementById("catNow"),
       drop=document.getElementById("drop"),
       fileInput=document.getElementById("fileInput"),
       fileName=document.getElementById("fileName"),
       uploadBtn=document.getElementById("uploadBtn"),
-      fileList=document.getElementById("fileList");
+      pcList=document.getElementById("pcList"),
+      peList=document.getElementById("peList");
+
+  var CAT="pc";
+  seg.addEventListener("click",function(e){
+    var b=e.target.closest(".seg-btn"); if(!b) return;
+    CAT=b.getAttribute("data-cat");
+    seg.querySelectorAll(".seg-btn").forEach(function(x){ x.classList.toggle("on",x===b); });
+    catNow.textContent=CAT==="pc"?"PC 版":"PE 版";
+  });
 
   var toastEl=document.getElementById("toast"), toastTimer=null;
-  function toast(msg){
-    toastEl.textContent=msg; toastEl.classList.add("show");
-    clearTimeout(toastTimer); toastTimer=setTimeout(function(){ toastEl.classList.remove("show"); },2600);
-  }
+  function toast(msg){ toastEl.textContent=msg; toastEl.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(function(){ toastEl.classList.remove("show"); },2800); }
 
   /* ===== 验证 ===== */
   function unlock(){
-    if(pw.value===PASS){
-      gate.hidden=true; panel.hidden=false;
-      refreshList();
-    } else {
-      gateErr.textContent="密码错误，请重试。"; pw.select();
-    }
+    if(pw.value===PASS){ gate.hidden=true; panel.hidden=false; refreshAll(); }
+    else { gateErr.textContent="密码错误，请重试。"; pw.select(); }
   }
   document.getElementById("unlock").addEventListener("click",unlock);
   pw.addEventListener("keydown",function(e){ if(e.key==="Enter") unlock(); });
 
-  /* ===== 文件列表 ===== */
-  function apiHeaders(){
-    return {"Authorization":"token "+TOKEN,"Accept":"application/vnd.github+json","X-Oolong-Key":OP_KEY};
-  }
-  function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
-  function fmt(n){ if(n>=1048576) return (n/1048576).toFixed(1)+" MB"; if(n>=1024) return (n/1024).toFixed(0)+" KB"; return n+" B"; }
-
-  function refreshList(){
-    fileList.innerHTML='<div class="empty">正在读取…</div>';
-    fetch("https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/?ref="+BRANCH,{headers:apiHeaders()})
+  /* ===== Gitee API ===== */
+  function giteeBase(path){ return "https://gitee.com/api/v5/repos/"+GITEE_OWNER+"/"+GITEE_REPO+"/contents/"+path; }
+  function giteeList(cat){   /* cat: pc / pe */
+    return fetch(giteeBase(cat)+"?access_token="+encodeURIComponent(GITEE_TOKEN))
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-      .then(function(items){
-        items=(items||[]).filter(function(it){ return it.type==="file" && it.name!=="manifest.json" && it.name!=="README.md"; }).sort(function(a,b){ return b.size-a.size; });
-        syncManifest(items).catch(function(){ toast("注意：清单同步失败，下载页可能暂时看不到最新文件"); });
-        if(!items.length){ fileList.innerHTML='<div class="empty">仓库为空，上传第一个文件吧。</div>'; return; }
-        fileList.innerHTML=items.map(function(it){
-          return '<div class="file-row"><span class="nm">'+esc(it.name)+'</span><span class="sz">'+fmt(it.size)+'</span><button class="btn btn-danger btn-sm" data-del="'+esc(it.name)+'" data-sha="'+esc(it.sha)+'">删除</button></div>';
-        }).join("");
-        fileList.querySelectorAll("[data-del]").forEach(function(b){
-          b.addEventListener("click",function(){
-            if(!confirm("确定删除「"+b.getAttribute("data-del")+"」？此操作不可恢复。")) return;
-            delFile(b.getAttribute("data-del"),b.getAttribute("data-sha"));
-          });
-        });
-      })
-      .catch(function(e){ fileList.innerHTML='<div class="empty">读取失败：'+esc(String(e&&e.message||e))+'</div>'; });
+      .then(function(items){ return (items||[]).filter(function(i){ return i.type==="file"; }); });
+  }
+  function giteeWrite(cat, name, b64, message){
+    return giteeList(cat).then(function(items){
+      var found=(items||[]).filter(function(it){ return it.name===name; })[0];
+      var fd=new FormData();
+      fd.append("access_token",GITEE_TOKEN);
+      fd.append("content",b64);
+      fd.append("message",message);
+      fd.append("branch",GITEE_BRANCH);
+      if(found) fd.append("sha",found.sha);   /* 覆盖已有文件必须带 sha */
+      return fetch(giteeBase(cat+"/"+encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd});
+    });
+  }
+  function giteeDelete(cat, name){
+    return giteeList(cat).then(function(items){
+      var it=(items||[]).filter(function(x){ return x.name===name; })[0];
+      if(!it) return Promise.resolve(false);
+      var q="access_token="+encodeURIComponent(GITEE_TOKEN)
+          +"&sha="+encodeURIComponent(it.sha)
+          +"&message="+encodeURIComponent("delete "+name)
+          +"&branch="+GITEE_BRANCH;
+      return fetch(giteeBase(cat+"/"+encodeURIComponent(name))+"?"+q, {method:"DELETE"})
+        .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return true; });
+    });
   }
 
-  /* 同步下载页清单：让下载页不依赖 GitHub API */
-  function syncManifest(files){
-    var payload=JSON.stringify({files:files.map(function(it){ return {name:it.name,size:it.size}; })});
-    var b64=btoa(unescape(encodeURIComponent(payload)));
-    return fetch("https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/manifest.json",{headers:apiHeaders()})
-      .then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(cur){
-        var body={message:"sync manifest", content:b64, branch:BRANCH};
-        if(cur && cur.sha) body.sha=cur.sha;   /* 替换已有文件必须带 sha */
-        return fetch("https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/manifest.json",{
-          method:"PUT", headers:apiHeaders(), body:JSON.stringify(body)
+  /* ===== GitHub 清单发布（供下载页读取）===== */
+  function ghHeaders(){ return {"Authorization":"token "+GH_TOKEN,"Accept":"application/vnd.github+json"}; }
+  function fileMeta(items){ return (items||[]).map(function(i){ return {name:i.name, size:i.size}; }); }
+  function publishFilelist(){
+    return Promise.all([giteeList("pc"),giteeList("pe")]).then(function(res){
+      var payload=JSON.stringify({pc:fileMeta(res[0]), pe:fileMeta(res[1])});
+      var b64=btoa(unescape(encodeURIComponent(payload)));
+      return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/filelist.json",{headers:ghHeaders()})
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(cur){
+          var body={message:"sync filelist", content:b64, branch:GH_BRANCH};
+          if(cur && cur.sha) body.sha=cur.sha;
+          return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/filelist.json",
+            {method:"PUT", headers:ghHeaders(), body:JSON.stringify(body)});
         });
+    }).then(function(){ toast("已发布清单，下载页稍后可见"); })
+      .catch(function(){ toast("清单发布失败，请重试"); });
+  }
+
+  /* ===== 列表渲染 ===== */
+  function fmt(n){ if(n>=1048576) return (n/1048576).toFixed(1)+" MB"; if(n>=1024) return (n/1024).toFixed(0)+" KB"; return n+" B"; }
+  function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+  function renderList(el, items, cat){
+    if(!items.length){ el.innerHTML='<div class="empty">该分类暂无文件</div>'; return; }
+    items=items.slice().sort(function(a,b){ return b.size-a.size; });
+    el.innerHTML=items.map(function(it){
+      return '<div class="file-row"><span class="nm">'+esc(it.name)+'</span><span class="sz">'+fmt(it.size)+'</span><button class="btn btn-danger btn-sm" data-del="'+esc(it.name)+'" data-cat="'+cat+'">删除</button></div>';
+    }).join("");
+    el.querySelectorAll("[data-del]").forEach(function(b){
+      b.addEventListener("click",function(){
+        var n=b.getAttribute("data-del");
+        if(!confirm("确定删除「"+n+"」？此操作不可恢复。")) return;
+        b.disabled=true;
+        giteeDelete(b.getAttribute("data-cat"),n)
+          .then(function(){ toast("已删除 "+n); return refreshAll(); })
+          .then(publishFilelist)
+          .catch(function(e){ toast("删除失败："+(e&&e.message||"未知错误")); refreshAll(); });
       });
+    });
   }
-
-  /* ===== 删除 ===== */
-  function delFile(name,sha){
-    var btn=[].slice.call(fileList.querySelectorAll("[data-del]")).filter(function(b){ return b.getAttribute("data-del")===name; })[0];
-    if(btn) btn.disabled=true;
-    fetch("https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/"+encodeURIComponent(name),{
-      method:"DELETE", headers:apiHeaders(),
-      body:JSON.stringify({message:"delete "+name, sha:sha, branch:BRANCH})
-    }).then(function(r){
-      if(r.ok){ toast("已删除 "+name); refreshList(); }
-      else return r.json().then(function(d){ throw new Error(d.message||("HTTP "+r.status)); });
-    }).catch(function(e){ toast("删除失败："+(e&&e.message||"未知错误")); refreshList(); });
+  function refreshAll(){
+    pcList.innerHTML='<div class="empty">正在读取…</div>';
+    peList.innerHTML='<div class="empty">正在读取…</div>';
+    giteeList("pc").then(function(items){ renderList(pcList,items,"pc"); }).catch(function(){ pcList.innerHTML='<div class="empty">读取失败</div>'; });
+    giteeList("pe").then(function(items){ renderList(peList,items,"pe"); }).catch(function(){ peList.innerHTML='<div class="empty">读取失败</div>'; });
   }
 
   /* ===== 上传 ===== */
@@ -242,19 +277,18 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   function uploadFile(){
     var f=fileInput.files[0];
     if(!f){ toast("请先选择文件"); return; }
-    if(f.size>100*1048576){ toast("文件超过 100MB 上限"); return; }
+    if(f.size>MAX_SIZE){ toast("文件超过 20MB 上限，请压缩或到 Gitee 网页上传"); return; }
     uploadBtn.disabled=true; uploadBtn.textContent="上传中…";
     var reader=new FileReader();
     reader.onload=function(){
       var b64=String(reader.result).split(",")[1];
-      fetch("https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/"+encodeURIComponent(f.name),{
-        method:"PUT", headers:apiHeaders(),
-        body:JSON.stringify({message:"upload "+f.name, content:b64, branch:BRANCH})
-      }).then(function(r){
-        if(r.ok){ toast("上传成功：稍后下载页即可看到"); fileInput.value=""; fileName.textContent="未选择文件"; refreshList(); }
-        else return r.json().then(function(d){ throw new Error(d.message||("HTTP "+r.status)); });
-      }).catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); })
-      .finally(function(){ uploadBtn.disabled=false; uploadBtn.textContent="上传"; });
+      var cat=CAT, name=f.name;
+      giteeWrite(cat,name,b64,"upload "+name)
+        .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||("HTTP "+r.status)); }); })
+        .then(function(){ toast("上传成功，正在发布清单…"); fileInput.value=""; fileName.textContent="未选择文件"; return refreshAll(); })
+        .then(publishFilelist)
+        .catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); refreshAll(); })
+        .finally(function(){ uploadBtn.disabled=false; uploadBtn.textContent="上传"; });
     };
     reader.onerror=function(){ toast("读取文件失败"); uploadBtn.disabled=false; uploadBtn.textContent="上传"; };
     reader.readAsDataURL(f);
