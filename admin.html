@@ -415,6 +415,14 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   }
 
   /* ===== 列表渲染 ===== */
+  function dedupe(list){   /* 同名条目外链优先，只保留一个 */
+    var seen={}, out=[];
+    list.forEach(function(x){
+      if(seen[x.name]) return;
+      seen[x.name]=true; out.push(x);
+    });
+    return out;
+  }
   function fmt(n){ if(n>=1048576) return (n/1048576).toFixed(1)+" MB"; if(n>=1024) return (n/1024).toFixed(0)+" KB"; return n+" B"; }
   function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
   function renderList(el, items, cat){
@@ -430,7 +438,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         if(!confirm("确定删除「"+n+"」？此操作不可恢复。")) return;
         var hit=null, idx=-1;
         extLinks[c].some(function(x,i){ if(x.name===n){ hit=x; idx=i; return true; } return false; });
-        if(hit){ extLinks[c].splice(idx,1); renderList(pcList, giteeCache.pc.concat(extLinks.pc), "pc"); renderList(peList, giteeCache.pe.concat(extLinks.pe), "pe"); publishAll(); return; }
+        if(hit){ extLinks[c].splice(idx,1); renderList(pcList, dedupe(giteeCache.pc.concat(extLinks.pc)), "pc"); renderList(peList, dedupe(giteeCache.pe.concat(extLinks.pe)), "pe"); publishAll(); return; }
         b.disabled=true;
         giteeDelete(c,n)
           .then(function(){ toast("已删除 "+n); return refreshAll(); })
@@ -444,10 +452,10 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     pcList.innerHTML='<div class="empty">正在读取…</div>';
     peList.innerHTML='<div class="empty">正在读取…</div>';
     giteeList("pc").then(function(items){ return fileMetaSmart("pc",items); })
-      .then(function(arr){ giteeCache.pc=arr; renderList(pcList,arr.concat(extLinks.pc),"pc"); })
+      .then(function(arr){ giteeCache.pc=arr; renderList(pcList,dedupe(arr.concat(extLinks.pc)),"pc"); })
       .catch(function(){ pcList.innerHTML='<div class="empty">读取失败</div>'; });
     giteeList("pe").then(function(items){ return fileMetaSmart("pe",items); })
-      .then(function(arr){ giteeCache.pe=arr; renderList(peList,arr.concat(extLinks.pe),"pe"); })
+      .then(function(arr){ giteeCache.pe=arr; renderList(peList,dedupe(arr.concat(extLinks.pe)),"pe"); })
       .catch(function(){ peList.innerHTML='<div class="empty">读取失败</div>'; });
   }
   function addLink(){
