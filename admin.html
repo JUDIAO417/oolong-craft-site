@@ -505,13 +505,14 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   });
   vFile.addEventListener("change",function(){ vFileName.textContent=vFile.files[0]?vFile.files[0].name:"未选择视频"; });
 
+  function giteeGetRoot(name){   /* 从 Gitee 权威仓库读 JSON 内容 */
+    return fetch(giteeBase(encodeURIComponent(name))+"?access_token="+encodeURIComponent(GITEE_TOKEN))
+      .then(function(r){ if(r.status===404) return []; if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(d){ return d==null?[]:JSON.parse(decodeURIComponent(escape(atob(d.content)))); });
+  }
   function loadMeta(){
-    var ghGet=function(path){
-      return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,{headers:ghHeaders()})
-        .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-        .then(function(d){ return JSON.parse(decodeURIComponent(escape(atob(d.content)))); });
-    };
-    return Promise.all([ghGet("groups.json"),ghGet("videos.json"),ghGet("memorial.json"),ghGet("pc.json"),ghGet("pe.json")])
+    /* 一律以 Gitee 权威数据为准，避免镜像滞后导致旧数据覆盖权威数据 */
+    return Promise.all([giteeGetRoot("groups.json"),giteeGetRoot("videos.json"),giteeGetRoot("memorial.json"),giteeGetRoot("pc.json"),giteeGetRoot("pe.json")])
       .then(function(r){
         groups=(r[0]||[]).slice(0,10);
         videos=(r[1]||[]).slice(0,50);
