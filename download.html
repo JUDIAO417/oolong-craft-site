@@ -177,7 +177,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
         </ul>
         <div class="dl-actions">
           <button class="btn btn-primary" data-groups>前往主播粉丝群</button>
-          <button class="btn btn-ghost" data-videos>先看安装教程</button>
+          <button class="btn btn-ghost" data-videos="pc">先看安装教程</button>
         </div>
       </article>
       <article class="dl-card rv">
@@ -191,7 +191,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
         </ul>
         <div class="dl-actions">
           <button class="btn btn-primary" data-groups>前往主播粉丝群</button>
-          <button class="btn btn-ghost" data-videos>先看安装教程</button>
+          <button class="btn btn-ghost" data-videos="pe">先看安装教程</button>
         </div>
       </article>
     </div>
@@ -369,9 +369,10 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
       el.addEventListener("click",function(){ copyText(el.getAttribute("data-qq")); });
     });
   }
-  function renderVideos(){
-    if(!videos.length){ mBody.innerHTML='<div class="modal-empty">教程视频整理中，稍后再来。</div>'; return; }
-    mBody.innerHTML='<div class="v-list">'+videos.map(function(v,i){
+  function renderVideos(cat){
+    var list=videos.filter(function(v){ return !v.cat || v.cat===cat; });
+    if(!list.length){ mBody.innerHTML='<div class="modal-empty">'+(cat==="pc"?"PC 版":"PE 版")+' 教程视频整理中，稍后再来。</div>'; return; }
+    mBody.innerHTML='<div class="v-list">'+list.map(function(v,i){
       var ctrl = v.type==="file"
         ? '<button class="btn btn-ghost btn-sm v-play">点击播放</button>'
         : '<a class="btn btn-ghost btn-sm" href="'+esc(v.src)+'" target="_blank" rel="noopener">打开视频</a>';
@@ -379,18 +380,20 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
     }).join('')+'</div>';
     mBody.querySelectorAll(".v-play").forEach(function(btn){
       btn.addEventListener("click",function(){
-        var v=videos[+btn.parentNode.getAttribute("data-i")];
+        var idx=+btn.parentNode.getAttribute("data-i");
+        var list2=videos.filter(function(v){ return !v.cat || v.cat===cat; });
+        var v=list2[idx];
         btn.parentNode.innerHTML='<div class="v-title">'+esc(v.title)+'</div><video controls autoplay playsinline preload="auto" src="'+rawUrl("videos",v.src)+'"></video>';
       });
     });
   }
-  function openModal(kind){
+  function openModal(kind,cat){
     if(kind==="groups"){ mTitle.textContent="主播粉丝群 · 点群号直接进群"; renderGroups(); }
-    else { mTitle.textContent="安装教程 · 点击播放"; renderVideos(); }
+    else { mTitle.textContent="安装教程 · "+(cat==="pc"?"PC 版":"PE 版")+"，点击播放"; renderVideos(cat||"pc"); }
     mask.hidden=false; document.body.style.overflow="hidden";
   }
   document.querySelectorAll("[data-groups]").forEach(function(b){ b.addEventListener("click",function(){ openModal("groups"); }); });
-  document.querySelectorAll("[data-videos]").forEach(function(b){ b.addEventListener("click",function(){ openModal("videos"); }); });
+  document.querySelectorAll("[data-videos]").forEach(function(b){ b.addEventListener("click",function(){ openModal("videos",b.getAttribute("data-videos")); }); });
 
   /* ===== 读取各部分 JSON（本站镜像）===== */
   function getJson(path){

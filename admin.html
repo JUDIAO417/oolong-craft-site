@@ -440,7 +440,8 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     if(!videos.length){ vList.innerHTML='<div class="empty">暂无教程视频</div>'; return; }
     vList.innerHTML=videos.map(function(v,i){
       var src=v.type==="file" ? v.src : "[链接] "+v.src;
-      return '<div class="file-row"><span class="nm">'+esc(v.title)+'</span><span class="sz">'+esc(src)+'</span><button class="btn btn-danger btn-sm" data-i="'+i+'">删除</button></div>';
+      var tag=(v.cat==="pe"?"[PE] ":"[PC] ");
+      return '<div class="file-row"><span class="nm">'+esc(tag+v.title)+'</span><span class="sz">'+esc(src)+'</span><button class="btn btn-danger btn-sm" data-i="'+i+'">删除</button></div>';
     }).join("");
     vList.querySelectorAll("[data-i]").forEach(function(b){
       b.addEventListener("click",function(){ delVideo(+b.getAttribute("data-i")); });
@@ -488,7 +489,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     if(VTYPE==="url"){
       var u=vUrl.value.trim();
       if(!u){ toast("请填写视频链接"); return; }
-      videos.push({title:title, src:u, type:"url"});
+      videos.push({title:title, src:u, type:"url", cat:VCAT});
       vTitle.value=""; vUrl.value=""; renderVideos(); publishAll(); return;
     }
     var f=vFile.files[0];
@@ -501,7 +502,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       giteeWrite("videos",name,String(rd.result).split(",")[1],"upload video "+name)
         .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
         .then(function(){
-          videos.push({title:title, src:name, type:"file"});
+          videos.push({title:title, src:name, type:"file", cat:VCAT});
           vTitle.value=""; vFile.value=""; vFileName.textContent="未选择视频";
           renderVideos(); return publishAll();
         })
