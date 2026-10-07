@@ -645,6 +645,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
         .then(function(){ return ghWriteB64("uploads/"+name, b64, "sync img "+name); })
         .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
+        .catch(function(e){ toast("图片同步 GitHub 失败（作品已保存，稍后可重试补图）："+(e&&e.message||"")); return {ok:true}; })  /* 图片同步失败不阻断 JSON 发布 */
         .then(function(){
           memorial.push({title:mTitle.value.trim(), desc:mDesc.value.trim(), img:"uploads/"+name});
           mTitle.value=""; mDesc.value=""; mFile.value=""; mFileName.textContent="未选择图片";
