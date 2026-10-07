@@ -110,7 +110,7 @@ header{
   transition:background .3s,box-shadow .3s;
 }
 header.scrolled{background:rgba(10,14,12,.78);box-shadow:0 8px 30px rgba(0,0,0,.28)}
-.nav{display:flex;align-items:center;justify-content:space-between;height:68px}
+.nav{display:flex;align-items:center;justify-content:space-between;height:68px;width:100%;max-width:none;padding:0 max(24px,calc((100vw - 1160px)/2))}  /* 导航占满全宽：logo 靠左、按钮靠右 */
 .brand{display:flex;align-items:center;gap:.7rem}
 .brand svg{width:30px;height:30px;border-radius:6px}
 .brand-name{font-family:var(--serif);font-weight:900;font-size:1.12rem;line-height:1.1}
