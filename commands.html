@@ -43,8 +43,9 @@ header.scrolled{background:rgba(14,22,18,.92);box-shadow:0 10px 30px rgba(0,0,0,
 .brand b{font-family:var(--pixel);font-size:.78rem;color:var(--tea)}
 .brand-en{font-size:.62rem;color:var(--dim);letter-spacing:.22em}
 .nav-cta{display:flex;align-items:center;gap:.8rem}
-.nav-cta a{font-size:.92rem;color:var(--muted);transition:color .2s}
-.nav-cta a:hover{color:var(--tea)}
+.nav-cta a:not(.btn){font-size:.92rem;color:var(--muted);transition:color .2s}
+.nav-cta a:not(.btn):hover{color:var(--tea)}
+a.btn.btn-primary{color:#151006}   /* 保护按钮文字色，不被导航灰色规则覆盖 */
 /* 按钮 */
 .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.25rem;border-radius:var(--r-sm);border:1px solid var(--glass-line-strong);font-size:.92rem;font-weight:600;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;background:var(--glass-bg);color:var(--ink);font-family:var(--sans)}
 .btn-primary{background:linear-gradient(135deg,rgba(247,183,92,.95),rgba(224,147,58,.85));color:#151006;border-color:rgba(232,226,212,.22);box-shadow:0 6px 20px rgba(240,179,92,.18)}
@@ -113,7 +114,6 @@ footer a{color:var(--tea)}
 
 <main>
   <div class="hero-head">
-    <span class="kicker">指令大全</span>
     <h1>玩法指令 <em>速查手册</em></h1>
     <p class="hero-sub">按玩法模块整理服务器常用指令。输入关键词可以快速搜索；点上面的标签可以只看某一类。</p>
   </div>
