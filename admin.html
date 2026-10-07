@@ -129,7 +129,10 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     </div>
 
     <div class="divider"></div>
-    <h2 style="font-size:1.2rem">仓库文件</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.8rem">
+      <h2 style="font-size:1.2rem">仓库文件</h2>
+      <button class="btn btn-ghost btn-sm" id="pubBtn">重新发布清单</button>
+    </div>
     <p class="sub">删除不可恢复，请确认后再点。修改后下载页几分钟内同步。</p>
     <h3 class="fg-title"><span class="fg-badge">PC</span>PC 版文件</h3>
     <div class="file-list" id="pcList"><div class="empty">正在读取…</div></div>
@@ -183,6 +186,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   }
   document.getElementById("unlock").addEventListener("click",unlock);
   pw.addEventListener("keydown",function(e){ if(e.key==="Enter") unlock(); });
+  document.getElementById("pubBtn").addEventListener("click",publishFilelist);
 
   /* ===== Gitee API ===== */
   function giteeBase(path){ return "https://gitee.com/api/v5/repos/"+GITEE_OWNER+"/"+GITEE_REPO+"/contents/"+path; }
