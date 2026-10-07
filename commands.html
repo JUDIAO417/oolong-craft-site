@@ -185,8 +185,16 @@ var ALL=[].concat(DATA), CAT="", qEl=document.getElementById("q"), grid=document
 function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
 function render(){
   var kw=qEl.value.trim().toLowerCase();
-  var list=ALL.filter(function(m){ if(CAT && m.cat!==CAT) return false; if(!kw) return true;
-    return m.cat.toLowerCase().indexOf(kw)>=0 || m.items.some(function(it){ return it.cmd.toLowerCase().indexOf(kw)>=0 || it.desc.toLowerCase().indexOf(kw)>=0; });
+  /* 搜索精确到单条命令：分类名命中→整类；命令/说明命中→只显示命中的那几条 */
+  var list=[];
+  ALL.forEach(function(m){
+    if(CAT && m.cat!==CAT) return;
+    if(!kw){ list.push(m); return; }
+    if(m.cat.toLowerCase().indexOf(kw)>=0){ list.push(m); return; }
+    var hit=m.items.filter(function(it){
+      return it.cmd.toLowerCase().indexOf(kw)>=0 || it.desc.toLowerCase().indexOf(kw)>=0;
+    });
+    if(hit.length) list.push({cat:m.cat, items:hit});
   });
   var cats=[];
   ALL.forEach(function(m){ if(cats.indexOf(m.cat)<0) cats.push(m.cat); });
