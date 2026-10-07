@@ -79,6 +79,16 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.8);-webkit-bac
 .faq details[open] summary .pm{transform:rotate(45deg);background:rgba(240,179,92,.1)}
 .faq .ans{padding:0 1.3rem 1.2rem;color:var(--muted);font-size:.93rem}
 
+.file-lead{color:var(--muted);max-width:64ch;margin-top:.4rem}
+.file-list{display:flex;flex-direction:column;gap:.7rem;margin-top:2rem}
+.file-row{display:flex;align-items:center;gap:1rem;background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:.85rem 1.1rem;transition:border-color .2s}
+.file-row:hover{border-color:var(--line-strong)}
+.file-ico{color:var(--tea);font-size:1rem;flex:none}
+.file-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.file-size{color:var(--muted);font-size:.85rem;flex:none}
+.file-empty{color:var(--muted);background:var(--bg-soft);border:1px dashed var(--line);border-radius:2px;padding:1.6rem;text-align:center;font-size:.92rem}
+.btn-sm{padding:.55rem 1rem;font-size:.88rem}
+
 footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem 0 2.4rem;margin-top:2rem}
 .foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1.8rem;align-items:flex-start}
 .foot-tag{color:var(--muted);font-size:.9rem;margin-top:.5rem;max-width:34ch}
@@ -186,6 +196,17 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
   </div>
 </section>
 
+<section class="sec" id="files" style="padding-top:0">
+  <div class="wrap">
+    <span class="kicker rv">FILE VAULT</span>
+    <h2 class="sec-title rv">文件下载区</h2>
+    <p class="file-lead rv">客户端整合包等文件都放在这里，点按钮直接下载。刚上传的文件需要几分钟同步，稍等刷新即可。</p>
+    <div class="file-list rv" id="fileList">
+      <div class="file-empty">正在读取文件列表…</div>
+    </div>
+  </div>
+</section>
+
 <section class="sec" id="faq" style="padding-top:0">
   <div class="wrap">
     <span class="kicker rv">下载问答</span>
@@ -254,6 +275,38 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
     rvs.forEach(function(el){ el.classList.add("in"); });
   }
 })();
+
+/* ===== 文件下载区 ===== */
+(function(){
+  var listEl = document.getElementById("fileList");
+  if(!listEl) return;
+  var OWNER="JUDIAO417", REPO="oolong-craft-files";
+  function fmt(n){ if(n>=1048576) return (n/1048576).toFixed(1)+" MB"; if(n>=1024) return (n/1024).toFixed(0)+" KB"; return n+" B"; }
+  function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+  function render(files){
+    files=(files||[]).filter(function(f){ return f.name!=="manifest.json" && f.name!=="README.md"; });
+    if(!files.length){ listEl.innerHTML='<div class="file-empty">仓库里暂时没有文件，稍后再来看看。</div>'; return; }
+    listEl.innerHTML=files.map(function(it){
+      var raw="https://raw.githubusercontent.com/"+OWNER+"/"+REPO+"/main/"+encodeURIComponent(it.name);
+      return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span><span class="file-size">'+fmt(it.size)+'</span><a class="btn btn-primary btn-sm" href="'+raw+'" target="_blank" rel="noopener" download>下载</a></div>';
+    }).join("");
+  }
+  fetch("https://raw.githubusercontent.com/"+OWNER+"/"+REPO+"/main/manifest.json")
+    .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+    .then(function(m){ render(m&&m.files); })
+    .catch(function(){
+      /* 清单读取失败时回退到 GitHub API（匿名，按浏览器 IP 限额） */
+      fetch("https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/")
+        .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+        .then(function(items){ render((items||[]).filter(function(it){ return it.type==="file"; }).map(function(it){ return {name:it.name,size:it.size}; })); })
+        .catch(function(){ listEl.innerHTML='<div class="file-empty">文件列表读取失败，请刷新重试。</div>'; });
+    });
+})();
+
+/* Ctrl+A 打开管理入口 */
+document.addEventListener("keydown", function(e){
+  if(e.ctrlKey && (e.key==="a" || e.key==="A")){ e.preventDefault(); window.location.href="admin.html"; }
+});
 </script>
 </body>
 </html>
