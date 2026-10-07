@@ -46,6 +46,10 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
 .field label{font-size:.88rem;color:var(--muted)}
 .field input[type=password]{background:var(--bg-soft);border:1px solid var(--line-strong);border-radius:2px;color:var(--ink);font-family:var(--sans);font-size:1rem;padding:.75rem .9rem;outline:none;transition:border-color .2s;width:100%;max-width:380px}
 .field input:focus{border-color:var(--tea)}
+.field input[type=text]{background:var(--bg-soft);border:1px solid var(--line-strong);border-radius:2px;color:var(--ink);font-family:var(--sans);font-size:.95rem;padding:.7rem .9rem;outline:none;transition:border-color .2s;width:100%;max-width:380px}
+.g-inputs{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
+.g-inputs input[type=text]{background:var(--bg-soft);border:1px solid var(--line-strong);border-radius:2px;color:var(--ink);font-family:var(--sans);font-size:.95rem;padding:.7rem .9rem;outline:none;transition:border-color .2s;width:100%}
+.g-inputs input:focus{border-color:var(--tea)}
 .err{color:var(--danger);font-size:.9rem;min-height:1.4em;margin:.2rem 0 .8rem}
 .seg{display:inline-flex;gap:.6rem;margin-bottom:1.1rem}
 .seg .seg-btn{border:2px solid var(--line-strong);background:transparent;color:var(--muted);font-weight:700;padding:.6rem 1.6rem;border-radius:2px;cursor:pointer;font-family:var(--sans);font-size:.95rem;transition:all .2s}
@@ -138,6 +142,40 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     <div class="file-list" id="pcList"><div class="empty">正在读取…</div></div>
     <h3 class="fg-title"><span class="fg-badge">PE</span>PE 版文件</h3>
     <div class="file-list" id="peList"><div class="empty">正在读取…</div></div>
+
+    <div class="divider"></div>
+    <h2 style="font-size:1.2rem">主播粉丝群</h2>
+    <p class="sub">最多 10 个。上传二维码图片，填写标题与抖音群号（弹窗格式：上面标题、下面群号，点群号跳转抖音）。</p>
+    <div class="g-inputs">
+      <input type="text" id="gTitle" placeholder="群标题，如：乌龙茶 1 群">
+      <input type="text" id="gQq" placeholder="抖音群号（点击时复制并跳转抖音搜索）">
+    </div>
+    <div class="up-row">
+      <label class="btn btn-ghost btn-sm" for="gFile" style="cursor:pointer">选择二维码图片</label>
+      <span class="file-now" id="gFileName">未选择图片</span>
+      <button class="btn btn-primary btn-sm" id="addGroup">添加粉丝群</button>
+    </div>
+    <input type="file" id="gFile" accept="image/*" style="display:none">
+    <div class="file-list" id="gList"><div class="empty">暂无粉丝群</div></div>
+
+    <div class="divider"></div>
+    <h2 style="font-size:1.2rem">安装教程视频</h2>
+    <p class="sub">最多 50 个。上传视频文件（≤20MB）或填写外部视频链接（B站 / 抖音 / 直链均可）。</p>
+    <div class="seg" id="vSeg">
+      <button class="seg-btn on" data-vtype="file">上传视频文件</button>
+      <button class="seg-btn" data-vtype="url">填写视频链接</button>
+    </div>
+    <div class="g-inputs">
+      <input type="text" id="vTitle" placeholder="视频标题，如：PC 版安装教程">
+      <input type="text" id="vUrl" placeholder="https://… 视频链接" style="display:none">
+    </div>
+    <div class="up-row">
+      <label class="btn btn-ghost btn-sm" for="vFile" id="vFileLabel" style="cursor:pointer">选择视频文件</label>
+      <span class="file-now" id="vFileName">未选择视频</span>
+      <button class="btn btn-primary btn-sm" id="addVideo">添加视频</button>
+    </div>
+    <input type="file" id="vFile" accept="video/*" style="display:none">
+    <div class="file-list" id="vList"><div class="empty">暂无教程视频</div></div>
     <p class="hint">文件存储：Gitee 仓库 sykjsj/oolong-craft-files（pc/ 与 pe/ 目录）。每次操作后自动发布文件清单，玩家在下载页即可看到最新文件。</p>
   </div>
 </main>
@@ -166,7 +204,21 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       fileName=document.getElementById("fileName"),
       uploadBtn=document.getElementById("uploadBtn"),
       pcList=document.getElementById("pcList"),
-      peList=document.getElementById("peList");
+      peList=document.getElementById("peList"),
+      gTitle=document.getElementById("gTitle"),
+      gQq=document.getElementById("gQq"),
+      gFile=document.getElementById("gFile"),
+      gFileName=document.getElementById("gFileName"),
+      gList=document.getElementById("gList"),
+      addGroupBtn=document.getElementById("addGroup"),
+      vSeg=document.getElementById("vSeg"),
+      vTitle=document.getElementById("vTitle"),
+      vUrl=document.getElementById("vUrl"),
+      vFile=document.getElementById("vFile"),
+      vFileName=document.getElementById("vFileName"),
+      vFileLabel=document.getElementById("vFileLabel"),
+      vList=document.getElementById("vList"),
+      addVideoBtn=document.getElementById("addVideo");
 
   var CAT="pc";
   seg.addEventListener("click",function(e){
@@ -181,7 +233,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
 
   /* ===== 验证 ===== */
   function unlock(){
-    if(pw.value===PASS){ gate.hidden=true; panel.hidden=false; refreshAll(); }
+    if(pw.value===PASS){ gate.hidden=true; panel.hidden=false; refreshAll(); loadMeta(); }
     else { gateErr.textContent="密码错误，请重试。"; pw.select(); }
   }
   document.getElementById("unlock").addEventListener("click",unlock);
@@ -225,7 +277,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   function fileMeta(items){ return (items||[]).map(function(i){ return {name:i.name, size:i.size}; }); }
   function publishFilelist(){
     return Promise.all([giteeList("pc"),giteeList("pe")]).then(function(res){
-      var payload=JSON.stringify({pc:fileMeta(res[0]), pe:fileMeta(res[1])});
+      var payload=JSON.stringify({pc:fileMeta(res[0]), pe:fileMeta(res[1]), groups:groups.slice(0,10), videos:videos.slice(0,50)});
       var b64=btoa(unescape(encodeURIComponent(payload)));
       return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/filelist.json",{headers:ghHeaders()})
         .then(function(r){ return r.ok ? r.json() : null; })
@@ -298,6 +350,116 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     reader.readAsDataURL(f);
   }
   uploadBtn.addEventListener("click",uploadFile);
+
+  /* ===== 粉丝群 / 教程视频 ===== */
+  var groups=[], videos=[], VTYPE="file";
+  vSeg.addEventListener("click",function(e){
+    var b=e.target.closest(".seg-btn"); if(!b) return;
+    VTYPE=b.getAttribute("data-vtype");
+    vSeg.querySelectorAll(".seg-btn").forEach(function(x){ x.classList.toggle("on",x===b); });
+    vUrl.style.display = VTYPE==="url" ? "" : "none";
+    vFileLabel.style.display = VTYPE==="file" ? "" : "none";
+  });
+  gFile.addEventListener("change",function(){ gFileName.textContent=gFile.files[0]?gFile.files[0].name:"未选择图片"; });
+  vFile.addEventListener("change",function(){ vFileName.textContent=vFile.files[0]?vFile.files[0].name:"未选择视频"; });
+
+  function loadMeta(){
+    return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/filelist.json",{headers:ghHeaders()})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(d){
+        var m=JSON.parse(decodeURIComponent(escape(atob(d.content))));
+        groups=(m.groups||[]).slice(0,10);
+        videos=(m.videos||[]).slice(0,50);
+        renderGroups(); renderVideos();
+      })
+      .catch(function(){ groups=[]; videos=[]; renderGroups(); renderVideos(); });
+  }
+  function renderGroups(){
+    if(!groups.length){ gList.innerHTML='<div class="empty">暂无粉丝群</div>'; return; }
+    gList.innerHTML=groups.map(function(g,i){
+      return '<div class="file-row"><span class="nm">'+esc(g.title)+' · '+esc(g.qq)+'</span><span class="sz">'+esc(g.file)+'</span><button class="btn btn-danger btn-sm" data-i="'+i+'">删除</button></div>';
+    }).join("");
+    gList.querySelectorAll("[data-i]").forEach(function(b){
+      b.addEventListener("click",function(){ delGroup(+b.getAttribute("data-i")); });
+    });
+  }
+  function renderVideos(){
+    if(!videos.length){ vList.innerHTML='<div class="empty">暂无教程视频</div>'; return; }
+    vList.innerHTML=videos.map(function(v,i){
+      var src=v.type==="file" ? v.src : "[链接] "+v.src;
+      return '<div class="file-row"><span class="nm">'+esc(v.title)+'</span><span class="sz">'+esc(src)+'</span><button class="btn btn-danger btn-sm" data-i="'+i+'">删除</button></div>';
+    }).join("");
+    vList.querySelectorAll("[data-i]").forEach(function(b){
+      b.addEventListener("click",function(){ delVideo(+b.getAttribute("data-i")); });
+    });
+  }
+  function delGroup(i){
+    var g=groups[i]; if(!g) return;
+    if(!confirm("删除粉丝群「"+g.title+"」？")) return;
+    giteeDelete("qr",g.file).catch(function(){});
+    groups.splice(i,1); renderGroups(); publishFilelist();
+  }
+  function delVideo(i){
+    var v=videos[i]; if(!v) return;
+    if(!confirm("删除教程「"+v.title+"」？")) return;
+    if(v.type==="file") giteeDelete("videos",v.src).catch(function(){});
+    videos.splice(i,1); renderVideos(); publishFilelist();
+  }
+  function addGroup(){
+    var f=gFile.files[0];
+    if(!gTitle.value.trim() || !gQq.value.trim()){ toast("请填写标题和群号"); return; }
+    if(!f){ toast("请选择二维码图片"); return; }
+    if(groups.length>=10){ toast("粉丝群最多 10 个"); return; }
+    if(f.size>5*1048576){ toast("二维码图片请小于 5MB"); return; }
+    addGroupBtn.disabled=true; addGroupBtn.textContent="上传中…";
+    var name=Date.now()+"-"+f.name;
+    var rd=new FileReader();
+    rd.onload=function(){
+      giteeWrite("qr",name,String(rd.result).split(",")[1],"upload qr "+name)
+        .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
+        .then(function(){
+          groups.push({title:gTitle.value.trim(), qq:gQq.value.trim(), file:name});
+          gTitle.value=""; gQq.value=""; gFile.value=""; gFileName.textContent="未选择图片";
+          renderGroups(); return publishFilelist();
+        })
+        .catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); })
+        .finally(function(){ addGroupBtn.disabled=false; addGroupBtn.textContent="添加粉丝群"; });
+    };
+    rd.onerror=function(){ toast("读取图片失败"); addGroupBtn.disabled=false; addGroupBtn.textContent="添加粉丝群"; };
+    rd.readAsDataURL(f);
+  }
+  function addVideo(){
+    var title=vTitle.value.trim();
+    if(!title){ toast("请填写视频标题"); return; }
+    if(videos.length>=50){ toast("教程视频最多 50 个"); return; }
+    if(VTYPE==="url"){
+      var u=vUrl.value.trim();
+      if(!u){ toast("请填写视频链接"); return; }
+      videos.push({title:title, src:u, type:"url"});
+      vTitle.value=""; vUrl.value=""; renderVideos(); publishFilelist(); return;
+    }
+    var f=vFile.files[0];
+    if(!f){ toast("请选择视频文件"); return; }
+    if(f.size>20*1048576){ toast("视频超过 20MB，请压缩或改用链接"); return; }
+    addVideoBtn.disabled=true; addVideoBtn.textContent="上传中…";
+    var name=Date.now()+"-"+f.name;
+    var rd=new FileReader();
+    rd.onload=function(){
+      giteeWrite("videos",name,String(rd.result).split(",")[1],"upload video "+name)
+        .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
+        .then(function(){
+          videos.push({title:title, src:name, type:"file"});
+          vTitle.value=""; vFile.value=""; vFileName.textContent="未选择视频";
+          renderVideos(); return publishFilelist();
+        })
+        .catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); })
+        .finally(function(){ addVideoBtn.disabled=false; addVideoBtn.textContent="添加视频"; });
+    };
+    rd.onerror=function(){ toast("读取视频失败"); addVideoBtn.disabled=false; addVideoBtn.textContent="添加视频"; };
+    rd.readAsDataURL(f);
+  }
+  addGroupBtn.addEventListener("click",addGroup);
+  addVideoBtn.addEventListener("click",addVideo);
 })();
 </script>
 </body>
