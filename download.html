@@ -301,7 +301,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
       return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span><span class="file-size">'+fmt(it.size)+'</span><a class="btn btn-primary btn-sm" href="'+raw+'" target="_blank" rel="noopener">下载</a></div>';
     }).join("");
   }
-  fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/filelist.json")
+  fetch("https://judiao417.github.io/oolong-craft-site/filelist.json")
     .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
     .then(function(m){
       m=m||{}; render(pcEl,"pc",m.pc); render(peEl,"pe",m.pe);
