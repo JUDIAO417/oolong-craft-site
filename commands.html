@@ -91,8 +91,19 @@ footer a{color:var(--tea)}
 @media(max-width:640px){
   .navbar{padding:.75rem 1rem}
   .brand b{font-size:.66rem}
-  .cmd-row{grid-template-columns:1fr;gap:.3rem}
-  .cmd{white-space:normal;word-break:break-all}
+  .brand-en{font-size:.5rem}
+  .hero-sub{font-size:.9rem}
+  /* 手机端双列紧凑卡：一屏可看到多个模组，避免一屏只显示一张大卡 */
+  .mod-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+  .mod-card{padding:.95rem .8rem .8rem}
+  .mod-head h2{font-size:1rem}
+  .mod-head .c{font-size:.45rem}
+  .cmd-row{grid-template-columns:1fr;gap:.25rem;padding:.5rem 0}
+  .cmd{font-size:.72rem;white-space:normal;word-break:break-all;padding:.15rem .45rem;line-height:1.55}
+  .cmd-desc{font-size:.76rem;line-height:1.6}
+  .cats{gap:.45rem;margin-bottom:2rem}
+  .cat-chip{font-size:.48rem;padding:.45rem .7rem}
+  .search{margin-bottom:2rem}
 }
 </style>
 </head>
