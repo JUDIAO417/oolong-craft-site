@@ -379,19 +379,16 @@ footer{border-top:1px solid var(--glass-line);background:rgba(13,19,16,.55);-web
     document.body.removeChild(ta);
   }
   function joinQQ(gid){
-    var pc="tencent://groupwelcome/?p=1&oldSubtype=1&groupCode="+gid+"&subtype=0";      /* PC 端拉起 QQ 加群 */
-    var mb="mqqapi://card/show_psl_card?src_type=internal&version=1&uin="+gid+"&card_type=group&source=external"; /* 手机端拉起 QQ 加群 */
-    var used=false;
-    var probe=function(url){ if(used) return; used=true; var ifr=document.createElement("iframe");
-      ifr.style.display="none"; ifr.src=url; document.body.appendChild(ifr);
-      setTimeout(function(){ ifr.remove(); },2500);
-    };
-    probe(mb); probe(pc);
-    setTimeout(function(){                       /* 兜底：未弹出 QQ 则复制群号提示 */
+    var isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    var url = isMobile
+      ? "mqqapi://card/show_pslcard?src_type=internal&version=1&card_type=group&uin="+gid   /* 手机：拉起 QQ 群资料页 */
+      : "tencent://groupwelcome/?p=1&oldSubtype=1&groupCode="+gid+"&subtype=0";            /* PC：拉起 QQ 加群窗口 */
+    window.location.href=url;                     /* 用户点击手势内直接跳协议，最可靠 */
+    setTimeout(function(){                        /* 兜底：未弹出 QQ 则复制群号提示 */
       if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(gid).then(function(){ toast("已尝试拉起 QQ，如未弹出请在 QQ 内搜索群号加入（已复制）"); },function(){ fallbackCopy(gid); toast("已尝试拉起 QQ，如未弹出请复制群号到 QQ 搜索加入"); });
-      } else { fallbackCopy(gid); toast("已尝试拉起 QQ，如未弹出请复制群号到 QQ 搜索加入"); }
-    },1200);
+        navigator.clipboard.writeText(gid).then(function(){ toast("正在拉起 QQ 加群… 如未弹出，群号已复制，请到 QQ 内搜索加入"); },function(){ fallbackCopy(gid); toast("正在拉起 QQ 加群… 如未弹出，请复制群号到 QQ 搜索加入"); });
+      } else { fallbackCopy(gid); toast("正在拉起 QQ 加群… 如未弹出，请复制群号到 QQ 搜索加入"); }
+    },1800);
   }
 
   function renderGroups(){
