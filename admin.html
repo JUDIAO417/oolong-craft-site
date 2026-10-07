@@ -368,9 +368,9 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
   function renderList(el, items, cat){
     if(!items.length){ el.innerHTML='<div class="empty">该分类暂无文件</div>'; return; }
-    items=items.slice().sort(function(a,b){ return b.size-a.size; });
+    items=items.slice().sort(function(a,b){ return (b.size||0)-(a.size||0); });
     el.innerHTML=items.map(function(it){
-      return '<div class="file-row"><span class="nm">'+esc(it.name)+'</span><span class="sz">'+fmt(it.size)+'</span><button class="btn btn-danger btn-sm" data-del="'+esc(it.name)+'" data-cat="'+cat+'">删除</button></div>';
+      return '<div class="file-row"><span class="nm">'+esc(it.name)+'</span><span class="sz">'+(it.size==null?"—":fmt(it.size))+'</span><button class="btn btn-danger btn-sm" data-del="'+esc(it.name)+'" data-cat="'+cat+'">删除</button></div>';
     }).join("");
     el.querySelectorAll("[data-del]").forEach(function(b){
       b.addEventListener("click",function(){
@@ -387,8 +387,12 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   function refreshAll(){
     pcList.innerHTML='<div class="empty">正在读取…</div>';
     peList.innerHTML='<div class="empty">正在读取…</div>';
-    giteeList("pc").then(function(items){ renderList(pcList,items,"pc"); }).catch(function(){ pcList.innerHTML='<div class="empty">读取失败</div>'; });
-    giteeList("pe").then(function(items){ renderList(peList,items,"pe"); }).catch(function(){ peList.innerHTML='<div class="empty">读取失败</div>'; });
+    giteeList("pc").then(function(items){ return fileMetaSmart("pc",items); })
+      .then(function(arr){ renderList(pcList,arr,"pc"); })
+      .catch(function(){ pcList.innerHTML='<div class="empty">读取失败</div>'; });
+    giteeList("pe").then(function(items){ return fileMetaSmart("pe",items); })
+      .then(function(arr){ renderList(peList,arr,"pe"); })
+      .catch(function(){ peList.innerHTML='<div class="empty">读取失败</div>'; });
   }
 
   /* ===== 上传 ===== */
