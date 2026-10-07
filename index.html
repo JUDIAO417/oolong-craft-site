@@ -162,7 +162,7 @@ header.scrolled{background:rgba(10,14,12,.78);box-shadow:0 8px 30px rgba(0,0,0,.
     linear-gradient(90deg,rgba(10,14,12,.88) 0%,rgba(10,14,12,.62) 46%,rgba(10,14,12,.34) 100%),
     linear-gradient(0deg,rgba(10,14,12,.92) 0%,rgba(10,14,12,.18) 46%,rgba(10,14,12,.42) 100%);
 }
-.hero-inner{max-width:none;padding-top:6.5rem;padding-bottom:8rem}  /* 内容铺满容器：不再窄条居中，左右不再大片空白 */
+.hero-inner{flex:1 1 auto;width:100%;padding-top:6.5rem;padding-bottom:8rem}  /* flex 子项占满整行：容器宽度由 wrap(1160px) 决定，内容左对齐 */
 .hero-inner .chips,.hero-inner .hero-cta,.hero-inner .hero-links{justify-content:flex-start}  /* 按钮行靠左 */
 .hero-inner{text-align:left}
 /* 首屏入场序列 */
