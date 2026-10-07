@@ -145,17 +145,14 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
 
     <div class="divider"></div>
     <h2 style="font-size:1.2rem">主播粉丝群</h2>
-    <p class="sub">最多 10 个。上传二维码图片，填写标题与抖音群号（弹窗格式：上面标题、下面群号，点群号跳转抖音）。</p>
+    <p class="sub">最多 10 个。填写标题与抖音群号（弹窗格式：上面标题、下面群号，点群号跳转抖音）。</p>
     <div class="g-inputs">
       <input type="text" id="gTitle" placeholder="群标题，如：乌龙茶 1 群">
       <input type="text" id="gQq" placeholder="抖音群号（点击时复制并跳转抖音搜索）">
     </div>
     <div class="up-row">
-      <label class="btn btn-ghost btn-sm" for="gFile" style="cursor:pointer">选择二维码图片</label>
-      <span class="file-now" id="gFileName">未选择图片</span>
       <button class="btn btn-primary btn-sm" id="addGroup">添加粉丝群</button>
     </div>
-    <input type="file" id="gFile" accept="image/*" style="display:none">
     <div class="file-list" id="gList"><div class="empty">暂无粉丝群</div></div>
 
     <div class="divider"></div>
@@ -226,8 +223,6 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       peList=document.getElementById("peList"),
       gTitle=document.getElementById("gTitle"),
       gQq=document.getElementById("gQq"),
-      gFile=document.getElementById("gFile"),
-      gFileName=document.getElementById("gFileName"),
       gList=document.getElementById("gList"),
       addGroupBtn=document.getElementById("addGroup"),
       vSeg=document.getElementById("vSeg"),
@@ -442,7 +437,6 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     vUrl.style.display = VTYPE==="url" ? "" : "none";
     vFileLabel.style.display = VTYPE==="file" ? "" : "none";
   });
-  gFile.addEventListener("change",function(){ gFileName.textContent=gFile.files[0]?gFile.files[0].name:"未选择图片"; });
   vFile.addEventListener("change",function(){ vFileName.textContent=vFile.files[0]?vFile.files[0].name:"未选择视频"; });
 
   function loadMeta(){
@@ -483,7 +477,6 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   function delGroup(i){
     var g=groups[i]; if(!g) return;
     if(!confirm("删除粉丝群「"+g.title+"」？")) return;
-    giteeDelete("qr",g.file).catch(function(){});
     groups.splice(i,1); renderGroups(); publishAll();
   }
   function delVideo(i){
@@ -493,27 +486,11 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     videos.splice(i,1); renderVideos(); publishAll();
   }
   function addGroup(){
-    var f=gFile.files[0];
     if(!gTitle.value.trim() || !gQq.value.trim()){ toast("请填写标题和群号"); return; }
-    if(!f){ toast("请选择二维码图片"); return; }
     if(groups.length>=10){ toast("粉丝群最多 10 个"); return; }
-    if(f.size>5*1048576){ toast("二维码图片请小于 5MB"); return; }
-    addGroupBtn.disabled=true; addGroupBtn.textContent="上传中…";
-    var name=Date.now()+"-"+f.name;
-    var rd=new FileReader();
-    rd.onload=function(){
-      giteeWrite("qr",name,String(rd.result).split(",")[1],"upload qr "+name)
-        .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
-        .then(function(){
-          groups.push({title:gTitle.value.trim(), qq:gQq.value.trim(), file:name});
-          gTitle.value=""; gQq.value=""; gFile.value=""; gFileName.textContent="未选择图片";
-          renderGroups(); return publishAll();
-        })
-        .catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); })
-        .finally(function(){ addGroupBtn.disabled=false; addGroupBtn.textContent="添加粉丝群"; });
-    };
-    rd.onerror=function(){ toast("读取图片失败"); addGroupBtn.disabled=false; addGroupBtn.textContent="添加粉丝群"; };
-    rd.readAsDataURL(f);
+    groups.push({title:gTitle.value.trim(), qq:gQq.value.trim()});
+    gTitle.value=""; gQq.value="";
+    renderGroups(); publishAll();
   }
   function addVideo(){
     var title=vTitle.value.trim();

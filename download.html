@@ -104,7 +104,6 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.8);-webkit-bac
 .g-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1.1rem}
 .gcard{background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:1.1rem;display:flex;flex-direction:column;gap:.8rem;align-items:center;text-align:center}
 .g-title{font-weight:700;font-family:var(--serif);font-size:1.02rem}
-.g-img{width:100%;max-width:200px;image-rendering:pixelated;border:1px solid var(--line-strong);background:#fff}
 .g-qq{font-size:.92rem;color:var(--tea);cursor:pointer;border:1px dashed var(--line-strong);padding:.45rem .9rem;border-radius:2px;transition:all .2s}
 .g-qq:hover{background:rgba(240,179,92,.12)}
 .v-list{display:flex;flex-direction:column;gap:.8rem}
@@ -362,7 +361,6 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
     if(!groups.length){ mBody.innerHTML='<div class="modal-empty">粉丝群正在整理中，稍后再来。</div>'; return; }
     mBody.innerHTML='<div class="g-grid">'+groups.map(function(g){
       return '<div class="gcard"><div class="g-title">'+esc(g.title)+'</div>'+
-        '<img class="g-img" src="'+rawUrl("qr",g.file)+'" alt="'+esc(g.title)+' 二维码" loading="lazy">'+
         '<div class="g-qq" role="button" tabindex="0" data-qq="'+esc(g.qq)+'">群号：'+esc(g.qq)+'</div></div>';
     }).join('')+'</div>';
     mBody.querySelectorAll("[data-qq]").forEach(function(el){
