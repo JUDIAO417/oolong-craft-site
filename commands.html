@@ -77,8 +77,13 @@ h1 em{font-style:normal;color:var(--tea)}
 .mod-card{height:100%;background:var(--glass-bg);border:1px solid var(--glass-line);border-radius:var(--r-lg);padding:1.4rem 1.5rem 1.2rem;backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px) saturate(120%);box-shadow:var(--shadow-glass);transition:transform .25s,box-shadow .25s;position:relative;overflow:hidden}
 .mod-card::before{content:"";position:absolute;top:-46%;right:-30%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(240,179,92,.12),transparent 65%);pointer-events:none}
 .mod-card:hover{transform:translateY(-4px);box-shadow:0 22px 52px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
-.mod-head{display:flex;align-items:baseline;gap:.55rem;margin-bottom:1rem;border-bottom:1px solid var(--glass-line);padding-bottom:.7rem}
-.mod-head h2{font-size:1.18rem;color:var(--tea)}
+.mod-head{display:flex;align-items:center;gap:.55rem;margin-bottom:0;border-bottom:1px solid var(--glass-line);padding:.2rem .2rem .7rem;cursor:pointer;user-select:none}
+.mod-head h2{font-size:1.18rem;color:var(--tea);flex:1;margin:0}
+.mod-body{overflow:hidden;max-height:14000px;transition:max-height .4s ease}
+.mod-card.collapsed .mod-body{max-height:0}
+.tog{flex:0 0 auto;background:none;border:none;color:var(--dim);cursor:pointer;padding:.2rem;display:flex;transition:transform .35s ease}
+.mod-card.collapsed .tog{transform:rotate(-90deg)}
+.mod-card.collapsed .mod-head{border-bottom-color:transparent}
 .mod-head .c{font-family:var(--pixel);font-size:.5rem;color:var(--dim);letter-spacing:.1em}
 .cmd-row{padding:.62rem 0;border-bottom:1px dashed rgba(240,179,92,.1);display:grid;grid-template-columns:auto 1fr;gap:.9rem;align-items:baseline}
 .cmd-row:last-child{border-bottom:none}
@@ -100,6 +105,7 @@ footer a{color:var(--tea)}
   .mod-card{padding:.95rem .8rem .8rem}
   .mod-head h2{font-size:1rem}
   .mod-head .c{font-size:.45rem}
+  .mod-head{padding:.15rem .1rem .55rem}
   .cmd-row{grid-template-columns:1fr;gap:.25rem;padding:.5rem 0}
   .cmd{font-size:.72rem;white-space:normal;word-break:break-all;padding:.15rem .45rem;line-height:1.55}
   .mod-grid{max-width:none}
@@ -189,13 +195,20 @@ function render(){
     });
   });
   var n=0;
+  var arrow='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
   grid.innerHTML=list.map(function(m){
     n+=m.items.length;
-    return '<div class="mod-card"><div class="mod-head"><h2>《'+esc(m.cat)+'》</h2><span class="c">'+m.items.length+' 条指令</span></div>'+
+    return '<div class="mod-card collapsed"><div class="mod-head"><h2>《'+esc(m.cat)+'》</h2><span class="c">'+m.items.length+' 条指令</span><button class="tog" aria-label="展开收起">'+arrow+'</button></div><div class="mod-body">'+
       m.items.map(function(it){
         return '<div class="cmd-row"><code class="cmd">'+esc(it.cmd)+'</code><span class="cmd-desc">'+esc(it.desc)+'</span></div>';
-      }).join('')+'</div>';
+      }).join('')+'</div></div>';
   }).join("") || '<div class="empty">没有找到匹配的指令。<br><br><b>换个关键词试试？</b></div>';
+  grid.querySelectorAll(".mod-head").forEach(function(h){
+    h.addEventListener("click",function(){ h.parentElement.classList.toggle("collapsed"); });
+  });
+  if(q||CAT){   /* 搜索或筛选时自动展开，避免内容被折叠挡住 */
+    grid.querySelectorAll(".mod-card.collapsed").forEach(function(c){ c.classList.remove("collapsed"); });
+  }
   cntEl.textContent=(list.length? n+" 条":"");
 }
 qEl.addEventListener("input",render);
