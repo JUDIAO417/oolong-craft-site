@@ -160,7 +160,11 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
 
     <div class="divider"></div>
     <h2 style="font-size:1.2rem">安装教程视频</h2>
-    <p class="sub">最多 50 个。上传视频文件（≤150MB）或填写外部视频链接（B站 / 抖音 / 直链均可）。</p>
+    <p class="sub">最多 50 个，按 PC / PE 分开维护。上传视频文件（≤150MB）或填写外部视频链接（B站 / 抖音 / 直链均可）。</p>
+    <div class="seg" id="vCatSeg">
+      <button class="seg-btn on" data-vcat="pc">PC 版</button>
+      <button class="seg-btn" data-vcat="pe">PE 版</button>
+    </div>
     <div class="seg" id="vSeg">
       <button class="seg-btn on" data-vtype="file">上传视频文件</button>
       <button class="seg-btn" data-vtype="url">填写视频链接</button>
@@ -227,6 +231,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       gList=document.getElementById("gList"),
       addGroupBtn=document.getElementById("addGroup"),
       vSeg=document.getElementById("vSeg"),
+      vCatSeg=document.getElementById("vCatSeg"),
       vTitle=document.getElementById("vTitle"),
       vUrl=document.getElementById("vUrl"),
       vFile=document.getElementById("vFile"),
@@ -401,7 +406,12 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   uploadBtn.addEventListener("click",uploadFile);
 
   /* ===== 粉丝群 / 教程视频 / 纪念馆 ===== */
-  var groups=[], videos=[], memorial=[], VTYPE="file";
+  var groups=[], videos=[], memorial=[], VTYPE="file", VCAT="pc";
+  vCatSeg.addEventListener("click",function(e){
+    var b=e.target.closest(".seg-btn"); if(!b) return;
+    VCAT=b.getAttribute("data-vcat");
+    vCatSeg.querySelectorAll(".seg-btn").forEach(function(x){ x.classList.toggle("on",x===b); });
+  });
   vSeg.addEventListener("click",function(e){
     var b=e.target.closest(".seg-btn"); if(!b) return;
     VTYPE=b.getAttribute("data-vtype");
