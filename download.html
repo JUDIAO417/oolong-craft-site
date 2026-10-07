@@ -392,13 +392,15 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
   document.querySelectorAll("[data-groups]").forEach(function(b){ b.addEventListener("click",function(){ openModal("groups"); }); });
   document.querySelectorAll("[data-videos]").forEach(function(b){ b.addEventListener("click",function(){ openModal("videos"); }); });
 
-  /* ===== 读取清单 ===== */
-  fetch("https://judiao417.github.io/oolong-craft-site/filelist.json")
-    .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
-    .then(function(m){
-      m=m||{};
-      render(pcEl,"pc",m.pc); render(peEl,"pe",m.pe);
-      groups=(m.groups||[]).slice(0,10); videos=(m.videos||[]).slice(0,50);
+  /* ===== 读取各部分 JSON（本站镜像）===== */
+  function getJson(path){
+    return fetch("https://judiao417.github.io/oolong-craft-site/"+path)
+      .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
+  }
+  Promise.all([getJson("pc.json"),getJson("pe.json"),getJson("groups.json"),getJson("videos.json")])
+    .then(function(r){
+      render(pcEl,"pc",r[0]); render(peEl,"pe",r[1]);
+      groups=(r[2]||[]).slice(0,10); videos=(r[3]||[]).slice(0,50);
     })
     .catch(function(){
       pcEl.innerHTML='<div class="file-empty">文件列表加载失败，请刷新重试。</div>';

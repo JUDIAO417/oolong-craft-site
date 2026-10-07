@@ -176,6 +176,21 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     </div>
     <input type="file" id="vFile" accept="video/*" style="display:none">
     <div class="file-list" id="vList"><div class="empty">暂无教程视频</div></div>
+
+    <div class="divider"></div>
+    <h2 style="font-size:1.2rem">纪念馆</h2>
+    <p class="sub">最多 20 个。上传建筑截图，填写标题与一句话介绍，主页「纪念馆」区块会同步展示。</p>
+    <div class="g-inputs">
+      <input type="text" id="mTitle" placeholder="作品标题，如：红石工坊">
+      <input type="text" id="mDesc" placeholder="一句话介绍，如：灯光亮起的地方，总有新机器在跑。">
+    </div>
+    <div class="up-row">
+      <label class="btn btn-ghost btn-sm" for="mFile" style="cursor:pointer">选择建筑截图</label>
+      <span class="file-now" id="mFileName">未选择图片</span>
+      <button class="btn btn-primary btn-sm" id="addMem">添加作品</button>
+    </div>
+    <input type="file" id="mFile" accept="image/*" style="display:none">
+    <div class="file-list" id="mList"><div class="empty">暂无纪念馆作品</div></div>
     <p class="hint">文件存储：Gitee 仓库 sykjsj/oolong-craft-files（pc/ 与 pe/ 目录）。每次操作后自动发布文件清单，玩家在下载页即可看到最新文件。</p>
   </div>
 </main>
@@ -218,7 +233,13 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       vFileName=document.getElementById("vFileName"),
       vFileLabel=document.getElementById("vFileLabel"),
       vList=document.getElementById("vList"),
-      addVideoBtn=document.getElementById("addVideo");
+      addVideoBtn=document.getElementById("addVideo"),
+      mTitle=document.getElementById("mTitle"),
+      mDesc=document.getElementById("mDesc"),
+      mFile=document.getElementById("mFile"),
+      mFileName=document.getElementById("mFileName"),
+      mList=document.getElementById("mList"),
+      addMemBtn=document.getElementById("addMem");
 
   var CAT="pc";
   seg.addEventListener("click",function(e){
@@ -238,7 +259,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   }
   document.getElementById("unlock").addEventListener("click",unlock);
   pw.addEventListener("keydown",function(e){ if(e.key==="Enter") unlock(); });
-  document.getElementById("pubBtn").addEventListener("click",publishFilelist);
+  document.getElementById("pubBtn").addEventListener("click",publishAll);
 
   /* ===== Gitee API ===== */
   function giteeBase(path){ return "https://gitee.com/api/v5/repos/"+GITEE_OWNER+"/"+GITEE_REPO+"/contents/"+path; }
@@ -272,23 +293,51 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     });
   }
 
-  /* ===== GitHub 清单发布（供下载页读取）===== */
+  /* ===== 数据同步：各部分独立 JSON，Gitee 权威 + 本站镜像 ===== */
   function ghHeaders(){ return {"Authorization":"token "+GH_TOKEN,"Accept":"application/vnd.github+json"}; }
   function fileMeta(items){ return (items||[]).map(function(i){ return {name:i.name, size:i.size}; }); }
-  function publishFilelist(){
+  function b64u(s){ return btoa(unescape(encodeURIComponent(s))); }
+  function giteeWriteRoot(name, b64, message){   /* 仓库根目录文件（JSON） */
+    return giteeList("").then(function(items){
+      var found=(items||[]).filter(function(it){ return it.name===name; })[0];
+      var fd=new FormData();
+      fd.append("access_token",GITEE_TOKEN);
+      fd.append("content",b64);
+      fd.append("message",message);
+      fd.append("branch",GITEE_BRANCH);
+      if(found) fd.append("sha",found.sha);
+      return fetch(giteeBase(encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd});
+    });
+  }
+  function ghWrite(path, content, msg){
+    return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,{headers:ghHeaders()})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(cur){
+        var body={message:msg, content:b64u(content), branch:GH_BRANCH};
+        if(cur && cur.sha) body.sha=cur.sha;
+        return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,
+          {method:"PUT", headers:ghHeaders(), body:JSON.stringify(body)});
+      });
+  }
+  function publishAll(){
     return Promise.all([giteeList("pc"),giteeList("pe")]).then(function(res){
-      var payload=JSON.stringify({pc:fileMeta(res[0]), pe:fileMeta(res[1]), groups:groups.slice(0,10), videos:videos.slice(0,50)});
-      var b64=btoa(unescape(encodeURIComponent(payload)));
-      return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/filelist.json",{headers:ghHeaders()})
-        .then(function(r){ return r.ok ? r.json() : null; })
-        .then(function(cur){
-          var body={message:"sync filelist", content:b64, branch:GH_BRANCH};
-          if(cur && cur.sha) body.sha=cur.sha;
-          return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/filelist.json",
-            {method:"PUT", headers:ghHeaders(), body:JSON.stringify(body)});
-        });
-    }).then(function(){ toast("已发布清单，下载页稍后可见"); })
-      .catch(function(){ toast("清单发布失败，请重试"); });
+      var jsons={
+        "pc.json":JSON.stringify(fileMeta(res[0])),
+        "pe.json":JSON.stringify(fileMeta(res[1])),
+        "groups.json":JSON.stringify(groups.slice(0,10)),
+        "videos.json":JSON.stringify(videos.slice(0,50)),
+        "memorial.json":JSON.stringify(memorial.slice(0,20))
+      };
+      var jobs=[];
+      Object.keys(jsons).forEach(function(k){
+        jobs.push(giteeWriteRoot(k,b64u(jsons[k]),"sync "+k));   /* Gitee 权威存储 */
+        jobs.push(ghWrite(k,jsons[k],"sync "+k));                 /* 本站镜像供页面读取 */
+      });
+      return Promise.all(jobs.map(function(p){
+        return p.then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); });
+      }));
+    }).then(function(){ toast("已同步各部分 JSON（Gitee 权威 + 本站镜像）"); })
+      .catch(function(e){ toast("同步失败："+(e&&e.message||"未知错误")); });
   }
 
   /* ===== 列表渲染 ===== */
@@ -307,7 +356,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
         b.disabled=true;
         giteeDelete(b.getAttribute("data-cat"),n)
           .then(function(){ toast("已删除 "+n); return refreshAll(); })
-          .then(publishFilelist)
+          .then(publishAll)
           .catch(function(e){ toast("删除失败："+(e&&e.message||"未知错误")); refreshAll(); });
       });
     });
@@ -342,7 +391,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       giteeWrite(cat,name,b64,"upload "+name)
         .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||("HTTP "+r.status)); }); })
         .then(function(){ toast("上传成功，正在发布清单…"); fileInput.value=""; fileName.textContent="未选择文件"; return refreshAll(); })
-        .then(publishFilelist)
+        .then(publishAll)
         .catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); refreshAll(); })
         .finally(function(){ uploadBtn.disabled=false; uploadBtn.textContent="上传"; });
     };
@@ -351,8 +400,8 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   }
   uploadBtn.addEventListener("click",uploadFile);
 
-  /* ===== 粉丝群 / 教程视频 ===== */
-  var groups=[], videos=[], VTYPE="file";
+  /* ===== 粉丝群 / 教程视频 / 纪念馆 ===== */
+  var groups=[], videos=[], memorial=[], VTYPE="file";
   vSeg.addEventListener("click",function(e){
     var b=e.target.closest(".seg-btn"); if(!b) return;
     VTYPE=b.getAttribute("data-vtype");
@@ -364,15 +413,19 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   vFile.addEventListener("change",function(){ vFileName.textContent=vFile.files[0]?vFile.files[0].name:"未选择视频"; });
 
   function loadMeta(){
-    return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/filelist.json",{headers:ghHeaders()})
-      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-      .then(function(d){
-        var m=JSON.parse(decodeURIComponent(escape(atob(d.content))));
-        groups=(m.groups||[]).slice(0,10);
-        videos=(m.videos||[]).slice(0,50);
-        renderGroups(); renderVideos();
+    var ghGet=function(path){
+      return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path,{headers:ghHeaders()})
+        .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+        .then(function(d){ return JSON.parse(decodeURIComponent(escape(atob(d.content)))); });
+    };
+    return Promise.all([ghGet("groups.json"),ghGet("videos.json"),ghGet("memorial.json")])
+      .then(function(r){
+        groups=(r[0]||[]).slice(0,10);
+        videos=(r[1]||[]).slice(0,50);
+        memorial=(r[2]||[]).slice(0,20);
+        renderGroups(); renderVideos(); renderMem();
       })
-      .catch(function(){ groups=[]; videos=[]; renderGroups(); renderVideos(); });
+      .catch(function(){ groups=[]; videos=[]; memorial=[]; renderGroups(); renderVideos(); renderMem(); });
   }
   function renderGroups(){
     if(!groups.length){ gList.innerHTML='<div class="empty">暂无粉丝群</div>'; return; }
@@ -397,13 +450,13 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
     var g=groups[i]; if(!g) return;
     if(!confirm("删除粉丝群「"+g.title+"」？")) return;
     giteeDelete("qr",g.file).catch(function(){});
-    groups.splice(i,1); renderGroups(); publishFilelist();
+    groups.splice(i,1); renderGroups(); publishAll();
   }
   function delVideo(i){
     var v=videos[i]; if(!v) return;
     if(!confirm("删除教程「"+v.title+"」？")) return;
     if(v.type==="file") giteeDelete("videos",v.src).catch(function(){});
-    videos.splice(i,1); renderVideos(); publishFilelist();
+    videos.splice(i,1); renderVideos(); publishAll();
   }
   function addGroup(){
     var f=gFile.files[0];
@@ -420,7 +473,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
         .then(function(){
           groups.push({title:gTitle.value.trim(), qq:gQq.value.trim(), file:name});
           gTitle.value=""; gQq.value=""; gFile.value=""; gFileName.textContent="未选择图片";
-          renderGroups(); return publishFilelist();
+          renderGroups(); return publishAll();
         })
         .catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); })
         .finally(function(){ addGroupBtn.disabled=false; addGroupBtn.textContent="添加粉丝群"; });
@@ -436,7 +489,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
       var u=vUrl.value.trim();
       if(!u){ toast("请填写视频链接"); return; }
       videos.push({title:title, src:u, type:"url"});
-      vTitle.value=""; vUrl.value=""; renderVideos(); publishFilelist(); return;
+      vTitle.value=""; vUrl.value=""; renderVideos(); publishAll(); return;
     }
     var f=vFile.files[0];
     if(!f){ toast("请选择视频文件"); return; }
@@ -450,7 +503,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
         .then(function(){
           videos.push({title:title, src:name, type:"file"});
           vTitle.value=""; vFile.value=""; vFileName.textContent="未选择视频";
-          renderVideos(); return publishFilelist();
+          renderVideos(); return publishAll();
         })
         .catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); })
         .finally(function(){ addVideoBtn.disabled=false; addVideoBtn.textContent="添加视频"; });
@@ -460,6 +513,52 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,17,13,.85);-webkit-ba
   }
   addGroupBtn.addEventListener("click",addGroup);
   addVideoBtn.addEventListener("click",addVideo);
+
+  /* ===== 纪念馆 ===== */
+  mFile.addEventListener("change",function(){ mFileName.textContent=mFile.files[0]?mFile.files[0].name:"未选择图片"; });
+  function renderMem(){
+    if(!memorial.length){ mList.innerHTML='<div class="empty">暂无纪念馆作品</div>'; return; }
+    mList.innerHTML=memorial.map(function(m,i){
+      return '<div class="file-row"><span class="nm">'+esc(m.title)+'</span><span class="sz">'+esc(m.desc)+'</span><button class="btn btn-danger btn-sm" data-i="'+i+'">删除</button></div>';
+    }).join("");
+    mList.querySelectorAll("[data-i]").forEach(function(b){
+      b.addEventListener("click",function(){ delMem(+b.getAttribute("data-i")); });
+    });
+  }
+  function delMem(i){
+    var m=memorial[i]; if(!m) return;
+    if(!confirm("删除纪念馆作品「"+m.title+"」？")) return;
+    if(m.img.indexOf("gitee.com/")>=0){
+      var tail=m.img.split("/raw/"+GITEE_BRANCH+"/")[1];
+      if(tail) giteeDelete("memorial",tail).catch(function(){});
+    }
+    memorial.splice(i,1); renderMem(); publishAll();
+  }
+  function addMem(){
+    var f=mFile.files[0];
+    if(!mTitle.value.trim() || !mDesc.value.trim()){ toast("请填写标题和介绍"); return; }
+    if(!f){ toast("请选择建筑截图"); return; }
+    if(memorial.length>=20){ toast("纪念馆最多 20 个作品"); return; }
+    if(f.size>5*1048576){ toast("截图请小于 5MB"); return; }
+    addMemBtn.disabled=true; addMemBtn.textContent="上传中…";
+    var name=Date.now()+"-"+f.name;
+    var rd=new FileReader();
+    rd.onload=function(){
+      giteeWrite("memorial",name,String(rd.result).split(",")[1],"upload memorial "+name)
+        .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
+        .then(function(){
+          memorial.push({title:mTitle.value.trim(), desc:mDesc.value.trim(),
+            img:"https://gitee.com/"+GITEE_OWNER+"/"+GITEE_REPO+"/raw/"+GITEE_BRANCH+"/memorial/"+encodeURIComponent(name)});
+          mTitle.value=""; mDesc.value=""; mFile.value=""; mFileName.textContent="未选择图片";
+          renderMem(); return publishAll();
+        })
+        .catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); })
+        .finally(function(){ addMemBtn.disabled=false; addMemBtn.textContent="添加作品"; });
+    };
+    rd.onerror=function(){ toast("读取图片失败"); addMemBtn.disabled=false; addMemBtn.textContent="添加作品"; };
+    rd.readAsDataURL(f);
+  }
+  addMemBtn.addEventListener("click",addMem);
 })();
 </script>
 </body>

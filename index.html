@@ -135,7 +135,7 @@ header{
 }
 .chips{display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:2.4rem}
 .chip{
-  font-family:var(--pixel);font-size:.58rem;padding:.62rem .85rem;
+  font-family:var(--pixel),var(--sans);font-size:.58rem;padding:.62rem .85rem;
   border:1px solid var(--line-strong);color:var(--tea);background:rgba(10,17,13,.55);
   border-radius:2px;letter-spacing:.05em;
 }
@@ -406,7 +406,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
       <span class="chip">JAVA 版</span>
       <span class="chip">支持 26.2</span>
       <span class="chip">生存 · 红石 · 建筑</span>
-      <span class="chip">地址入群获取</span>
+      <span class="chip">地址安装获取</span>
     </div>
     <div class="hero-cta">
       <a class="btn btn-primary" href="download.html">获取服务器地址</a>
@@ -435,7 +435,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
       <span class="kicker">一间茶寮</span>
       <h2 class="sec-title">一壶慢慢泡开的乌龙</h2>
       <p>乌龙茶的地盘是一个 Java 版 26.2 的社区服务器。比起人声鼎沸的大服，我们更想留一块安静的地方：种田、搭房、研究红石，或者只是盖一座自己满意的小房子。</p>
-      <p>名字取自一壶乌龙茶——热乎、回甘、常来常新。服主把这里当自家地盘打理，进来的每一位玩家，也都当这里是半个家。规矩不多，但互相尊重是底线。</p>
+      <p>乌龙茶的名字，来自服主养的一只小黑猫。服主把这里当自家地盘打理，进来的每一位玩家，也都当这里是半个家。规矩不多，但互相尊重是底线。</p>
       <div class="about-stats">
         <div class="stat"><b>Java 版</b><span>游戏平台</span></div>
         <div class="stat"><b>26.2</b><span>支持版本</span></div>
@@ -482,25 +482,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
   <div class="wrap">
     <span class="kicker rv">纪念馆</span>
     <h2 class="sec-title rv">夜里亮灯的地方，都是有人安家的证据</h2>
-    <div class="gal-grid">
-      <figure class="gal rv">
-        <div class="thumb" data-lb="assets/building-night-lake.jpg" role="button" tabindex="0" aria-label="查看大图：地下红石工坊">
-          <img src="assets/building-night-lake.jpg" alt="夜色中临水的灰色现代建筑" loading="lazy">
-        </div>
-        <figcaption>
-          <h3>地下红石工坊</h3>
-          <p>灯光亮起的地方，总有新机器在跑。</p>
-        </figcaption>
-      </figure>
-      <figure class="gal rv">
-        <div class="thumb" data-lb="assets/building-night-creative.jpg" role="button" tabindex="0" aria-label="查看大图：夜色建筑">
-          <img src="assets/building-night-creative.jpg" alt="夜色中的白色创意镂空建筑" loading="lazy">
-        </div>
-        <figcaption>
-          <h3>夜色建筑</h3>
-          <p>晚上亮灯的时候，是拍照最好看的角度。</p>
-        </figcaption>
-      </figure>
+    <div class="gal-grid" id="galGrid">
       <div class="gal-cta rv">
         <span class="pixel">YOUR BUILD</span>
         <h3>下一张图，<br>会是你的作品吗？</h3>
@@ -679,6 +661,42 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:3.2rem
   } else {
     rvs.forEach(function(el){ el.classList.add("in"); });
   }
+
+  /* 纪念馆（由 memorial.json 驱动，管理页维护） */
+  var galGrid=document.getElementById("galGrid");
+  function escHtml(s){ var d=document.createElement("div"); d.textContent=(s==null?"":String(s)); return d.innerHTML; }
+  function escAttr(s){ return escHtml(s).replace(/"/g,"&quot;"); }
+  function renderGal(items){
+    items=(items||[]).slice(0,20);
+    var html="";
+    items.forEach(function(m){
+      html+='<figure class="gal rv"><div class="thumb" data-lb="'+escAttr(m.img)+'" role="button" tabindex="0" aria-label="查看大图：'+escAttr(m.title)+'"><img src="'+escAttr(m.img)+'" alt="'+escAttr(m.title)+'" loading="lazy"></div><figcaption><h3>'+escHtml(m.title)+'</h3><p>'+escHtml(m.desc)+'</p></figcaption></figure>';
+    });
+    if(!items.length){
+      html='<div class="gal rv" style="grid-column:1/-1;text-align:center;color:var(--muted);padding:2.5rem 1rem;border:1px dashed var(--line-strong);border-radius:2px">纪念馆正在装修，第一件展品在路上。</div>';
+    }
+    var cta=galGrid.querySelector(".gal-cta");
+    var holder=document.createElement("div");
+    holder.style.display="contents";
+    holder.innerHTML=html;
+    galGrid.insertBefore(holder,cta);
+    holder.querySelectorAll(".thumb[data-lb]").forEach(function(t){
+      t.addEventListener("click",function(){ openLb(t.getAttribute("data-lb")); });
+      t.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openLb(t.getAttribute("data-lb")); } });
+    });
+    if("IntersectionObserver" in window && !prefersReduced){
+      var io2=new IntersectionObserver(function(es){
+        es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add("in"); io2.unobserve(en.target); } });
+      },{threshold:.12,rootMargin:"0px 0px -40px 0px"});
+      holder.querySelectorAll(".rv").forEach(function(el){ io2.observe(el); });
+    } else {
+      holder.querySelectorAll(".rv").forEach(function(el){ el.classList.add("in"); });
+    }
+  }
+  fetch("https://judiao417.github.io/oolong-craft-site/memorial.json")
+    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(function(m){ renderGal(m); })
+    .catch(function(){ renderGal([]); });
 
   /* 灯箱 */
   var lb = document.getElementById("lb");
