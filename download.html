@@ -383,7 +383,12 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
   var mask=document.getElementById("modalMask"), mTitle=document.getElementById("modalTitle"), mBody=document.getElementById("modalBody");
   var toastEl=document.getElementById("toast"), tt=null;
   function toast(msg){ toastEl.textContent=msg; toastEl.classList.add("show"); clearTimeout(tt); tt=setTimeout(function(){ toastEl.classList.remove("show"); },2400); }
-  function closeModal(){ mask.hidden=true; document.body.style.overflow=""; }
+  function closeModal(){
+    /* 关闭弹窗同时停止所有播放中的视频 */
+    var vds=document.querySelectorAll("#modal video");
+    for(var i=0;i<vds.length;i++){ vds[i].pause(); vds[i].removeAttribute("src"); vds[i].load(); }
+    mask.hidden=true; document.body.style.overflow="";
+  }
   document.getElementById("modalClose").addEventListener("click",closeModal);
   mask.addEventListener("click",function(e){ if(e.target===mask) closeModal(); });
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeModal(); });
