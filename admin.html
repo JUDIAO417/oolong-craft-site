@@ -95,6 +95,18 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
 #toast{position:fixed;left:50%;bottom:2.2rem;transform:translateX(-50%) translateY(20px);background:rgba(20,26,22,.8);border:1px solid var(--glass-line-strong);color:var(--ink);padding:.7rem 1.3rem;border-radius:var(--r-md);font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:99;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
 #toast.show{opacity:1;transform:translateX(-50%)}
 @media (max-width:560px){.panel{padding:1.6rem 1.3rem}.seg .seg-btn{padding:.55rem 1.2rem}}
+
+/* ===== 居中结果弹窗 ===== */
+#modalMask{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,8,4,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:9999}
+#modalMask.show{display:flex}
+.modal-box{width:min(440px,90vw);max-height:80vh;display:flex;flex-direction:column;background:linear-gradient(165deg,rgba(46,35,18,.97),rgba(18,13,7,.98));border:1px solid rgba(240,179,92,.28);border-radius:18px;padding:1.6rem 1.6rem 1.25rem;box-shadow:0 26px 70px rgba(0,0,0,.65);text-align:center;animation:modal-pop .25s ease}
+@keyframes modal-pop{from{transform:scale(.9) translateY(8px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-ico{width:54px;height:54px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:1.7rem;line-height:1}
+.modal-ico.ok{background:rgba(94,226,160,.14);color:#5EE2A0;border:1px solid rgba(94,226,160,.45);box-shadow:0 0 22px rgba(94,226,160,.18)}
+.modal-ico.err{background:rgba(255,107,107,.14);color:#FF6B6B;border:1px solid rgba(255,107,107,.45);box-shadow:0 0 22px rgba(255,107,107,.18)}
+.modal-title{font-size:1.08rem;font-weight:800;color:var(--ink);margin-bottom:.7rem}
+.modal-detail{font-size:.83rem;color:var(--muted);line-height:1.75;max-height:38vh;overflow:auto;text-align:left;white-space:pre-wrap;word-break:break-all;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:.7rem .9rem;margin-bottom:1.1rem}
+.modal-box .btn{margin:0 auto;min-width:120px}
 </style>
 </head>
 <body>
@@ -245,6 +257,12 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
 </main>
 
 <div id="toast"></div>
+<div id="modalMask"><div class="modal-box" id="modalBox">
+  <div class="modal-ico" id="modalIco"></div>
+  <div class="modal-title" id="modalTitle"></div>
+  <div class="modal-detail" id="modalDetail"></div>
+  <button class="btn btn-primary btn-sm" id="modalClose">知道了</button>
+</div></div>
 
 <script>
 (function(){
@@ -310,6 +328,24 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   var toastEl=document.getElementById("toast"), toastTimer=null;
   function toast(msg){ toastEl.textContent=msg; toastEl.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(function(){ toastEl.classList.remove("show"); },2800); }
 
+  /* ===== 屏幕居中结果弹窗：成功自动关闭，失败列出具体问题 ===== */
+  var modalMask=document.getElementById("modalMask"), modalIco=document.getElementById("modalIco"),
+      modalTitle=document.getElementById("modalTitle"), modalDetail=document.getElementById("modalDetail"),
+      modalClose=document.getElementById("modalClose"), modalTimer=null;
+  function notify(kind,title,detail){
+    modalIco.className="modal-ico "+(kind==="ok"?"ok":"err");
+    modalIco.textContent=kind==="ok"?"✓":"✕";
+    modalTitle.textContent=title;
+    modalDetail.textContent=detail||"";
+    modalMask.classList.add("show");
+    clearTimeout(modalTimer);
+    if(kind==="ok") modalTimer=setTimeout(function(){ modalMask.classList.remove("show"); },1600);
+  }
+  modalClose.addEventListener("click",function(){ modalMask.classList.remove("show"); });
+  modalMask.addEventListener("click",function(e){ if(e.target===modalMask) modalMask.classList.remove("show"); });
+  /* fetch 超时包装：长时间无响应给明确报错，避免"点了没反应" */
+  function fto(p,ms){ return Promise.race([p,new Promise(function(_,rej){ setTimeout(function(){ rej(new Error("请求超时（"+(ms/1000)+" 秒无响应），请检查网络后重试")); },ms); })]); }
+
   /* ===== 验证 ===== */
   function unlock(){
     if(pw.value===PASS){ gate.hidden=true; panel.hidden=false; refreshAll(); loadMeta(); }
@@ -336,7 +372,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         fd.append("message",message);
         fd.append("branch",GITEE_BRANCH);
         if(found) fd.append("sha",found.sha);   /* 覆盖已有文件必须带 sha */
-        return fetch(giteeBase(cat+"/"+encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd})
+        return fto(fetch(giteeBase(cat+"/"+encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd}),90000)
           .then(function(r){
             if(r.ok) return r;
             if((r.status===409||r.status===422) && times<3)  /* sha 冲突：等待后重取最新 sha 再写 */
@@ -385,7 +421,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         fd.append("message",message);
         fd.append("branch",GITEE_BRANCH);
         if(found) fd.append("sha",found.sha);
-        return fetch(giteeBase(encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd})
+        return fto(fetch(giteeBase(encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd}),90000)
           .then(function(r){
             if(r.ok) return r;
             if((r.status===409||r.status===422) && times<3)
@@ -409,7 +445,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         .then(function(cur){
           var body={message:msg, content:b64, branch:GH_BRANCH};
           if(cur && cur.sha) body.sha=cur.sha;
-          return ghPut(path, body).then(function(r){
+          return fto(ghPut(path, body),90000).then(function(r){
             if(r.ok) return r;
             if((r.status===409||r.status===422) && times<3)  /* sha 冲突：等待后重取最新 sha 再写 */
               return new Promise(function(res){ setTimeout(res, 250*(times+1)); }).then(function(){ return attempt(times+1); });
@@ -471,10 +507,10 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         });
       }, Promise.resolve({ok:0,fail:[]}));
     }).then(function(acc){
-      if(acc.fail.length) toast("部分同步失败（"+acc.fail.length+" 个）："+acc.fail.join("；").slice(0,80));
-      else toast("已同步各部分 JSON（Gitee 权威 + 本站镜像）");
+      if(acc.fail.length) notify("err","同步失败（"+acc.fail.length+" 个文件）",acc.fail.join("\n"));
+      else notify("ok","同步成功","文件清单与各部分数据已发布");
     })
-      .catch(function(e){ toast("同步失败："+(e&&e.message||"未知错误")); })
+      .catch(function(e){ notify("err","同步失败",(e&&e.message||"未知错误")); })
       .finally(function(){ pubBusy=false; });
   }
 
@@ -505,7 +541,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         if(hit){ extLinks[c].splice(idx,1); renderList(pcList, dedupe(giteeCache.pc.concat(extLinks.pc)), "pc"); renderList(peList, dedupe(giteeCache.pe.concat(extLinks.pe)), "pe"); publishAll(); return; }
         b.disabled=true;
         giteeDelete(c,n)
-          .then(function(){ toast("已删除 "+n); return refreshAll(); })
+          .then(function(){ notify("ok","已删除","文件 "+n+" 已从 Gitee 移除"); return refreshAll(); })
           .then(publishAll)
           .catch(function(e){ toast("删除失败："+(e&&e.message||"未知错误")); refreshAll(); });
       });
@@ -554,12 +590,12 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       var cat=CAT, name=f.name;
       giteeWrite(cat,name,b64,"upload "+name)
         .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||("HTTP "+r.status)); }); })
-        .then(function(){ toast("上传成功，正在发布清单…"); fileInput.value=""; fileName.textContent="未选择文件"; return refreshAll(); })
+        .then(function(){ notify("ok","上传成功","「"+name+"」已存入 Gitee "+cat.toUpperCase()+"，正在发布文件清单…"); fileInput.value=""; fileName.textContent="未选择文件"; return refreshAll(); })
         .then(publishAll)
-        .catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); refreshAll(); })
+        .catch(function(e){ notify("err","上传失败","文件："+name+"\n原因："+(e&&e.message||"未知错误")+"\n\n建议：改小文件后重试，或到 Gitee 网页版手动上传；文件已传成功但同步失败时会在此说明。"); refreshAll(); })
         .finally(function(){ uploadBtn.disabled=false; uploadBtn.textContent="上传"; });
     };
-    reader.onerror=function(){ toast("读取文件失败"); uploadBtn.disabled=false; uploadBtn.textContent="上传"; };
+    reader.onerror=function(){ notify("err","上传失败","无法读取本地文件，请重新选择后重试。"); uploadBtn.disabled=false; uploadBtn.textContent="上传"; };
     reader.readAsDataURL(f);
   }
   uploadBtn.addEventListener("click",uploadFile);
@@ -635,7 +671,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     if(groups.length>=10){ toast("粉丝群最多 10 个"); return; }
     groups.push({title:gTitle.value.trim(), qq:gQq.value.trim()});
     gTitle.value=""; gQq.value="";
-    renderGroups(); publishAll();
+    renderGroups(); publishAll(); notify("ok","已添加粉丝群","「"+groups[groups.length-1].title+"」"+groups[groups.length-1].qq);
   }
   function addVideo(){
     var title=vTitle.value.trim();
@@ -710,7 +746,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
         .then(function(){ return ghWriteB64("uploads/"+name, b64, "sync img "+name); })
         .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
-        .catch(function(e){ toast("图片同步 GitHub 失败（作品已保存，稍后可重试补图）："+(e&&e.message||"")); return {ok:true}; })  /* 图片同步失败不阻断 JSON 发布 */
+        .catch(function(e){ notify("err","提醒：图片未同步到本站","作品「"+mTitle.value.trim()+"」已保存（玩家页暂不显示图片），原因："+(e&&e.message||"未知错误")+"\n可稍后在纪念馆列表中删除重传。"); return {ok:true}; })  /* 图片同步失败不阻断 JSON 发布 */
         .then(function(){
           memorial.push({title:mTitle.value.trim(), desc:mDesc.value.trim(), img:"uploads/"+name});
           mTitle.value=""; mDesc.value=""; mFile.value=""; mFileName.textContent="未选择图片";
