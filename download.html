@@ -385,7 +385,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
   function toast(msg){ toastEl.textContent=msg; toastEl.classList.add("show"); clearTimeout(tt); tt=setTimeout(function(){ toastEl.classList.remove("show"); },2400); }
   function closeModal(){
     /* 关闭弹窗同时停止所有播放中的视频 */
-    var vds=document.querySelectorAll("#modal video");
+    var vds=document.querySelectorAll("#modalMask video");
     for(var i=0;i<vds.length;i++){ vds[i].pause(); vds[i].removeAttribute("src"); vds[i].load(); }
     mask.hidden=true; document.body.style.overflow="";
   }
