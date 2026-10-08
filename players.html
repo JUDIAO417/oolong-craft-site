@@ -199,10 +199,12 @@ footer a{color:var(--tea)}
     if(!s) return "";
     s=s.replace(/&r&r/g,"{rainbow}");
     if(s.indexOf("{rainbow}")>=0){
-      var head="", rest=s;
-      var m=s.indexOf("{rainbow}");
-      if(m>0){ head=s.slice(0,m); rest=s.slice(m+9); }
-      return parseMC(head)+'<span class="rainbow">'+esc(rest)+'</span>';
+      var parts=s.split("{rainbow}"), out="";
+      for(var i=0;i<parts.length;i++){
+        if(i===0) out+=parseMC(parts[i]);
+        else out+='<span class="rainbow">'+esc(parts[i])+'</span>';
+      }
+      return out;
     }
     var out="", buf="", col="", bold="", italic="";
     function flush(){ if(buf){ out+='<span style="'+(col?'color:'+col+';':'')+(bold?'font-weight:800;':'')+(italic?'font-style:italic;':'')+'">'+esc(buf)+'</span>'; buf=""; } }
