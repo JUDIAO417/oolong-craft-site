@@ -454,15 +454,29 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
   document.querySelectorAll("[data-groups]").forEach(function(b){ b.addEventListener("click",function(){ openModal("groups"); }); });
   document.querySelectorAll("[data-videos]").forEach(function(b){ b.addEventListener("click",function(){ openModal("videos",b.getAttribute("data-videos")); }); });
 
-  /* ===== 读取各部分 JSON（本站镜像）===== */
-  /* 数据实时读取：优先 GitHub raw（推送后即时生效），失败回退本站镜像 */
-  function rtJson(path){
-    return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path+"?ts="+Date.now(),{cache:"no-store"})
-      .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
-      .catch(function(){
-        return fetch("https://judiao417.github.io/oolong-craft-site/"+path+"?t="+Date.now(),{cache:"no-store"})
-          .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
+  /* ===== 读取各部分 JSON ===== */
+  /* 数据实时读取：GitHub API 直读优先（实时权威，绕开 raw 的 CDN 路径缓存），按文件各自 60s 节流；失败回退 raw → 本站镜像 */
+  var apiLast={}, API_GAP=60000;
+  function viaApi(path){
+    var now=Date.now();
+    if(now-(apiLast[path]||0)<API_GAP) return Promise.reject(new Error("throttled"));
+    apiLast[path]=now;
+    return fetch("https://api.github.com/repos/JUDIAO417/oolong-craft-site/contents/"+path+"?ref=main&ts="+now,{cache:"no-store",headers:{"Accept":"application/vnd.github+json"}})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(d){
+        var b64=d.content||"";
+        return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b64),function(c){ return c.charCodeAt(0); })));
       });
+  }
+  function rtJson(path){
+    return viaApi(path).catch(function(){
+      return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path+"?ts="+Date.now(),{cache:"no-store"})
+        .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+        .catch(function(){
+          return fetch("https://judiao417.github.io/oolong-craft-site/"+path+"?t="+Date.now(),{cache:"no-store"})
+            .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
+        });
+    });
   }
   Promise.all([rtJson("pc.json"),rtJson("pe.json"),rtJson("groups.json"),rtJson("videos.json")])
     .then(function(r){
