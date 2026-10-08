@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>指令大全 · 乌龙茶的地盘</title>
-<meta name="description" content="乌龙茶的地盘服务器指令大全：圈地、宠物、传送、领地等玩法指令速查。">
+<title>服务器玩家 · 乌龙茶的地盘</title>
+<meta name="description" content="乌龙茶的地盘服务器内的玩家名单">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='10' width='20' height='14' fill='%23F0B35C'/%3E%3Crect x='5' y='10' width='20' height='4' fill='%23E0933A'/%3E%3Crect x='25' y='14' width='4' height='6' fill='%23F0B35C'/%3E%3Crect x='29' y='16' width='2' height='2' fill='%23E0933A'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Press+Start+2P&family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
 <style>
@@ -119,6 +119,17 @@ footer a{color:var(--tea)}
   .cat-chip{font-size:.48rem;padding:.45rem .7rem}
   .search{margin-bottom:2rem}
 }
+
+  .p-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;max-width:1100px;margin:0 auto}
+  .p-card{background:var(--glass-bg);border:1px solid var(--glass-line);border-radius:var(--r-lg);padding:1.6rem 1.4rem;backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px) saturate(120%);box-shadow:var(--shadow-glass);transition:transform .25s,box-shadow .25s;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.7rem}
+  .p-card:hover{transform:translateY(-4px);box-shadow:0 22px 52px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
+  .p-ava{width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--pixel);font-size:1.7rem;color:#151006;flex:none}
+  .p-name{font-size:1.05rem;font-weight:700;color:var(--ink);margin:0;line-height:1.35;word-break:break-all}
+  .p-desc{font-size:.85rem;color:var(--muted);margin:0;line-height:1.65;max-width:100%}
+  .p-head{max-width:1100px;margin:0 auto 1.8rem;display:flex;justify-content:flex-end}
+  .p-head .cnt{font-family:var(--pixel);font-size:.55rem;color:var(--dim);letter-spacing:.08em}
+  @media (max-width:860px){.p-grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.p-grid{grid-template-columns:1fr;max-width:420px}.p-card{flex-direction:row;text-align:left;align-items:center;justify-content:flex-start;gap:1rem;padding:1.1rem 1.2rem}.p-desc{flex:1}}
 </style>
 </head>
 <body>
@@ -128,11 +139,10 @@ footer a{color:var(--tea)}
   <div class="navbar">
     <a class="brand" href="index.html">
       <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="10" width="20" height="14" fill="#F0B35C"/><rect x="5" y="10" width="20" height="4" fill="#E0933A"/><rect x="25" y="14" width="4" height="6" fill="#F0B35C"/><rect x="29" y="16" width="2" height="2" fill="#E0933A"/></svg>
-      <span><b>乌龙茶的地盘</b><br><span class="brand-en">COMMAND GUIDE</span></span>
+      <span><b>乌龙茶的地盘</b><br><span class="brand-en">PLAYERS</span></span>
     </a>
     <div class="nav-cta">
       <a href="index.html">返回官网</a>
-      <a href="players.html">玩家</a>
       <a class="btn btn-primary" href="download.html">获取客户端</a>
     </div>
   </div>
@@ -140,96 +150,40 @@ footer a{color:var(--tea)}
 
 <main>
   <div class="hero-head">
-    <h1>玩法指令 <em>速查手册</em></h1>
-    <p class="hero-sub">按玩法模块整理服务器常用指令。输入关键词可以快速搜索；点上面的标签可以只看某一类。</p>
+    <h1>服务器玩家 <em>常驻名单</em></h1>
+    <p class="hero-sub">乌龙茶的地盘里住着这些玩家。不是游客，是常回来的人。</p>
   </div>
 
-  <div class="search">
-    <span class="mag" aria-hidden="true">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-    </span>
-    <input id="q" type="search" placeholder="搜索指令，如 /res 或 圈地…" autocomplete="off">
+  <div class="p-head">
     <span class="cnt" id="cnt"></span>
   </div>
 
-  <div class="cats" id="cats"></div>
-
-  <div class="mod-grid" id="grid"></div>
+  <div class="p-grid" id="grid"><div class="empty">服务器内的玩家名单整理中，入住后陆续更新。</div></div>
 </main>
 
 <footer>
-  乌龙茶的地盘 · OOLONG CRAFT —— 指令随服务器版本更新，一切以进服公告为准。<br>
+  乌龙茶的地盘 · OOLONG CRAFT —— 玩家名单随时更新，以进服后实际情况为准。<br>
   <a href="index.html">返回首页</a> · <a href="download.html">下载客户端</a>
 </footer>
 
 <script>
-var DATA=[
-  {"cat":"圈地","items":[
-    {"cmd":"/res create 名字","desc":"把选中的区域圈成你的领地"},
-    {"cmd":"/res select x1 z1 x2 z2","desc":"用坐标框选一块区域"},
-    {"cmd":"/res remove 名字","desc":"删除自己的领地"},
-    {"cmd":"/res ps 名字 玩家名","desc":"把某个玩家添加为领地成员"}
-  ]},
-  {"cat":"宠物","items":[
-    {"cmd":"/pet spawn","desc":"召唤你的宠物（示例，待补充）"},
-    {"cmd":"/pet info","desc":"查看宠物信息（示例，待补充）"},
-    {"cmd":"/pet release","desc":"放生宠物（示例，待补充）"}
-  ]},
-  {"cat":"传送","items":[
-    {"cmd":"/home","desc":"回到自己设置的出生点（示例，待补充）"},
-    {"cmd":"/sethome","desc":"设置个人出生点（示例，待补充）"},
-    {"cmd":"/tpa 玩家名","desc":"请求传送到某玩家身边（示例，待补充）"}
-  ]}
-];
-var ALL=[].concat(DATA), CAT="", qEl=document.getElementById("q"), grid=document.getElementById("grid"), catsEl=document.getElementById("cats"), cntEl=document.getElementById("cnt");
-
-function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
-function render(){
-  var kw=qEl.value.trim().toLowerCase();
-  /* 搜索精确到单条命令：分类名命中→整类；命令/说明命中→只显示命中的那几条 */
-  var list=[];
-  ALL.forEach(function(m){
-    if(CAT && m.cat!==CAT) return;
-    if(!kw){ list.push(m); return; }
-    if(m.cat.toLowerCase().indexOf(kw)>=0){ list.push(m); return; }
-    var hit=m.items.filter(function(it){
-      return it.cmd.toLowerCase().indexOf(kw)>=0 || it.desc.toLowerCase().indexOf(kw)>=0;
-    });
-    if(hit.length) list.push({cat:m.cat, items:hit});
-  });
-  var cats=[];
-  ALL.forEach(function(m){ if(cats.indexOf(m.cat)<0) cats.push(m.cat); });
-  catsEl.innerHTML=cats.map(function(c){
-    return '<button class="cat-chip'+(CAT===c?" on":"")+'" data-c="'+esc(c)+'">《'+esc(c)+'》</button>';
-  }).join("");
-  catsEl.querySelectorAll("[data-c]").forEach(function(b){
-    b.addEventListener("click",function(){
-      CAT=(CAT===b.getAttribute("data-c")?"":b.getAttribute("data-c"));
-      render();
-    });
-  });
-  var n=0;
-  var arrow='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
-  grid.innerHTML=list.map(function(m){
-    n+=m.items.length;
-    return '<div class="mod-card collapsed"><div class="mod-head"><h2>《'+esc(m.cat)+'》</h2><span class="c">'+m.items.length+' 条指令</span><button class="tog" aria-label="展开收起">'+arrow+'</button></div><div class="mod-body">'+
-      m.items.map(function(it){
-        return '<div class="cmd-row"><code class="cmd">'+esc(it.cmd)+'</code><span class="cmd-desc">'+esc(it.desc)+'</span></div>';
-      }).join('')+'</div></div>';
-  }).join("") || '<div class="empty">没有找到匹配的指令。<br><br><b>换个关键词试试？</b></div>';
-  grid.querySelectorAll(".mod-head").forEach(function(h){
-    h.addEventListener("click",function(){ h.parentElement.classList.toggle("collapsed"); });
-  });
-  if(q||CAT){   /* 搜索或筛选时自动展开，避免内容被折叠挡住 */
-    grid.querySelectorAll(".mod-card.collapsed").forEach(function(c){ c.classList.remove("collapsed"); });
+(function(){
+  "use strict";
+  var grid=document.getElementById("grid"), cntEl=document.getElementById("cnt");
+  function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+  var PALETTE=[["#F0B35C","#7a4e12"],["#5EE2A0","#0e5c3a"],["#8FB8FF","#234a8a"],["#C48BFF","#5c2d8f"],["#FF8FB0","#8f2d4f"],["#FFD166","#8a6d10"],["#7FE3E8","#1f6b70"]];
+  function palette(name){
+    var h=0; for(var i=0;i<name.length;i++){ h=(h*31+name.charCodeAt(i))>>>0; }
+    return PALETTE[h%PALETTE.length];
   }
-  grid.classList.toggle("single", list.length===1 && !!CAT);  /* 手机端单分类占满整行 */
-  cntEl.textContent=(list.length? n+" 条":"");
-}
-qEl.addEventListener("input",render);
-render();
-
-/* 数据优先从 Gitee 权威仓库实时读取（写入立即生效），失败回退本站镜像；仍失败使用内置示例 */
+  function render(list){
+    if(!list || !list.length){ grid.innerHTML='<div class="empty">服务器内的玩家名单整理中，入住后陆续更新。</div>'; cntEl.textContent=""; return; }
+    cntEl.textContent=list.length+" 位玩家";
+    grid.innerHTML=list.map(function(p){
+      var c=palette(p.name||"?");
+      return '<div class="p-card"><div class="p-ava" style="background:linear-gradient(135deg,'+c[0]+','+c[1]+')">'+esc((p.name||"?").charAt(0).toUpperCase())+'</div><div><h3 class="p-name">'+esc(p.name||"")+'</h3><p class="p-desc">'+esc(p.desc||"")+'</p></div></div>';
+    }).join("");
+  }
   /* 数据实时读取：优先 GitHub raw（推送后即时生效），失败回退本站镜像 */
   function rtJson(path){
     return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path,{cache:"no-store"})
@@ -239,11 +193,8 @@ render();
           .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
       });
   }
-rtJson("commands.json")
-  .then(function(d){
-    if(d && d.length){ ALL=d; render(); }
-  })
-  .catch(function(){});
+  rtJson("players.json").then(function(d){ if(d && d.length) render(d); }).catch(function(){});
+})();
 </script>
 </body>
 </html>

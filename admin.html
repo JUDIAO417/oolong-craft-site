@@ -226,6 +226,18 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     </div>
     <input type="file" id="mFile" accept="image/*" style="display:none">
     <div class="file-list" id="mList"><div class="empty">暂无纪念馆作品</div></div>
+
+    <div class="divider"></div>
+    <h2 style="font-size:1.2rem">服务器玩家</h2>
+    <p class="sub">最多 50 个。填写玩家游戏ID与一句话介绍，玩家页会同步展示。</p>
+    <div class="g-inputs">
+      <input type="text" id="pName" placeholder="玩家游戏ID，如：乌龙茶">
+      <input type="text" id="pDesc" placeholder="一句话介绍，如：服主，喜欢盖房子">
+    </div>
+    <div class="up-row">
+      <button class="btn btn-primary btn-sm" id="addPlayer">添加玩家</button>
+    </div>
+    <div class="file-list" id="pList"><div class="empty">暂无玩家</div></div>
     <p class="hint">文件存储：Gitee 仓库 sykjsj/oolong-craft-files（pc/ 与 pe/ 目录）。每次操作后自动发布文件清单，玩家在下载页即可看到最新文件。</p>
   </div>
 </main>
@@ -276,7 +288,11 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       mFile=document.getElementById("mFile"),
       mFileName=document.getElementById("mFileName"),
       mList=document.getElementById("mList"),
-      addMemBtn=document.getElementById("addMem");
+      addMemBtn=document.getElementById("addMem"),
+      pName=document.getElementById("pName"),
+      pDesc=document.getElementById("pDesc"),
+      pList=document.getElementById("pList"),
+      addPlayerBtn=document.getElementById("addPlayer");
 
   var CAT="pc";
   var extLinks={pc:[],pe:[]};
@@ -424,7 +440,8 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         "pe.json":JSON.stringify(peItems),
         "groups.json":JSON.stringify(groups.slice(0,10)),
         "videos.json":JSON.stringify(videos.slice(0,50)),
-        "memorial.json":JSON.stringify(memorial.slice(0,20))
+        "memorial.json":JSON.stringify(memorial.slice(0,20)),
+        "players.json":JSON.stringify(players.slice(0,50))
       };
       var jobs=[];
       Object.keys(jsons).forEach(function(k){
@@ -535,7 +552,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   uploadBtn.addEventListener("click",uploadFile);
 
   /* ===== 粉丝群 / 教程视频 / 纪念馆 ===== */
-  var groups=[], videos=[], memorial=[], VTYPE="file", VCAT="pc";
+  var groups=[], videos=[], memorial=[], players=[], VTYPE="file", VCAT="pc";
   vCatSeg.addEventListener("click",function(e){
     var b=e.target.closest(".seg-btn"); if(!b) return;
     VCAT=b.getAttribute("data-vcat");
@@ -557,16 +574,17 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   }
   function loadMeta(){
     /* 一律以 Gitee 权威数据为准，避免镜像滞后导致旧数据覆盖权威数据 */
-    return Promise.all([giteeGetRoot("groups.json"),giteeGetRoot("videos.json"),giteeGetRoot("memorial.json"),giteeGetRoot("pc.json"),giteeGetRoot("pe.json")])
+    return Promise.all([giteeGetRoot("groups.json"),giteeGetRoot("videos.json"),giteeGetRoot("memorial.json"),giteeGetRoot("pc.json"),giteeGetRoot("pe.json"),giteeGetRoot("players.json")])
       .then(function(r){
         groups=(r[0]||[]).slice(0,10);
         videos=(r[1]||[]).slice(0,50);
         memorial=(r[2]||[]).slice(0,20);
         extLinks.pc=(r[3]||[]).filter(function(x){ return x.url; });
         extLinks.pe=(r[4]||[]).filter(function(x){ return x.url; });
-        renderGroups(); renderVideos(); renderMem(); refreshAll();
+        players=(r[5]||[]).slice(0,50);
+        renderGroups(); renderVideos(); renderMem(); renderPlayers(); refreshAll();
       })
-      .catch(function(){ groups=[]; videos=[]; memorial=[]; renderGroups(); renderVideos(); renderMem(); refreshAll(); });
+      .catch(function(){ groups=[]; videos=[]; memorial=[]; players=[]; renderGroups(); renderVideos(); renderMem(); renderPlayers(); refreshAll(); });
   }
   function renderGroups(){
     if(!groups.length){ gList.innerHTML='<div class="empty">暂无粉丝群</div>'; return; }
@@ -692,6 +710,31 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     rd.readAsDataURL(f);
   }
   addMemBtn.addEventListener("click",addMem);
+
+  /* ===== 服务器玩家管理 ===== */
+  function renderPlayers(){
+    if(!players.length){ pList.innerHTML='<div class="empty">暂无玩家</div>'; return; }
+    pList.innerHTML=players.map(function(p,i){
+      return '<div class="file-row"><span class="nm">'+esc(p.name)+'</span><span class="sz">'+esc(p.desc||"")+'</span><button class="btn btn-danger btn-sm" data-p="'+i+'">删除</button></div>';
+    }).join("");
+    pList.querySelectorAll("[data-p]").forEach(function(b){
+      b.addEventListener("click",function(){ delPlayer(+b.getAttribute("data-p")); });
+    });
+  }
+  function addPlayer(){
+    var name=pName.value.trim(), desc=pDesc.value.trim();
+    if(!name){ toast("请填写玩家游戏ID"); return; }
+    if(players.length>=50){ toast("玩家最多 50 个"); return; }
+    players.push({name:name, desc:desc});
+    pName.value=""; pDesc.value="";
+    renderPlayers(); publishAll();
+  }
+  function delPlayer(i){
+    var p=players[i]; if(!p) return;
+    if(!confirm("移除玩家「"+p.name+"」？")) return;
+    players.splice(i,1); renderPlayers(); publishAll();
+  }
+  addPlayerBtn.addEventListener("click",addPlayer);
 })();
   document.body.classList.add("loaded");
   var hd=document.querySelector("header");
