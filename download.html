@@ -56,7 +56,7 @@ header.scrolled{background:rgba(10,14,12,.78);box-shadow:0 8px 30px rgba(0,0,0,.
 .brand{display:flex;align-items:center;gap:.7rem}
 .brand svg{width:30px;height:30px}
 .brand-name{font-family:var(--serif);font-weight:900;font-size:1.12rem;line-height:1.1}
-.brand-en{font-family:var(--pixel);font-size:.53rem;color:var(--tea);margin-top:.3rem;letter-spacing:.14em}
+.brand-en{font-family:var(--pixel);font-size:.53rem;color:var(--tea);margin-top:.3rem;letter-spacing:.14em;white-space:nowrap}
 .nav-cta{display:flex;align-items:center;gap:.9rem}
 
 .hero{position:relative;padding:clamp(4rem,8vw,6rem) 0 clamp(3rem,6vw,4.5rem);border-bottom:1px solid var(--glass-line);background:linear-gradient(180deg,rgba(240,179,92,.05),transparent 60%)}
@@ -154,7 +154,16 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
 
 @media (max-width:860px){.dl-grid{grid-template-columns:1fr}.steps-strip{grid-template-columns:1fr}}
-@media (max-width:560px){.foot-links{flex-direction:column;gap:.8rem}.dl-card{padding:1.8rem 1.4rem 1.7rem}}
+@media (max-width:560px){
+  .foot-links{flex-direction:column;gap:.8rem}.dl-card{padding:1.8rem 1.4rem 1.7rem}
+  .wrap.nav{padding:0 .8rem;gap:.5rem}
+  .brand{gap:.5rem}
+  .brand svg{width:24px;height:24px}
+  .brand-name{font-size:1rem;white-space:nowrap}
+  .brand-en{font-size:.46rem;letter-spacing:.1em;white-space:nowrap}
+  .nav-cta{gap:.4rem}
+  .nav-cta .btn{padding:.5rem .7rem;font-size:.82rem;white-space:nowrap}
+}
 </style>
 </head>
 <body>
