@@ -232,6 +232,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     <p class="sub">最多 50 个。填写玩家游戏ID与一句话介绍，玩家页会同步展示。</p>
     <div class="g-inputs">
       <input type="text" id="pName" placeholder="玩家游戏ID，如：乌龙茶">
+      <input type="text" id="pTitle" placeholder="称号（可选），支持 &1-9 上色 / &r&r 彩色循环">
       <input type="text" id="pDesc" placeholder="一句话介绍，如：服主，喜欢盖房子">
     </div>
     <div class="up-row">
@@ -290,6 +291,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       mList=document.getElementById("mList"),
       addMemBtn=document.getElementById("addMem"),
       pName=document.getElementById("pName"),
+      pTitle=document.getElementById("pTitle"),
       pDesc=document.getElementById("pDesc"),
       pList=document.getElementById("pList"),
       addPlayerBtn=document.getElementById("addPlayer");
@@ -715,18 +717,18 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   function renderPlayers(){
     if(!players.length){ pList.innerHTML='<div class="empty">暂无玩家</div>'; return; }
     pList.innerHTML=players.map(function(p,i){
-      return '<div class="file-row"><span class="nm">'+esc(p.name)+'</span><span class="sz">'+esc(p.desc||"")+'</span><button class="btn btn-danger btn-sm" data-p="'+i+'">删除</button></div>';
+      return '<div class="file-row"><span class="nm">'+esc(p.name)+'</span><span class="sz" style="color:var(--tea)">'+esc(p.title||"")+'</span><span class="sz">'+esc(p.desc||"")+'</span><button class="btn btn-danger btn-sm" data-p="'+i+'">删除</button></div>';
     }).join("");
     pList.querySelectorAll("[data-p]").forEach(function(b){
       b.addEventListener("click",function(){ delPlayer(+b.getAttribute("data-p")); });
     });
   }
   function addPlayer(){
-    var name=pName.value.trim(), desc=pDesc.value.trim();
+    var name=pName.value.trim(), title=pTitle.value.trim(), desc=pDesc.value.trim();
     if(!name){ toast("请填写玩家游戏ID"); return; }
     if(players.length>=50){ toast("玩家最多 50 个"); return; }
-    players.push({name:name, desc:desc});
-    pName.value=""; pDesc.value="";
+    players.push({name:name, title:title, desc:desc});
+    pName.value=""; pTitle.value=""; pDesc.value="";
     renderPlayers(); publishAll();
   }
   function delPlayer(i){
