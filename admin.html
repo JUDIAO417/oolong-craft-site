@@ -377,6 +377,8 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
             if(r.ok) return r;
             if((r.status===409||r.status===422) && times<5)  /* sha 冲突：等待后重取最新 sha 再写 */
               return new Promise(function(res){ setTimeout(res, 500*(times+1)); }).then(function(){ return attempt(times+1); });
+            if((r.status===429||r.status>=500) && times<5)  /* 限流/服务端抖动：退避重试 */
+              return new Promise(function(res){ setTimeout(res, 1200*(times+1)); }).then(function(){ return attempt(times+1); });
             return r;
           });
       });
@@ -426,6 +428,8 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
             if(r.ok) return r;
             if((r.status===409||r.status===422) && times<5)
               return new Promise(function(res){ setTimeout(res, 500*(times+1)); }).then(function(){ return attempt(times+1); });
+            if((r.status===429||r.status>=500) && times<5)
+              return new Promise(function(res){ setTimeout(res, 1200*(times+1)); }).then(function(){ return attempt(times+1); });
             return r;
           });
       });
@@ -449,6 +453,8 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
             if(r.ok) return r;
             if((r.status===409||r.status===422) && times<5)  /* sha 冲突：等待后重取最新 sha 再写 */
               return new Promise(function(res){ setTimeout(res, 500*(times+1)); }).then(function(){ return attempt(times+1); });
+            if((r.status===429||r.status>=500) && times<5)  /* 限流/服务端抖动：退避重试 */
+              return new Promise(function(res){ setTimeout(res, 1200*(times+1)); }).then(function(){ return attempt(times+1); });
             return r;
           });
         });
@@ -501,7 +507,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       return jobs.reduce(function(p,j){
         return p.then(function(acc){
           return j.then(function(r){
-            if(!r.ok) return r.json().then(function(d){ acc.fail.push((d&&d.message)||("HTTP "+r.status)); return acc; }, function(){ acc.fail.push("HTTP "+r.status); return acc; });
+            if(!r.ok) return r.json().then(function(d){ acc.fail.push("HTTP "+r.status+(d&&d.message?(" "+d.message):"")); return acc; }, function(){ acc.fail.push("HTTP "+r.status); return acc; });
             acc.ok++; return acc;
           }, function(e){ acc.fail.push((e&&e.message)||"网络错误"); return acc; });
         });
