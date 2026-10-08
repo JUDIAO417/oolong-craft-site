@@ -709,9 +709,14 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     var name=Date.now()+"-"+f.name;
     var rd=new FileReader();
     rd.onload=function(){
-      giteeWrite("videos",name,String(rd.result).split(",")[1],"upload video "+name)
+      var vb64=String(rd.result).split(",")[1];
+      giteeWrite("videos",name,vb64,"upload video "+name)
         .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
         .then(function(){
+          /* 视频镜像到 GitHub uploads（手机播放走 GitHub raw，Gitee raw 手机端 403） */
+          ghWriteB64("uploads/"+name, vb64, "sync video "+name).catch(function(e){
+            notify("err","提醒：视频未同步到本站","视频已存入 Gitee，但本站镜像失败："+(e&&e.message||"未知错误")+"\n手机端可能无法播放，可稍后重试或告诉我处理。");
+          });
           videos.push({title:title, src:name, type:"file", cat:VCAT});
           vTitle.value=""; vFile.value=""; vFileName.textContent="未选择视频";
           renderVideos(); return publishAll();

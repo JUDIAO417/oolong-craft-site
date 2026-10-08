@@ -365,6 +365,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
   var GITEE_OWNER="sykjsj", GITEE_REPO="oolong-craft-files", GITEE_BRANCH="master";
   var groups=[], videos=[];
   function rawUrl(cat,name){ return "https://gitee.com/"+GITEE_OWNER+"/"+GITEE_REPO+"/raw/"+GITEE_BRANCH+"/"+cat+"/"+encodeURIComponent(name); }
+  function ghUrl(name){ return "https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/uploads/"+encodeURIComponent(name); }  /* 视频镜像：GitHub raw 手机可直放 */
   function fmt(n){ if(n>=1048576) return (n/1048576).toFixed(1)+" MB"; if(n>=1024) return (n/1024).toFixed(0)+" KB"; return n+" B"; }
   function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
   function render(el, cat, files){
@@ -421,7 +422,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
     mBody.innerHTML='<div class="v-list">'+list.map(function(v,i){
       var ctrl = v.type==="file"
         ? '<button class="btn btn-ghost btn-sm v-play">点击播放</button>'
-        : '<a class="btn btn-ghost btn-sm" href="'+esc(v.src)+'" target="_blank" rel="noopener">打开视频</a>';
+        : '<a class="btn btn-ghost btn-sm" href="'+esc(v.type==="file"?ghUrl(v.src):v.src)+'" target="_blank" rel="noopener">打开视频</a>';
       return '<div class="vcard" data-i="'+i+'"><div class="v-title">'+esc(v.title)+'</div>'+ctrl+'</div>';
     }).join('')+'</div>';
     mBody.querySelectorAll(".v-play").forEach(function(btn){
@@ -429,7 +430,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
         var idx=+btn.parentNode.getAttribute("data-i");
         var list2=videos.filter(function(v){ return !v.cat || v.cat===cat; });
         var v=list2[idx];
-        btn.parentNode.innerHTML='<div class="v-title">'+esc(v.title)+'</div><video controls autoplay playsinline preload="auto" src="'+rawUrl("videos",v.src)+'"></video>';
+        btn.parentNode.innerHTML='<div class="v-title">'+esc(v.title)+'</div><video controls autoplay playsinline preload="auto" src="'+(v.type==="file"?ghUrl(v.src):esc(v.src))+'"></video>';
       });
     });
   }
