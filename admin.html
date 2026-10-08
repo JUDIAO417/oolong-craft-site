@@ -357,8 +357,8 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
 
   /* ===== Gitee API ===== */
   function giteeBase(path){ return "https://gitee.com/api/v5/repos/"+GITEE_OWNER+"/"+GITEE_REPO+"/contents/"+path; }
-  function giteeList(cat){   /* cat: pc / pe */
-    return fetch(giteeBase(cat)+"?access_token="+encodeURIComponent(GITEE_TOKEN))
+  function giteeList(cat){   /* cat: pc / pe；ts+no-store 强制实时列表，避免缓存旧 sha 导致写入冲突 */
+    return fetch(giteeBase(cat)+"?access_token="+encodeURIComponent(GITEE_TOKEN)+"&ts="+Date.now(),{cache:"no-store"})
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
       .then(function(items){ return (items||[]).filter(function(i){ return i.type==="file"; }); });
   }
@@ -375,8 +375,8 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         return fto(fetch(giteeBase(cat+"/"+encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd}),90000)
           .then(function(r){
             if(r.ok) return r;
-            if((r.status===409||r.status===422) && times<3)  /* sha 冲突：等待后重取最新 sha 再写 */
-              return new Promise(function(res){ setTimeout(res, 250*(times+1)); }).then(function(){ return attempt(times+1); });
+            if((r.status===409||r.status===422) && times<5)  /* sha 冲突：等待后重取最新 sha 再写 */
+              return new Promise(function(res){ setTimeout(res, 500*(times+1)); }).then(function(){ return attempt(times+1); });
             return r;
           });
       });
@@ -404,7 +404,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     var need=arr.filter(function(x){ return x.size==null; });
     if(!need.length) return Promise.resolve(arr);
     return Promise.all(need.map(function(x){
-      return fetch(giteeBase(cat+"/"+encodeURIComponent(x.name))+"?access_token="+encodeURIComponent(GITEE_TOKEN))
+      return fetch(giteeBase(cat+"/"+encodeURIComponent(x.name))+"?access_token="+encodeURIComponent(GITEE_TOKEN)+"&ts="+Date.now(),{cache:"no-store"})
         .then(function(r){ return r.ok?r.json():null; })
         .then(function(d){ if(d && typeof d.size==="number") x.size=d.size; return x; })
         .catch(function(){ return x; });
@@ -424,8 +424,8 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         return fto(fetch(giteeBase(encodeURIComponent(name)), {method:found?"PUT":"POST", body:fd}),90000)
           .then(function(r){
             if(r.ok) return r;
-            if((r.status===409||r.status===422) && times<3)
-              return new Promise(function(res){ setTimeout(res, 250*(times+1)); }).then(function(){ return attempt(times+1); });
+            if((r.status===409||r.status===422) && times<5)
+              return new Promise(function(res){ setTimeout(res, 500*(times+1)); }).then(function(){ return attempt(times+1); });
             return r;
           });
       });
@@ -447,8 +447,8 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
           if(cur && cur.sha) body.sha=cur.sha;
           return fto(ghPut(path, body),90000).then(function(r){
             if(r.ok) return r;
-            if((r.status===409||r.status===422) && times<3)  /* sha 冲突：等待后重取最新 sha 再写 */
-              return new Promise(function(res){ setTimeout(res, 250*(times+1)); }).then(function(){ return attempt(times+1); });
+            if((r.status===409||r.status===422) && times<5)  /* sha 冲突：等待后重取最新 sha 再写 */
+              return new Promise(function(res){ setTimeout(res, 500*(times+1)); }).then(function(){ return attempt(times+1); });
             return r;
           });
         });
