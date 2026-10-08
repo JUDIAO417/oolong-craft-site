@@ -126,8 +126,9 @@ footer a{color:var(--tea)}
   .p-ava{width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--pixel);font-size:1.7rem;color:#151006;flex:none}
   .p-name{font-size:1.05rem;font-weight:700;color:var(--ink);margin:0;line-height:1.35;word-break:break-all}
   .p-desc{font-size:.85rem;color:var(--muted);margin:0;line-height:1.65;max-width:100%}
-  .p-head{max-width:1100px;margin:0 auto 1.8rem;display:flex;justify-content:flex-end}
+  .p-head{max-width:1100px;margin:0 auto 1.8rem;display:flex;align-items:center;gap:.8rem}
   .p-head .cnt{font-family:var(--pixel);font-size:.55rem;color:var(--dim);letter-spacing:.08em}
+  .p-head #pRef{padding:.45rem .9rem;font-size:.82rem}
   @media (max-width:860px){.p-grid{grid-template-columns:repeat(2,1fr)}}
   @media (max-width:560px){.p-grid{grid-template-columns:1fr;max-width:420px}.p-card{flex-direction:row;text-align:left;align-items:center;justify-content:flex-start;gap:1rem;padding:1.1rem 1.2rem}.p-desc{flex:1}}
 
@@ -172,6 +173,7 @@ footer a{color:var(--tea)}
   </div>
 
   <div class="p-head">
+    <button class="btn btn-ghost btn-sm" id="pRef" type="button">刷新</button>
     <span class="cnt" id="cnt"></span>
   </div>
 
@@ -282,25 +284,41 @@ footer a{color:var(--tea)}
         .catch(function(){ /* 皮肤图加载失败（离线无正版皮肤）→ 仍显示默认皮肤，不打断 */ });
     }catch(e){ fallback2D(c); }
   }
-  /* 数据实时读取：优先 GitHub raw（推送后即时生效），失败回退本站镜像 */
-  function rtJson(path){
-    return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path+"?ts="+Date.now(),{cache:"no-store"})
-      .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
-      .catch(function(){
-        return fetch("https://judiao417.github.io/oolong-craft-site/"+path+"?t="+Date.now(),{cache:"no-store"})
-          .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
+  /* 数据实时读取：GitHub API 直读优先（实时权威，无 CDN 缓存），60s 节流防限流；失败回退 raw（最终一致）→ 本站镜像 */
+  var apiLast=0, API_GAP=60000;
+  function viaApi(path){
+    var now=Date.now();
+    if(now-apiLast<API_GAP) return Promise.reject(new Error("throttled"));
+    apiLast=now;  /* 无论成败都进入冷却，防持续触发限流 */
+    return fetch("https://api.github.com/repos/JUDIAO417/oolong-craft-site/contents/"+path+"?ref=main&ts="+now,{cache:"no-store",headers:{"Accept":"application/vnd.github+json"}})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(d){
+        var b64=d.content||"";
+        return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b64),function(c){ return c.charCodeAt(0); })));
       });
   }
+  function rtJson(path){
+    return viaApi(path).catch(function(){
+      return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path+"?ts="+Date.now(),{cache:"no-store"})
+        .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+        .catch(function(){
+          return fetch("https://judiao417.github.io/oolong-craft-site/"+path+"?t="+Date.now(),{cache:"no-store"})
+            .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
+        });
+    });
+  }
   var lastP="", pollTimer=null;
-  function loadP(){
-    rtJson("players.json").then(function(d){
+  function loadP(forceApi){
+    var p=forceApi ? viaApi("players.json").catch(function(){ return rtJson("players.json"); }) : rtJson("players.json");
+    p.then(function(d){
       var j=JSON.stringify(d||[]);
       if(j!==lastP){ lastP=j; render(d||[]); }
     }).catch(function(){});
-    pollTimer=setTimeout(loadP,30000);
+    pollTimer=setTimeout(function(){ loadP(false); },30000);
   }
-  document.addEventListener("visibilitychange",function(){ if(!document.hidden){ clearTimeout(pollTimer); loadP(); } });
-  loadP();
+  document.getElementById("pRef").addEventListener("click",function(){ clearTimeout(pollTimer); loadP(true); });
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden){ clearTimeout(pollTimer); loadP(true); } });
+  loadP(true);
 })();
 </script>
 </body>
