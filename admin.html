@@ -358,7 +358,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   /* ===== Gitee API ===== */
   function giteeBase(path){ return "https://gitee.com/api/v5/repos/"+GITEE_OWNER+"/"+GITEE_REPO+"/contents/"+path; }
   function giteeList(cat){   /* cat: pc / pe；ts+no-store 强制实时列表，避免缓存旧 sha 导致写入冲突 */
-    return fetch(giteeBase(cat)+"?access_token="+encodeURIComponent(GITEE_TOKEN)+"&ts="+Date.now(),{cache:"no-store"})
+    return fto(fetch(giteeBase(cat)+"?access_token="+encodeURIComponent(GITEE_TOKEN)+"&ts="+Date.now(),{cache:"no-store"}),45000)
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
       .then(function(items){ return (items||[]).filter(function(i){ return i.type==="file"; }); });
   }
@@ -393,7 +393,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
           +"&sha="+encodeURIComponent(it.sha)
           +"&message="+encodeURIComponent("delete "+name)
           +"&branch="+GITEE_BRANCH;
-      return fetch(giteeBase(cat+"/"+encodeURIComponent(name))+"?"+q, {method:"DELETE"})
+      return fto(fetch(giteeBase(cat+"/"+encodeURIComponent(name))+"?"+q, {method:"DELETE"}),45000)
         .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return true; });
     });
   }
@@ -483,6 +483,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   function publishAll(){
     if(pubBusy){ toast("正在同步中，请稍候…"); return Promise.resolve(); }
     pubBusy=true;
+    var lockTimer=setTimeout(function(){ pubBusy=false; },300000);  /* 5 分钟强复位，防止异常卡死导致后续操作无反馈 */
     return Promise.all([giteeList("pc"),giteeList("pe")]).then(function(res){
       return Promise.all([fileMetaSmart("pc",res[0]),fileMetaSmart("pe",res[1])]);
     }).then(function(fm){
@@ -517,7 +518,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       else notify("ok","同步成功","文件清单与各部分数据已发布");
     })
       .catch(function(e){ notify("err","同步失败",(e&&e.message||"未知错误")); })
-      .finally(function(){ pubBusy=false; });
+      .finally(function(){ pubBusy=false; clearTimeout(lockTimer); });
   }
 
   /* ===== 列表渲染 ===== */
@@ -590,6 +591,12 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     if(!f){ toast("请先选择文件"); return; }
     if(f.size>MAX_SIZE){ toast("文件超过 150MB 上限，请压缩或到 Gitee 网页上传"); return; }
     uploadBtn.disabled=true; uploadBtn.textContent="上传中…";
+    var upDone=false, upTimer=setTimeout(function(){
+      if(!upDone){
+        notify("err","上传超时","文件上传超过 4 分钟未完成，请检查网络或改小文件后重试。");
+        uploadBtn.disabled=false; uploadBtn.textContent="上传";
+      }
+    },240000);
     var reader=new FileReader();
     reader.onload=function(){
       var b64=String(reader.result).split(",")[1];
@@ -599,7 +606,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         .then(function(){ notify("ok","上传成功","「"+name+"」已存入 Gitee "+cat.toUpperCase()+"，正在发布文件清单…"); fileInput.value=""; fileName.textContent="未选择文件"; return refreshAll(); })
         .then(publishAll)
         .catch(function(e){ notify("err","上传失败","文件："+name+"\n原因："+(e&&e.message||"未知错误")+"\n\n建议：改小文件后重试，或到 Gitee 网页版手动上传；文件已传成功但同步失败时会在此说明。"); refreshAll(); })
-        .finally(function(){ uploadBtn.disabled=false; uploadBtn.textContent="上传"; });
+        .finally(function(){ upDone=true; clearTimeout(upTimer); uploadBtn.disabled=false; uploadBtn.textContent="上传"; });
     };
     reader.onerror=function(){ notify("err","上传失败","无法读取本地文件，请重新选择后重试。"); uploadBtn.disabled=false; uploadBtn.textContent="上传"; };
     reader.readAsDataURL(f);
