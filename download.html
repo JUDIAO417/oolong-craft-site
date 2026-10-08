@@ -365,7 +365,8 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
   var GITEE_OWNER="sykjsj", GITEE_REPO="oolong-craft-files", GITEE_BRANCH="master";
   var groups=[], videos=[];
   function rawUrl(cat,name){ return "https://gitee.com/"+GITEE_OWNER+"/"+GITEE_REPO+"/raw/"+GITEE_BRANCH+"/"+cat+"/"+encodeURIComponent(name); }
-  function ghUrl(name){ return "https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/uploads/"+encodeURIComponent(name); }  /* 视频镜像：GitHub raw 手机可直放 */
+  function ghUrl(name){ return "https://judiao417.github.io/oolong-craft-site/uploads/"+encodeURIComponent(name)+"?t="+Date.now(); }  /* 视频镜像：GitHub Pages MIME 正确(视频可播)，ts 绕过 CDN 缓存 */
+  function ghRaw(name){ return "https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/uploads/"+encodeURIComponent(name); }  /* 兜底源 */
   function fmt(n){ if(n>=1048576) return (n/1048576).toFixed(1)+" MB"; if(n>=1024) return (n/1024).toFixed(0)+" KB"; return n+" B"; }
   function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
   function render(el, cat, files){
@@ -430,7 +431,13 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
         var idx=+btn.parentNode.getAttribute("data-i");
         var list2=videos.filter(function(v){ return !v.cat || v.cat===cat; });
         var v=list2[idx];
-        btn.parentNode.innerHTML='<div class="v-title">'+esc(v.title)+'</div><video controls autoplay playsinline preload="auto" src="'+(v.type==="file"?ghUrl(v.src):esc(v.src))+'"></video>';
+        btn.parentNode.innerHTML='<div class="v-title">'+esc(v.title)+'</div><video controls autoplay playsinline preload="auto" src="'+(v.type==="file"?ghUrl(v.src):esc(v.src))+'"></video><p class="v-tip">视频加载慢或黑屏时，稍等片刻或点右下角重试。</p>';
+        var vd=btn.parentNode.querySelector("video");
+        if(vd && v.type==="file"){
+          vd.addEventListener("error",function(){
+            vd.src=ghRaw(v.src); vd.load();
+          },{once:true});
+        }
       });
     });
   }
