@@ -70,6 +70,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
 .field input[type=text]{background:rgba(255,255,255,.04);border:1px solid var(--glass-line-strong);border-radius:var(--r-sm);color:var(--ink);font-family:var(--sans);font-size:.95rem;padding:.7rem .9rem;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;max-width:380px}
 .g-inputs{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
 .g-inputs input[type=text]{background:rgba(255,255,255,.04);border:1px solid var(--glass-line-strong);border-radius:var(--r-sm);color:var(--ink);font-family:var(--sans);font-size:.95rem;padding:.7rem .9rem;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.g-inputs select{background:rgba(255,255,255,.04);border:1px solid var(--glass-line-strong);border-radius:var(--r-sm);color:var(--ink);font-family:var(--sans);font-size:.95rem;padding:.7rem .9rem;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;max-width:380px}
 .g-inputs input:focus{border-color:var(--tea);box-shadow:0 0 0 3px rgba(240,179,92,.15)}
 .err{color:var(--danger);font-size:.9rem;min-height:1.4em;margin:.2rem 0 .8rem}
 .seg{display:inline-flex;gap:.6rem;margin-bottom:1.1rem}
@@ -246,6 +247,10 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       <input type="text" id="pName" placeholder="玩家游戏ID，如：乌龙茶">
       <input type="text" id="pTitle" placeholder="称号（可选），支持 &1-9 上色 / &r&r 彩色循环">
       <input type="text" id="pSkin" placeholder="皮肤图片链接（可选），留空则按游戏ID自动拉取皮肤">
+      <select id="pBody">
+        <option value="default">体型：经典（粗胳膊）</option>
+        <option value="slim">体型：纤细（细胳膊）</option>
+      </select>
       <input type="text" id="pDesc" placeholder="一句话介绍，如：服主，喜欢盖房子">
     </div>
     <div class="up-row">
@@ -312,6 +317,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       pName=document.getElementById("pName"),
       pTitle=document.getElementById("pTitle"),
       pSkin=document.getElementById("pSkin"),
+      pBody=document.getElementById("pBody"),
       pDesc=document.getElementById("pDesc"),
       pList=document.getElementById("pList"),
       addPlayerBtn=document.getElementById("addPlayer");
@@ -789,29 +795,29 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   var editIdx=-1;
   function editPlayer(i){
     var p=players[i]; if(!p) return;
-    pName.value=p.name||""; pTitle.value=p.title||""; pSkin.value=p.skin||""; pDesc.value=p.desc||"";
+    pName.value=p.name||""; pTitle.value=p.title||""; pSkin.value=p.skin||""; pBody.value=(p.body==="slim"?"slim":"default"); pDesc.value=p.desc||"";
     editIdx=i; addPlayerBtn.textContent="保存修改";
     document.getElementById("pName").focus();
     window.scrollTo({top:0,behavior:"smooth"});
   }
   function addPlayer(){
-    var name=pName.value.trim(), title=pTitle.value.trim(), skin=pSkin.value.trim(), desc=pDesc.value.trim();
+    var name=pName.value.trim(), title=pTitle.value.trim(), skin=pSkin.value.trim(), body=pBody.value==="slim"?"slim":"default", desc=pDesc.value.trim();
     if(!name){ toast("请填写玩家游戏ID"); return; }
     if(editIdx>=0){
-      players[editIdx]={name:name, title:title, skin:skin, desc:desc};
+      players[editIdx]={name:name, title:title, skin:skin, body:body, desc:desc};
       editIdx=-1; addPlayerBtn.textContent="添加玩家";
       renderPlayers(); publishAll(); notify("ok","已保存","玩家「"+name+"」信息已更新");
       return;
     }
     if(players.length>=50){ toast("玩家最多 50 个"); return; }
-    players.push({name:name, title:title, skin:skin, desc:desc});
-    pName.value=""; pTitle.value=""; pSkin.value=""; pDesc.value="";
+    players.push({name:name, title:title, skin:skin, body:body, desc:desc});
+    pName.value=""; pTitle.value=""; pSkin.value=""; pBody.value="default"; pDesc.value="";
     renderPlayers(); publishAll(); notify("ok","已添加玩家","「"+name+"」已加入名单");
   }
   function delPlayer(i){
     var p=players[i]; if(!p) return;
     if(!confirm("移除玩家「"+p.name+"」？")) return;
-    if(editIdx===i){ editIdx=-1; addPlayerBtn.textContent="添加玩家"; pName.value=""; pTitle.value=""; pSkin.value=""; pDesc.value=""; }
+    if(editIdx===i){ editIdx=-1; addPlayerBtn.textContent="添加玩家"; pName.value=""; pTitle.value=""; pSkin.value=""; pBody.value="default"; pDesc.value=""; }
     players.splice(i,1); renderPlayers(); publishAll(); notify("ok","已删除","玩家「"+p.name+"」已移除");
   }
   addPlayerBtn.addEventListener("click",addPlayer);

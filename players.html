@@ -233,7 +233,7 @@ footer a{color:var(--tea)}
       var n=(p.name||""), nE=encodeURIComponent(n);
       var skinUrl=p.skin?p.skin:("https://mc-heads.net/skin/"+nE);
       var bodyUrl=p.skin?p.skin:("https://mc-heads.net/body/"+nE+"/64");
-      return '<div class="p-card"><div class="p-skinwrap"><canvas class="p-skin3d" data-skin="'+skinUrl+'" data-body="'+bodyUrl+'"></canvas><img class="p-skin2d" src="'+bodyUrl+'" alt="'+esc(n)+'" loading="lazy"><div class="p-ava" style="background:linear-gradient(135deg,'+c[0]+','+c[1]+')">'+esc((n||"?").charAt(0).toUpperCase())+'</div></div><div>'+title+'<h3 class="p-name">'+parseMC(n)+'</h3><p class="p-desc">'+esc(p.desc||"")+'</p></div></div>';
+      return '<div class="p-card"><div class="p-skinwrap"><canvas class="p-skin3d" data-skin="'+skinUrl+'" data-body="'+bodyUrl+'" data-model="'+(p.body==="slim"?"slim":"default")+'"></canvas><img class="p-skin2d" src="'+bodyUrl+'" alt="'+esc(n)+'" loading="lazy"><div class="p-ava" style="background:linear-gradient(135deg,'+c[0]+','+c[1]+')">'+esc((n||"?").charAt(0).toUpperCase())+'</div></div><div>'+title+'<h3 class="p-name">'+parseMC(n)+'</h3><p class="p-desc">'+esc(p.desc||"")+'</p></div></div>';
     }).join("");
     init3D();
     /* 2D 兜底图加载失败 → 首字徽章 */
@@ -280,7 +280,7 @@ footer a{color:var(--tea)}
       skv3dCtx++;
       viewer.autoRotate=true; viewer.autoRotateSpeed=0.9;
       viewer.animation=new skinview3d.IdleAnimation();
-      viewer.loadSkin(c.getAttribute("data-skin")||"https://mc-heads.net/skin/Steve",{model:"default"})
+      viewer.loadSkin(c.getAttribute("data-skin")||"https://mc-heads.net/skin/Steve",{model:c.getAttribute("data-model")||"default"})
         .catch(function(){ /* 皮肤图加载失败（离线无正版皮肤）→ 仍显示默认皮肤，不打断 */ });
     }catch(e){ fallback2D(c); }
   }
