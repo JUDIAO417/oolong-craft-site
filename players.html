@@ -136,13 +136,18 @@ footer a{color:var(--tea)}
   .rainbow{background:linear-gradient(90deg,#f43f5e,#f59e0b,#84cc16,#22c55e,#06b6d4,#6366f1,#d946ef,#f43f5e);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbow-flow 3.2s linear infinite;font-weight:800}
   @keyframes rainbow-flow{0%{background-position:0% 50%}100%{background-position:220% 50%}}
 
-  .p-skinwrap{position:relative;width:46px;height:72px;flex:none;display:flex;align-items:center;justify-content:center}
-  .p-skin{width:46px;height:72px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));display:block}
-  .p-skinwrap .p-ava{display:none;width:52px;height:52px}
-  .p-card{flex-direction:row;text-align:left;align-items:center;justify-content:flex-start;gap:1.1rem}
+  .p-card{padding:1.8rem 1.6rem;gap:1.4rem;flex-direction:row;text-align:left;align-items:center;justify-content:flex-start}
   .p-card>div:last-child{flex:1;min-width:0}
-  @media (min-width:861px){.p-card{flex-direction:row;text-align:left;align-items:center;justify-content:flex-start;gap:1.1rem}}
+  .p-skinwrap{position:relative;width:132px;height:176px;flex:none;display:flex;align-items:center;justify-content:center}
+  .p-skin3d{width:132px;height:176px;display:block;image-rendering:auto}
+  .p-skin2d{width:96px;height:150px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 6px 12px rgba(0,0,0,.4));display:none}
+  .p-skinwrap .p-ava{display:none;width:64px;height:64px;font-size:1.9rem}
+  .p-name{font-size:1.25rem;margin:.15rem 0 0}
+  .p-title{font-size:1rem}
+  .p-desc{font-size:.92rem}
+  @media (max-width:560px){.p-card{flex-direction:row;text-align:left;align-items:center;justify-content:flex-start;gap:1rem;padding:1.2rem 1rem}.p-skinwrap{width:88px;height:120px}.p-skin3d{width:88px;height:120px}.p-skin2d{width:64px;height:100px}.p-name{font-size:1.05rem}}
 </style>
+<script src="assets/skinview3d.bundle.js"></script>
 </head>
 <body>
 <div class="ambient"><span></span><span></span><span></span></div>
@@ -221,17 +226,59 @@ footer a{color:var(--tea)}
     grid.innerHTML=list.map(function(p){
       var c=palette(p.name||"?");
       var title=p.title?('<p class="p-title">'+parseMC(p.title)+'</p>'):'';
-      var skinSrc=p.skin?p.skin:("https://mc-heads.net/body/"+encodeURIComponent(p.name||"")+"/64");
-      return '<div class="p-card"><div class="p-skinwrap"><img class="p-skin" src="'+skinSrc+'" alt="'+esc(p.name||"")+'" loading="lazy"><div class="p-ava" style="background:linear-gradient(135deg,'+c[0]+','+c[1]+')">'+esc((p.name||"?").charAt(0).toUpperCase())+'</div></div><div>'+title+'<h3 class="p-name">'+esc(p.name||"")+'</h3><p class="p-desc">'+esc(p.desc||"")+'</p></div></div>';
+      var n=(p.name||""), nE=encodeURIComponent(n);
+      var skinUrl=p.skin?p.skin:("https://mc-heads.net/skin/"+nE);
+      var bodyUrl=p.skin?p.skin:("https://mc-heads.net/body/"+nE+"/64");
+      return '<div class="p-card"><div class="p-skinwrap"><canvas class="p-skin3d" data-skin="'+skinUrl+'" data-body="'+bodyUrl+'"></canvas><img class="p-skin2d" src="'+bodyUrl+'" alt="'+esc(n)+'" loading="lazy"><div class="p-ava" style="background:linear-gradient(135deg,'+c[0]+','+c[1]+')">'+esc((n||"?").charAt(0).toUpperCase())+'</div></div><div>'+title+'<h3 class="p-name">'+parseMC(n)+'</h3><p class="p-desc">'+esc(p.desc||"")+'</p></div></div>';
     }).join("");
-    /* 皮肤加载失败（离线无正版皮肤/网络不可达）→ 回退显示首字徽章 */
-    grid.querySelectorAll("img.p-skin").forEach(function(img){
+    init3D();
+    /* 2D 兜底图加载失败 → 首字徽章 */
+    grid.querySelectorAll("img.p-skin2d").forEach(function(img){
       img.addEventListener("error",function(){
         img.style.display="none";
         var ava=img.parentElement.querySelector(".p-ava");
         if(ava) ava.style.display="flex";
       });
     });
+  }
+  /* 3D 皮肤模型：懒加载初始化，WebGL 不可用/皮肤加载失败时回退 2D 图 */
+  var skv3dCtx=0, skvIO=null;
+  function init3D(){
+    var canvases=Array.prototype.slice.call(grid.querySelectorAll("canvas.p-skin3d"));
+    if(!canvases.length) return;
+    if(!window.skinview3d || !window.WebGLRenderingContext){ canvases.forEach(function(c){ fallback2D(c); }); return; }
+    if(typeof IntersectionObserver==="undefined"){ canvases.forEach(function(c){ make3D(c); }); return; }
+    if(!skvIO){
+      skvIO=new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if(!en.isIntersecting) return;
+          skvIO.unobserve(en.target);
+          make3D(en.target);
+        });
+      },{rootMargin:"120px 0px"});
+    }
+    canvases.forEach(function(c){ skvIO.observe(c); });
+  }
+  function fallback2D(c){
+    try{
+      c.style.display="none";
+      var img=c.parentElement.querySelector("img.p-skin2d");
+      if(img) img.style.display="block";
+    }catch(e){}
+  }
+  function make3D(c){
+    if(skv3dCtx>=14){ fallback2D(c); return; }   /* 浏览器 WebGL 上下文约 16 个上限，保底 14 */
+    try{
+      var viewer=new skinview3d.SkinViewer({
+        canvas:c, width:132, height:176,
+        skin:c.getAttribute("data-skin")||"https://mc-heads.net/skin/Steve"
+      });
+      skv3dCtx++;
+      viewer.autoRotate=true; viewer.autoRotateSpeed=0.9;
+      viewer.animation=new skinview3d.IdleAnimation();
+      viewer.loadSkin(c.getAttribute("data-skin")||"https://mc-heads.net/skin/Steve",{model:"default"})
+        .catch(function(){ /* 皮肤图加载失败（离线无正版皮肤）→ 仍显示默认皮肤，不打断 */ });
+    }catch(e){ fallback2D(c); }
   }
   /* 数据实时读取：优先 GitHub raw（推送后即时生效），失败回退本站镜像 */
   function rtJson(path){
