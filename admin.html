@@ -777,24 +777,42 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   function renderPlayers(){
     if(!players.length){ pList.innerHTML='<div class="empty">暂无玩家</div>'; return; }
     pList.innerHTML=players.map(function(p,i){
-      return '<div class="file-row"><span class="nm">'+esc(p.name)+'</span><span class="sz" style="color:var(--tea)">'+esc(p.title||"")+'</span><span class="sz">'+esc(p.desc||"")+'</span><button class="btn btn-danger btn-sm" data-p="'+i+'">删除</button></div>';
+      return '<div class="file-row"><span class="nm">'+esc(p.name)+'</span><span class="sz" style="color:var(--tea)">'+esc(p.title||"")+'</span><span class="sz">'+esc(p.desc||"")+'</span><button class="btn btn-sm" data-e="'+i+'">编辑</button><button class="btn btn-danger btn-sm" data-p="'+i+'">删除</button></div>';
     }).join("");
+    pList.querySelectorAll("[data-e]").forEach(function(b){
+      b.addEventListener("click",function(){ editPlayer(+b.getAttribute("data-e")); });
+    });
     pList.querySelectorAll("[data-p]").forEach(function(b){
       b.addEventListener("click",function(){ delPlayer(+b.getAttribute("data-p")); });
     });
   }
+  var editIdx=-1;
+  function editPlayer(i){
+    var p=players[i]; if(!p) return;
+    pName.value=p.name||""; pTitle.value=p.title||""; pSkin.value=p.skin||""; pDesc.value=p.desc||"";
+    editIdx=i; addPlayerBtn.textContent="保存修改";
+    document.getElementById("pName").focus();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
   function addPlayer(){
     var name=pName.value.trim(), title=pTitle.value.trim(), skin=pSkin.value.trim(), desc=pDesc.value.trim();
     if(!name){ toast("请填写玩家游戏ID"); return; }
+    if(editIdx>=0){
+      players[editIdx]={name:name, title:title, skin:skin, desc:desc};
+      editIdx=-1; addPlayerBtn.textContent="添加玩家";
+      renderPlayers(); publishAll(); notify("ok","已保存","玩家「"+name+"」信息已更新");
+      return;
+    }
     if(players.length>=50){ toast("玩家最多 50 个"); return; }
     players.push({name:name, title:title, skin:skin, desc:desc});
     pName.value=""; pTitle.value=""; pSkin.value=""; pDesc.value="";
-    renderPlayers(); publishAll();
+    renderPlayers(); publishAll(); notify("ok","已添加玩家","「"+name+"」已加入名单");
   }
   function delPlayer(i){
     var p=players[i]; if(!p) return;
     if(!confirm("移除玩家「"+p.name+"」？")) return;
-    players.splice(i,1); renderPlayers(); publishAll();
+    if(editIdx===i){ editIdx=-1; addPlayerBtn.textContent="添加玩家"; pName.value=""; pTitle.value=""; pSkin.value=""; pDesc.value=""; }
+    players.splice(i,1); renderPlayers(); publishAll(); notify("ok","已删除","玩家「"+p.name+"」已移除");
   }
   addPlayerBtn.addEventListener("click",addPlayer);
 })();
