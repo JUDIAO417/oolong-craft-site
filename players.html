@@ -135,6 +135,13 @@ footer a{color:var(--tea)}
   .p-name{font-size:1.05rem;font-weight:700;color:var(--ink);margin:.1rem 0 0;line-height:1.35;word-break:break-all}
   .rainbow{background:linear-gradient(90deg,#f43f5e,#f59e0b,#84cc16,#22c55e,#06b6d4,#6366f1,#d946ef,#f43f5e);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbow-flow 3.2s linear infinite;font-weight:800}
   @keyframes rainbow-flow{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+
+  .p-skinwrap{position:relative;width:46px;height:72px;flex:none;display:flex;align-items:center;justify-content:center}
+  .p-skin{width:46px;height:72px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));display:block}
+  .p-skinwrap .p-ava{display:none;width:52px;height:52px}
+  .p-card{flex-direction:row;text-align:left;align-items:center;justify-content:flex-start;gap:1.1rem}
+  .p-card>div:last-child{flex:1;min-width:0}
+  @media (min-width:861px){.p-card{flex-direction:row;text-align:left;align-items:center;justify-content:flex-start;gap:1.1rem}}
 </style>
 </head>
 <body>
@@ -214,8 +221,17 @@ footer a{color:var(--tea)}
     grid.innerHTML=list.map(function(p){
       var c=palette(p.name||"?");
       var title=p.title?('<p class="p-title">'+parseMC(p.title)+'</p>'):'';
-      return '<div class="p-card"><div class="p-ava" style="background:linear-gradient(135deg,'+c[0]+','+c[1]+')">'+esc((p.name||"?").charAt(0).toUpperCase())+'</div><div>'+title+'<h3 class="p-name">'+esc(p.name||"")+'</h3><p class="p-desc">'+esc(p.desc||"")+'</p></div></div>';
+      var skinSrc=p.skin?p.skin:("https://mc-heads.net/body/"+encodeURIComponent(p.name||"")+"/64");
+      return '<div class="p-card"><div class="p-skinwrap"><img class="p-skin" src="'+skinSrc+'" alt="'+esc(p.name||"")+'" loading="lazy"><div class="p-ava" style="background:linear-gradient(135deg,'+c[0]+','+c[1]+')">'+esc((p.name||"?").charAt(0).toUpperCase())+'</div></div><div>'+title+'<h3 class="p-name">'+esc(p.name||"")+'</h3><p class="p-desc">'+esc(p.desc||"")+'</p></div></div>';
     }).join("");
+    /* 皮肤加载失败（离线无正版皮肤/网络不可达）→ 回退显示首字徽章 */
+    grid.querySelectorAll("img.p-skin").forEach(function(img){
+      img.addEventListener("error",function(){
+        img.style.display="none";
+        var ava=img.parentElement.querySelector(".p-ava");
+        if(ava) ava.style.display="flex";
+      });
+    });
   }
   /* 数据实时读取：优先 GitHub raw（推送后即时生效），失败回退本站镜像 */
   function rtJson(path){
