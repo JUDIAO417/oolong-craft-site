@@ -499,17 +499,17 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       };
       var jobs=[];
       Object.keys(jsons).forEach(function(k){
-        if(k==="players.json"){ jobs.push(ghWrite(k,jsons[k],"sync "+k)); return; }  /* 玩家数据仅存 GitHub */
-        jobs.push(giteeWriteRoot(k,b64u(jsons[k]),"sync "+k));   /* Gitee 权威存储 */
-        jobs.push(ghWrite(k,jsons[k],"sync "+k));                 /* 本站镜像供页面读取 */
+        if(k==="players.json"){ jobs.push({name:"players.json(GitHub)", run:function(){ return ghWrite(k,jsons[k],"sync "+k); }}); return; }  /* 玩家数据仅存 GitHub */
+        jobs.push({name:k+"(Gitee)", run:function(){ return giteeWriteRoot(k,b64u(jsons[k]),"sync "+k); }});   /* Gitee 权威存储 */
+        jobs.push({name:k+"(GitHub)", run:function(){ return ghWrite(k,jsons[k],"sync "+k); }});                 /* 本站镜像供页面读取 */
       });
       /* 串行执行，避免并发 sha 竞态与接口限流；单个文件失败不中断整体 */
       return jobs.reduce(function(p,j){
         return p.then(function(acc){
-          return j.then(function(r){
-            if(!r.ok) return r.json().then(function(d){ acc.fail.push("HTTP "+r.status+(d&&d.message?(" "+d.message):"")); return acc; }, function(){ acc.fail.push("HTTP "+r.status); return acc; });
+          return j.run().then(function(r){
+            if(!r.ok) return r.json().then(function(d){ acc.fail.push(j.name+": HTTP "+r.status+(d&&d.message?(" "+d.message):"")); return acc; }, function(){ acc.fail.push(j.name+": HTTP "+r.status); return acc; });
             acc.ok++; return acc;
-          }, function(e){ acc.fail.push((e&&e.message)||"网络错误"); return acc; });
+          }, function(e){ acc.fail.push(j.name+": "+(e&&e.message||"网络错误")); return acc; });
         });
       }, Promise.resolve({ok:0,fail:[]}));
     }).then(function(acc){
