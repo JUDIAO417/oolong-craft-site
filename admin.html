@@ -420,6 +420,14 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     return attempt(0);
   }
   function ghWrite(path, content, msg){ return ghWriteB64(path, b64u(content), msg); }
+  function ghGet(path){   /* 从 GitHub 读 JSON（玩家数据仅存本站仓库） */
+    return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path+"?ts="+Date.now(),{headers:ghHeaders(),cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(d){
+        var b64=d.content||"";
+        return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b64),function(c){ return c.charCodeAt(0); })));
+      });
+  }
   function ghDelete(path){
     return fetch("https://api.github.com/repos/"+GH_OWNER+"/"+GH_SITE_REPO+"/contents/"+path+"?ts="+Date.now(),{headers:ghHeaders(),cache:"no-store"})
       .then(function(r){ return r.ok ? r.json() : null; })
@@ -449,6 +457,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       };
       var jobs=[];
       Object.keys(jsons).forEach(function(k){
+        if(k==="players.json"){ jobs.push(ghWrite(k,jsons[k],"sync "+k)); return; }  /* 玩家数据仅存 GitHub */
         jobs.push(giteeWriteRoot(k,b64u(jsons[k]),"sync "+k));   /* Gitee 权威存储 */
         jobs.push(ghWrite(k,jsons[k],"sync "+k));                 /* 本站镜像供页面读取 */
       });
@@ -578,7 +587,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   }
   function loadMeta(){
     /* 一律以 Gitee 权威数据为准，避免镜像滞后导致旧数据覆盖权威数据 */
-    return Promise.all([giteeGetRoot("groups.json"),giteeGetRoot("videos.json"),giteeGetRoot("memorial.json"),giteeGetRoot("pc.json"),giteeGetRoot("pe.json"),giteeGetRoot("players.json")])
+    return Promise.all([giteeGetRoot("groups.json"),giteeGetRoot("videos.json"),giteeGetRoot("memorial.json"),giteeGetRoot("pc.json"),giteeGetRoot("pe.json"),ghGet("players.json")])
       .then(function(r){
         groups=(r[0]||[]).slice(0,10);
         videos=(r[1]||[]).slice(0,50);
