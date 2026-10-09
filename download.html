@@ -434,6 +434,9 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
     }).join('')+'</div>';
     mBody.querySelectorAll(".v-play").forEach(function(btn){
       btn.addEventListener("click",function(){
+        /* 先停止弹窗里所有已在播放的视频（浏览器只允许一个有声视频自动播放，否则第二个会一直转圈） */
+        var olds=document.querySelectorAll("#modalMask video");
+        for(var oi=0;oi<olds.length;oi++){ olds[oi].pause(); olds[oi].removeAttribute("src"); olds[oi].load(); }
         var idx=+btn.parentNode.getAttribute("data-i");
         var list2=videos.filter(function(v){ return !v.cat || v.cat===cat; });
         var v=list2[idx];
