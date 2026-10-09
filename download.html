@@ -367,6 +367,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
   function rawUrl(cat,name){ return "https://gitee.com/"+GITEE_OWNER+"/"+GITEE_REPO+"/raw/"+GITEE_BRANCH+"/"+cat+"/"+encodeURIComponent(name); }
   function ghUrl(name){ return "https://judiao417.github.io/oolong-craft-site/uploads/"+encodeURIComponent(name)+"?t="+Date.now(); }  /* 视频镜像：GitHub Pages MIME 正确(视频可播)，ts 绕过 CDN 缓存 */
   function ghRaw(name){ return "https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/uploads/"+encodeURIComponent(name); }  /* 兜底源 */
+  function ghJsd(name){ return "https://cdn.jsdelivr.net/gh/JUDIAO417/oolong-craft-site@main/uploads/"+encodeURIComponent(name); }  /* 中间源：jsDelivr MIME 正确 */
   function fmt(n){ if(n>=1048576) return (n/1048576).toFixed(1)+" MB"; if(n>=1024) return (n/1024).toFixed(0)+" KB"; return n+" B"; }
   function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
   function render(el, cat, files){
@@ -439,9 +440,11 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
         btn.parentNode.innerHTML='<div class="v-title">'+esc(v.title)+'</div><video controls autoplay playsinline preload="auto" src="'+(v.type==="file"?ghUrl(v.src):esc(v.src))+'"></video><p class="v-tip">视频加载慢或黑屏时，稍等片刻或点右下角重试。</p>';
         var vd=btn.parentNode.querySelector("video");
         if(vd && v.type==="file"){
+          /* 播放源三级回退：Pages(部署中可能404) → jsDelivr(MIME对) → raw(最后兜底) */
           vd.addEventListener("error",function(){
-            vd.src=ghRaw(v.src); vd.load();
-          },{once:true});
+            if(!vd.dataset.fb1){ vd.dataset.fb1="1"; vd.src=ghJsd(v.src); vd.load(); return; }
+            if(!vd.dataset.fb2){ vd.dataset.fb2="1"; vd.src=ghRaw(v.src); vd.load(); }
+          },{once:false});
         }
       });
     });
