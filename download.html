@@ -370,14 +370,33 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
   function ghJsd(name){ return "https://cdn.jsdelivr.net/gh/JUDIAO417/oolong-craft-site@main/uploads/"+encodeURIComponent(name); }  /* 中间源：jsDelivr MIME 正确 */
   function fmt(n){ if(n>=1048576) return (n/1048576).toFixed(1)+" MB"; if(n>=1024) return (n/1024).toFixed(0)+" KB"; return n+" B"; }
   function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+  /* 国内加速镜像（GitHub Release 直链镜像代理，免费），依次探测可用 */
+  var MIRRORS=["https://gh-proxy.com/","https://ghfast.top/","https://ghproxy.net/"];
+  function accel(url,btn){
+    if(btn.dataset.busy) return; btn.dataset.busy="1";
+    var i=0;
+    function tryNext(){
+      if(i>=MIRRORS.length){ btn.dataset.busy=""; toast("加速通道暂不可用，请用「下载」原站下载"); return; }
+      var m=MIRRORS[i++]+url, ctl=new AbortController();
+      var t=setTimeout(function(){ ctl.abort(); },6000);
+      fetch(m,{method:"HEAD",mode:"no-cors",signal:ctl.signal})
+        .then(function(){ clearTimeout(t); btn.dataset.busy=""; window.open(m,"_blank"); })
+        .catch(function(){ clearTimeout(t); tryNext(); });
+    }
+    tryNext();
+  }
   function render(el, cat, files){
     files=(files||[]).filter(function(f){ return f && f.name; });
     if(!files.length){ el.innerHTML='<div class="file-empty">'+cat+' 版文件暂未上传，稍后再来看看。</div>'; return; }
     el.innerHTML=files.map(function(it){
       var href=it.url?it.url:rawUrl(cat,it.name);
       var tag=it.url?'<span class="file-size" style="color:var(--tea)">[外链]</span>':'';
-      return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span>'+tag+'<span class="file-size">'+(it.size==null?"—":fmt(it.size))+'</span><a class="btn btn-primary btn-sm" href="'+esc(href)+'" target="_blank" rel="noopener">下载</a></div>';
+      var acc=(it.url&&it.url.indexOf("github.com/")>-1)?'<button class="btn btn-sm" data-a="'+esc(it.url)+'">加速下载</button>':'';
+      return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span>'+tag+'<span class="file-size">'+(it.size==null?"—":fmt(it.size))+'</span><a class="btn btn-primary btn-sm" href="'+esc(href)+'" target="_blank" rel="noopener">下载</a>'+acc+'</div>';
     }).join("");
+    el.querySelectorAll("[data-a]").forEach(function(b){
+      b.addEventListener("click",function(){ accel(b.getAttribute("data-a"),b); });
+    });
   }
 
   /* ===== 弹窗 ===== */
