@@ -386,17 +386,29 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
     }
     tryNext();
   }
+  function copyLink(u,btn){
+    var t=document.createElement("textarea"); t.value=u; t.style.position="fixed"; t.style.opacity="0";
+    document.body.appendChild(t); t.select();
+    try{ document.execCommand("copy"); }catch(e){}
+    document.body.removeChild(t);
+    btn.textContent="已复制"; setTimeout(function(){ btn.textContent="复制直链"; },1600);
+  }
   function render(el, cat, files){
     files=(files||[]).filter(function(f){ return f && f.name; });
     if(!files.length){ el.innerHTML='<div class="file-empty">'+cat+' 版文件暂未上传，稍后再来看看。</div>'; return; }
-    el.innerHTML=files.map(function(it){
+    var tip=(files||[]).some(function(f){ return f.url&&f.url.indexOf("github.com/")>-1; })
+      ? '<div class="file-tip">国内下载慢？点「复制直链」后粘贴到迅雷 / IDM（多线程）下载，速度可提升到几 MB/s。</div>':'';
+    el.innerHTML=tip+files.map(function(it){
       var href=it.url?it.url:rawUrl(cat,it.name);
       var tag=it.url?'<span class="file-size" style="color:var(--tea)">[外链]</span>':'';
-      var acc=(it.url&&it.url.indexOf("github.com/")>-1)?'<button class="btn btn-sm" data-a="'+esc(it.url)+'">加速下载</button>':'';
+      var acc=(it.url&&it.url.indexOf("github.com/")>-1)?'<button class="btn btn-sm" data-a="'+esc(it.url)+'">加速下载</button><button class="btn btn-sm" data-c="'+esc(href)+'">复制直链</button>':'';
       return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span>'+tag+'<span class="file-size">'+(it.size==null?"—":fmt(it.size))+'</span><a class="btn btn-primary btn-sm" href="'+esc(href)+'" target="_blank" rel="noopener">下载</a>'+acc+'</div>';
     }).join("");
     el.querySelectorAll("[data-a]").forEach(function(b){
       b.addEventListener("click",function(){ accel(b.getAttribute("data-a"),b); });
+    });
+    el.querySelectorAll("[data-c]").forEach(function(b){
+      b.addEventListener("click",function(){ copyLink(b.getAttribute("data-c"),b); });
     });
   }
 
