@@ -810,11 +810,16 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
   var galGrid=document.getElementById("galGrid");
   function escHtml(s){ var d=document.createElement("div"); d.textContent=(s==null?"":String(s)); return d.innerHTML; }
   function escAttr(s){ return escHtml(s).replace(/"/g,"&quot;"); }
+  function galImg(u){
+    /* uploads/ 前缀（管理页上传的图/视频镜像）→ GitHub raw 直链，首次访问即生效 */
+    return (u&&u.indexOf("uploads/")===0)?("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+u):u;
+  }
   function renderGal(items){
     items=(items||[]).slice(0,20);
     var html="";
     items.forEach(function(m){
-      html+='<figure class="gal rv"><div class="thumb" data-lb="'+escAttr(m.img)+'" role="button" tabindex="0" aria-label="查看大图：'+escAttr(m.title)+'"><img src="'+escAttr(m.img)+'" alt="'+escAttr(m.title)+'" loading="lazy"></div><figcaption><h3>'+escHtml(m.title)+'</h3><p>'+escHtml(m.desc)+'</p></figcaption></figure>';
+      var u=galImg(m.img);
+      html+='<figure class="gal rv"><div class="thumb" data-lb="'+escAttr(u)+'" role="button" tabindex="0" aria-label="查看大图：'+escAttr(m.title)+'"><img src="'+escAttr(u)+'" alt="'+escAttr(m.title)+'" loading="lazy"></div><figcaption><h3>'+escHtml(m.title)+'</h3><p>'+escHtml(m.desc)+'</p></figcaption></figure>';
     });
     if(!items.length){
       html='<div class="gal rv" style="grid-column:1/-1;text-align:center;color:var(--muted);padding:2.5rem 1rem;border:1px dashed var(--glass-line-strong);border-radius:2px">纪念馆正在装修，第一件展品在路上。</div>';
@@ -839,7 +844,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
   }
   /* 数据实时读取：优先 GitHub raw（推送后即时生效），失败回退本站镜像 */
   function rtJson(path){
-    return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path,{cache:"no-store"})
+    return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path+"?ts="+Date.now(),{cache:"no-store"})
       .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
       .catch(function(){
         return fetch("https://judiao417.github.io/oolong-craft-site/"+path+"?t="+Date.now(),{cache:"no-store"})
