@@ -727,7 +727,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
   <div class="srv-win" id="srvWin">
     <div class="srv-head" id="srvHead"><span class="t">SERVER</span><span class="lbl" id="srvLbl">乌龙茶的地盘</span><button class="srv-close" id="srvClose" aria-label="关闭">×</button></div>
     <div class="srv-body" id="srvBody"><div class="srv-empty">正在获取服务器状态…</div></div>
-    <div class="srv-foot"><span class="ts" id="srvTs">状态窗 v8</span><button class="srv-ref" id="srvRef">刷新</button></div>
+    <div class="srv-foot"><span class="ts" id="srvTs">状态窗 v9</span><button class="srv-ref" id="srvRef">刷新</button></div>
   </div>
 
 <!-- ===== 页脚 ===== -->
@@ -1036,7 +1036,8 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
           clearTimeout(timer);
           try{
             var doc=f.contentDocument||f.contentWindow.document;
-            var txt=(doc.body?doc.body.textContent:"")||"";
+            /* JSON 文档无 body，需读 documentElement */
+            var txt=(doc.body&&doc.body.textContent?doc.body.textContent:"")||(doc.documentElement?doc.documentElement.textContent:"")||"";
             var d=JSON.parse(txt.replace(/^\s+|\s+$/g,""));
             fin(); resolve(d);
           }catch(e){ fin(); diag.push(name+"→解析失败"); reject(new Error("parse")); }
@@ -1047,13 +1048,17 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
       });
     }
     function readStatus(){
-      /* 1) iframe 读本站（同源、与页面同加载通道，用户网络已验证可达；Actions 双写 main，数据分钟级旧） */
-      return loadViaFrame("本站iframe", "https://judiao417.github.io/oolong-craft-site/server-status.json?t="+Date.now())
+      /* 1) 同源 fetch 本站（与首页 memorial.json 同一读取通道，页面正常即此通道必通） */
+      return fetch("https://judiao417.github.io/oolong-craft-site/server-status.json?t="+Date.now(),{cache:"no-store"})
+        .then(function(r){ if(!r.ok){ diag.push("本站→HTTP"+r.status); throw new Error(r.status); } return r.json(); })
+        .catch(function(e){ var last=diag[diag.length-1]; if(!last||last.indexOf("本站")!==0){ diag.push("本站→网络不通"); } throw e; })
         /* 2) jsDelivr（带 CORS 头，浏览器可跨域 fetch） */
         .catch(function(){ return tryF("jsDelivr","https://cdn.jsdelivr.net/gh/JUDIAO417/oolong-craft-site@status/server-status.json"); })
         /* 3) 公共 CORS 代理读 raw status 分支 */
         .catch(function(){ return tryF("CORS代理","https://api.allorigins.win/raw?url="+encodeURIComponent("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/status/server-status.json?ts="+Date.now())); })
-        /* 4) GitHub API */
+        /* 4) iframe 读本站（与 HTML 同加载通道；已修复 JSON 无 body 解析） */
+        .catch(function(){ return loadViaFrame("iframe兜底", "https://judiao417.github.io/oolong-craft-site/server-status.json?t="+Date.now()); })
+        /* 5) GitHub API */
         .catch(function(){ return viaApi("server-status.json").catch(function(){ throw new Error(diag.join("；")); }); });
     }
     readStatus().then(function(d){
