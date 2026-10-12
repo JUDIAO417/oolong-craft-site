@@ -35,7 +35,7 @@ else:
     else:
         body_rows = '<div class="row"><span class="k">状态</span><span class="v"><span class="dot unk"></span> 获取失败</span></div>'
 
-desc_row = '<div class="desc"><span class="rainbow">鲍茶的地盘</span></div>'  # 简介：乌龙茶的地盘
+desc_row = '<div class="desc"><span class="rainbow">乌龙茶的地盘</span></div>'  # 简介
 
 TPL = """<!doctype html><html lang="zh"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
