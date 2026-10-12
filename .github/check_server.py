@@ -20,18 +20,26 @@ def parse(d, api):
     if not isinstance(d, dict):
         return None
     players = d.get("players") or {}
+    favicon = d.get("favicon") or ""
+    motd = ""
     if "now" in players:  # mcapi.us
-        return {
-            "online": bool(d.get("online")),
-            "cur": int(players.get("now") or 0),
-            "max": int(players.get("max") or 0),
-            "ver": ((d.get("server") or {}).get("name") or "") or ((d.get("version") or {}).get("name") or ""),
-        }
+        motd = str(d.get("motd") or "")
+        ver = ((d.get("server") or {}).get("name") or "") or ((d.get("version") or {}).get("name") or "")
+    else:  # mcstatus.io / mcsrvstat.us
+        md = d.get("motd") or {}
+        if isinstance(md, dict):
+            clean = md.get("clean") or []
+            motd = " ".join(clean) if isinstance(clean, list) else str(clean)
+        elif isinstance(md, str):
+            motd = md
+        ver = (d.get("version") or {}).get("name_raw") or (d.get("version") or {}).get("name") or ""
     return {
         "online": bool(d.get("online")),
-        "cur": int(players.get("online") or 0),
+        "cur": int(players.get("now", players.get("online", 0)) or 0),
         "max": int(players.get("max") or 0),
-        "ver": (d.get("version") or {}).get("name_raw") or (d.get("version") or {}).get("name") or "",
+        "ver": ver,
+        "favicon": favicon,
+        "motd": motd,
     }
 
 best = None
@@ -44,7 +52,18 @@ for api in APIS:
         continue
     # 取在线且人数最大的结果（接口缓存可能滞后，避免"有人显示没人"）
     if best is None or (p["online"] and (p["cur"] > best["cur"] or not best["online"])):
-        best = {"online": p["online"], "cur": p["cur"], "max": p["max"], "version": p["ver"], "source": api}
+        best = {"online": p["online"], "cur": p["cur"], "max": p["max"], "version": p["ver"], "favicon": p["favicon"], "motd": p["motd"], "source": api}
+
+# mcstatus.io 无 favicon 字段：从其他接口补充服务器头像
+if best and not best.get("favicon"):
+    for api2 in APIS:
+        try:
+            d2 = fetch(api2)
+            if isinstance(d2, dict) and d2.get("favicon"):
+                best["favicon"] = d2["favicon"]
+                break
+        except Exception:
+            continue
 
 out = {"ts": int(time.time()), "java": best, "bedrock": None}
 with open("server-status.json", "w", encoding="utf-8") as f:
