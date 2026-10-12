@@ -1024,12 +1024,16 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
     clearInterval(srvTimer); srvTimer=null;
   }
   srvFab.addEventListener("click",function(){ srvWin.classList.contains("open")?srvClose():srvOpen(); });
-  document.getElementById("srvClose").addEventListener("click",srvClose);
+  var srvCloseBtn=document.getElementById("srvClose");
+  srvCloseBtn.addEventListener("click",srvClose);
+  srvCloseBtn.addEventListener("pointerup",function(e){ e.stopPropagation(); setTimeout(srvClose,0); });
   srvRef.addEventListener("click",querySrv);
   /* 拖动窗口（桌面鼠标 + 手机触摸） */
   (function(){
     var hd=document.getElementById("srvHead"), sx=0, sy=0, ox=0, oy=0, drag=false;
     hd.addEventListener("pointerdown",function(e){
+      /* 点关闭按钮不进入拖动（否则移动端会吞掉点击） */
+      if(e.target && e.target.closest && e.target.closest(".srv-close")) return;
       drag=true; sx=e.clientX; sy=e.clientY;
       var r=srvWin.getBoundingClientRect(); ox=r.left; oy=r.top;
       hd.setPointerCapture(e.pointerId);
