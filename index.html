@@ -1020,9 +1020,10 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
         .catch(function(e){ var last=diag[diag.length-1]; if(!last||last.indexOf(name)!==0){ diag.push(name+"→网络不通"); } throw e; });
     }
     function readStatus(){
-      return tryF("本站", "https://judiao417.github.io/oolong-craft-site/server-status.json?t="+Date.now())
-        .catch(function(){ return tryF("jsDelivr","https://cdn.jsdelivr.net/gh/JUDIAO417/oolong-craft-site@main/server-status.json"); })
-        .catch(function(){ return tryF("raw","https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/server-status.json?ts="+Date.now()); })
+      /* 状态文件在 status 分支（Actions 每 5 分钟更新、不触发 Pages 构建，raw 匿名可读、国内可达） */
+      return tryF("raw", "https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/status/server-status.json?ts="+Date.now())
+        .catch(function(){ return tryF("本站", "https://judiao417.github.io/oolong-craft-site/server-status.json?t="+Date.now()); })
+        .catch(function(){ return tryF("jsDelivr","https://cdn.jsdelivr.net/gh/JUDIAO417/oolong-craft-site@status/server-status.json"); })
         .catch(function(){ return viaApi("server-status.json").catch(function(){ throw new Error(diag.join("；")); }); });
     }
     readStatus().then(function(d){
