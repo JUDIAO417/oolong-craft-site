@@ -920,49 +920,76 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
     var t=(Array.isArray(a)?a.join(" "):String(a||""));
     return t.replace(/\u00a7[0-9a-fk-or]/gi,"").trim();
   }
+  /* 查询接口链：mcsrvstat.us → mcstatus.io → mcapi.us（国内可达性互补）；都失败＝状态未知（非离线） */
+  function srvApis(kind,host,port){
+    if(kind==="bedrock"){
+      return [
+        "https://api.mcsrvstat.us/bedrock/3/"+encodeURIComponent(host)+":"+(port||19132),
+        "https://api.mcstatus.io/v2/status/bedrock/"+encodeURIComponent(host)+":"+(port||19132)
+      ];
+    }
+    return [
+      "https://api.mcsrvstat.us/3/"+encodeURIComponent(host)+":"+(port||25565),
+      "https://api.mcstatus.io/v2/status/java/"+encodeURIComponent(host)+":"+(port||25565),
+      "https://mcapi.us/server/status?ip="+encodeURIComponent(host)+"&port="+(port||25565)
+    ];
+  }
+  function norm(d){
+    /* 统一各接口字段 */
+    if(!d || typeof d!=="object") return null;
+    if(d.status==="success"||("now" in (d.players||{}))){
+      /* mcapi.us */
+      return {online:!!d.online, cur:d.players?d.players.now:0, max:d.players?d.players.max:0, version:d.server&&d.server.name||(d.version&&d.version.name)||"", motd:(d.server&&d.server.name)||""};
+    }
+    return {online:!!d.online, cur:d.players?d.players.online:0, max:d.players?d.players.max:0, version:d.version&&(d.version.name_raw||d.version.name)||"", motd:cleanMotd(d.motd&&d.motd.clean)};
+  }
   function querySrv(){
     if(!srvCfg) return;
     var rows=[];
     var q=[];
-    if(srvCfg.java && srvCfg.java.host) q.push({key:"java",label:"Java 版",api:"https://api.mcsrvstat.us/3/"+encodeURIComponent(srvCfg.java.host)+":"+(srvCfg.java.port||25565)});
-    if(srvCfg.bedrock && srvCfg.bedrock.host) q.push({key:"bedrock",label:"基岩版",api:"https://api.mcsrvstat.us/bedrock/3/"+encodeURIComponent(srvCfg.bedrock.host)+":"+(srvCfg.bedrock.port||19132)});
+    if(srvCfg.java && srvCfg.java.host) q.push({key:"java",label:"Java 版",apis:srvApis("java",srvCfg.java.host,srvCfg.java.port)});
+    if(srvCfg.bedrock && srvCfg.bedrock.host) q.push({key:"bedrock",label:"基岩版",apis:srvApis("bedrock",srvCfg.bedrock.host,srvCfg.bedrock.port)});
     if(!q.length){ srvBody.innerHTML='<div class="srv-empty">服务器地址尚未配置，请在管理页填写。</div>'; return; }
-    var done=q.length, total={on:0,off:0};
-    rows=q.map(function(x){
-      return {key:x.key,label:x.label,st:"checking"};
-    });
+    rows=q.map(function(x){ return {key:x.key,label:x.label,st:"checking",cur:0,max:0,version:"",motd:""}; });
+    function probe(x,row,ai){
+      if(ai>=x.apis.length){ row.st="unknown"; paint(); return; }
+      var ctl=new AbortController(); var t=setTimeout(function(){ ctl.abort(); },8000);
+      fetch(x.apis[ai],{cache:"no-store",signal:ctl.signal})
+        .then(function(r){ return r.ok?r.json():Promise.reject(new Error("HTTP "+r.status)); })
+        .then(function(d){
+          clearTimeout(t);
+          var n=norm(d);
+          if(n && n.online!==undefined){ row.st=n.online?"on":"off"; row.cur=n.cur||0; row.max=n.max||0; row.version=n.version||""; row.motd=n.motd||""; paint(); }
+          else{ probe(x,row,ai+1); }
+        })
+        .catch(function(e){ clearTimeout(t); probe(x,row,ai+1); });
+    }
     function paint(){
       srvBody.innerHTML=rows.map(function(r){
         var h;
         if(r.st==="checking") h='<span class="srv-badge" style="opacity:.7">查询中</span>';
         else if(r.st==="on") h='<span class="srv-badge ok">在线</span>';
-        else h='<span class="srv-badge bad">离线</span>';
+        else if(r.st==="off") h='<span class="srv-badge bad">离线</span>';
+        else h='<span class="srv-badge" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18)">获取失败</span>';
         var extra="";
-        if(r.st==="on") extra='<div class="srv-row"><span class="k">在线人数</span><span class="v mono">'+r.players+' / '+r.max+'</span></div>'+(r.version?'<div class="srv-row"><span class="k">版本</span><span class="v">'+esc(r.version)+'</span></div>':'')+(r.motd?'<div class="srv-row"><span class="k">欢迎语</span><span class="v" style="font-weight:500">'+esc(r.motd)+'</span></div>':'');
+        if(r.st==="on") extra='<div class="srv-row"><span class="k">在线人数</span><span class="v mono">'+r.cur+' / '+r.max+'</span></div>'+(r.version?'<div class="srv-row"><span class="k">版本</span><span class="v">'+esc(r.version)+'</span></div>':'')+(r.motd?'<div class="srv-row"><span class="k">欢迎语</span><span class="v" style="font-weight:500">'+esc(r.motd)+'</span></div>':'');
         return '<div class="srv-row"><span class="k">'+r.label+'</span><span class="v">'+h+'</span></div>'+extra;
       }).join("");
       var on=rows.filter(function(r){ return r.st==="on"; }).length;
-      srvDot.className="dot"+(on?" on":(rows.length&&rows.some(function(r){ return r.st==="on"; })?" on":" off"));
+      var un=rows.filter(function(r){ return r.st==="unknown"; }).length;
+      if(on) srvDot.className="dot on";
+      else if(rows.length&&rows.length===un) srvDot.className="dot";
+      else srvDot.className="dot off";
       if(rows.every(function(r){ return r.st!=="checking"; })){
         var pc=rows.reduce(function(a,r){ return a+(r.st==="on"?r.cur:0); },0);
         var pm=rows.reduce(function(a,r){ return a+(r.st==="on"?r.max:0); },0);
-        srvPc.textContent=pc+"/"+pm;
+        srvPc.textContent=(un===rows.length)?"—":(pc+"/"+pm);
         srvTs.textContent="更新于 "+new Date().toLocaleTimeString("zh-CN",{hour12:false});
       }
     }
-    q.forEach(function(x){
-      fetch(x.api,{cache:"no-store"})
-        .then(function(r){ return r.ok?r.json():Promise.reject(new Error("HTTP "+r.status)); })
-        .then(function(d){
-          var row=rows.filter(function(y){ return y.key===x.key; })[0];
-          if(d && d.online){ row.st="on"; row.cur=d.players?d.players.online:0; row.max=d.players?d.players.max:0; row.version=d.version||""; row.motd=cleanMotd(d.motd&&d.motd.clean); }
-          else{ row.st="off"; row.cur=0; row.max=0; }
-          paint();
-        })
-        .catch(function(){
-          var row=rows.filter(function(y){ return y.key===x.key; })[0];
-          row.st="off"; row.cur=0; row.max=0; paint();
-        });
+    rows.forEach(function(row){
+      var x=q.filter(function(y){ return y.key===row.key; })[0];
+      probe(x,row,0);
     });
     paint();
   }
