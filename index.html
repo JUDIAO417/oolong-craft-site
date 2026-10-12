@@ -951,19 +951,6 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
     if(srvCfg.bedrock && srvCfg.bedrock.host) q.push({key:"bedrock",label:"基岩版",apis:srvApis("bedrock",srvCfg.bedrock.host,srvCfg.bedrock.port)});
     if(!q.length){ srvBody.innerHTML='<div class="srv-empty">服务器地址尚未配置，请在管理页填写。</div>'; return; }
     rows=q.map(function(x){ return {key:x.key,label:x.label,st:"checking",cur:0,max:0,version:"",motd:""}; });
-    function probe(x,row,ai){
-      if(ai>=x.apis.length){ row.st="unknown"; paint(); return; }
-      var ctl=new AbortController(); var t=setTimeout(function(){ ctl.abort(); },8000);
-      fetch(x.apis[ai],{cache:"no-store",signal:ctl.signal})
-        .then(function(r){ return r.ok?r.json():Promise.reject(new Error("HTTP "+r.status)); })
-        .then(function(d){
-          clearTimeout(t);
-          var n=norm(d);
-          if(n && n.online!==undefined){ row.st=n.online?"on":"off"; row.cur=n.cur||0; row.max=n.max||0; row.version=n.version||""; row.motd=n.motd||""; paint(); }
-          else{ probe(x,row,ai+1); }
-        })
-        .catch(function(e){ clearTimeout(t); probe(x,row,ai+1); });
-    }
     function paint(){
       srvBody.innerHTML=rows.map(function(r){
         var h;
@@ -987,11 +974,43 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
         srvTs.textContent="更新于 "+new Date().toLocaleTimeString("zh-CN",{hour12:false});
       }
     }
-    rows.forEach(function(row){
-      var x=q.filter(function(y){ return y.key===row.key; })[0];
-      probe(x,row,0);
-    });
-    paint();
+    /* 后台状态（GitHub Actions 每 5 分钟查询，运行在美国节点，国内网络读取 GitHub 必通） */
+    function paintFrom(d){
+      rows.forEach(function(r){
+        var st=d[r.key];
+        if(st===undefined||st===null){ r.st="unknown"; r.cur=0; r.max=0; r.version=""; r.motd=""; }
+        else if(st.online){ r.st="on"; r.cur=st.cur||0; r.max=st.max||0; r.version=st.version||""; r.motd=""; }
+        else{ r.st="off"; r.cur=0; r.max=0; r.version=""; r.motd=""; }
+      });
+      var ag=Math.max(0,Math.round((Date.now()/1000-(d.ts||0))/60));
+      srvTs.textContent="后台 "+(ag<1?"刚刚":(ag+" 分钟前"))+"更新 · 每 5 分钟自动刷新";
+      paint();
+    }
+    function directProbe(){
+      rows.forEach(function(row){
+        var x=q.filter(function(y){ return y.key===row.key; })[0];
+        probe(x,row,0);
+      });
+    }
+    viaApi("server-status.json").then(function(d){
+      if(d && d.ts){ paintFrom(d); }
+      else{ directProbe(); }
+    }).catch(function(){ directProbe(); });
+    /* 直连可达时即时覆盖为最新 */
+    directProbe();
+  }
+  function probe(x,row,ai){
+    if(ai>=x.apis.length){ row.st="unknown"; paint(); return; }
+    var ctl=new AbortController(); var t=setTimeout(function(){ ctl.abort(); },8000);
+    fetch(x.apis[ai],{cache:"no-store",signal:ctl.signal})
+      .then(function(r){ return r.ok?r.json():Promise.reject(new Error("HTTP "+r.status)); })
+      .then(function(d){
+        clearTimeout(t);
+        var n=norm(d);
+        if(n && n.online!==undefined){ row.st=n.online?"on":"off"; row.cur=n.cur||0; row.max=n.max||0; row.version=n.version||""; row.motd=n.motd||""; srvTs.textContent="更新于 "+new Date().toLocaleTimeString("zh-CN",{hour12:false}); paint(); }
+        else{ probe(x,row,ai+1); }
+      })
+      .catch(function(){ clearTimeout(t); probe(x,row,ai+1); });
   }
   function srvOpen(){
     srvWin.classList.add("open");
