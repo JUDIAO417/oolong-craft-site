@@ -727,7 +727,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
   <div class="srv-win" id="srvWin">
     <div class="srv-head" id="srvHead"><span class="t">SERVER</span><span class="lbl" id="srvLbl">乌龙茶的地盘</span><button class="srv-close" id="srvClose" aria-label="关闭">×</button></div>
     <div class="srv-body" id="srvBody"><div class="srv-empty">正在获取服务器状态…</div></div>
-    <div class="srv-foot"><span class="ts" id="srvTs">状态窗 v6</span><button class="srv-ref" id="srvRef">刷新</button></div>
+    <div class="srv-foot"><span class="ts" id="srvTs">状态窗 v7</span><button class="srv-ref" id="srvRef">刷新</button></div>
   </div>
 
 <!-- ===== 页脚 ===== -->
@@ -1043,12 +1043,12 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
       });
     }
     function readStatus(){
-      /* 1) iframe 读本站（与页面同通道，必通；status 分支已不触发 Pages 构建） */
+      /* 1) iframe 读本站（同源、与页面同加载通道，用户网络已验证可达；Actions 双写 main，数据分钟级旧） */
       return loadViaFrame("本站iframe", "https://judiao417.github.io/oolong-craft-site/server-status.json?t="+Date.now())
-        /* 2) raw status 分支（国内可达、独立通道） */
-        .catch(function(){ return tryF("raw", "https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/status/server-status.json?ts="+Date.now()); })
-        /* 3) jsDelivr */
+        /* 2) jsDelivr（带 CORS 头，浏览器可跨域 fetch） */
         .catch(function(){ return tryF("jsDelivr","https://cdn.jsdelivr.net/gh/JUDIAO417/oolong-craft-site@status/server-status.json"); })
+        /* 3) 公共 CORS 代理读 raw status 分支 */
+        .catch(function(){ return tryF("CORS代理","https://api.allorigins.win/raw?url="+encodeURIComponent("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/status/server-status.json?ts="+Date.now())); })
         /* 4) GitHub API */
         .catch(function(){ return viaApi("server-status.json").catch(function(){ throw new Error(diag.join("；")); }); });
     }

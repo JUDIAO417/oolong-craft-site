@@ -12,15 +12,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: 查询服务器状态
         run: python3 .github/check_server.py
-      - name: 提交到 status 分支（不触发 Pages 构建）
+      - name: 双写 main 与 status 分支
         run: |
           git config user.name "oolong-status-bot"
           git config user.email "bot@users.noreply.github.com"
-          git checkout -B status
           git add server-status.json
-          if git diff --cached --quiet; then
-            echo "状态无变化"
-          else
+          git diff --cached --quiet && echo "无变化" || {
+            git commit -m "update server status [skip ci]"
+            git push "https://x-access-token:${{ github.token }}@github.com/JUDIAO417/oolong-craft-site.git" main
+            git checkout -B status
+            git add server-status.json
             git commit -m "update server status [skip ci]"
             git push -f "https://x-access-token:${{ github.token }}@github.com/JUDIAO417/oolong-craft-site.git" status
-          fi
+          }
