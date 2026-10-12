@@ -882,7 +882,8 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
     }
   }
   /* 数据实时读取：优先 GitHub raw（推送后即时生效），失败回退本站镜像 */
-  /* 数据实时读取：GitHub API 直读优先（实时权威，绕 raw CDN 缓存），60s 节流；失败回退 raw → 本站镜像 */
+  /* 数据实时读取：GitHub Pages 优先（用户访问官网的域名，必然可达，ts 绕 CDN 缓存）
+     → raw 兜底 → GitHub API 兜底（60s 节流，防国内网络 403/限流时卡壳） */
   var apiLast={}, API_GAP=60000;
   function viaApi(path){
     var now=Date.now();
@@ -896,14 +897,14 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
       });
   }
   function rtJson(path){
-    return viaApi(path).catch(function(){
-      return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path+"?ts="+Date.now(),{cache:"no-store"})
-        .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
-        .catch(function(){
-          return fetch("https://judiao417.github.io/oolong-craft-site/"+path+"?t="+Date.now(),{cache:"no-store"})
-            .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
-        });
-    });
+    var t=Date.now();
+    return fetch("https://judiao417.github.io/oolong-craft-site/"+path+"?t="+t,{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .catch(function(){
+        return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path+"?ts="+t,{cache:"no-store"})
+          .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+          .catch(function(){ return viaApi(path); });
+      });
   }
   rtJson("memorial.json")
     .then(function(m){ renderGal(m); })
@@ -1005,7 +1006,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
         probe(x,row,0);
       });
     }
-    viaApi("server-status.json").then(function(d){
+    rtJson("server-status.json").then(function(d){
       if(d && d.ts){ paintFrom(d); }
       else{ directProbe(); }
     }).catch(function(){ directProbe(); });
