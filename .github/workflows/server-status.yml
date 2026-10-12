@@ -1,0 +1,25 @@
+name: server-status
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 查询服务器状态
+        run: python3 .github/check_server.py
+      - name: 提交状态文件
+        run: |
+          git config user.name "oolong-status-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add server-status.json
+          if git diff --cached --quiet; then
+            echo "状态无变化"
+          else
+            git commit -m "update server status [skip ci]"
+            git push "https://x-access-token:${{ github.token }}@github.com/JUDIAO417/oolong-craft-site.git" main
+          fi
