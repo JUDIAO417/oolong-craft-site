@@ -11,11 +11,14 @@ def esc(x):
     return html.escape(str(x))
 
 j = d.get("java") if isinstance(d, dict) else None
-ts_raw = d.get("ts", 0) if isinstance(d, dict) else 0
-try:
-    ts_str = datetime.datetime.fromtimestamp(ts_raw).strftime("%Y-%m-%d %H:%M:%S")
-except Exception:
-    ts_str = ""
+favicon = (j or {}).get("favicon") or ""
+motd = (j or {}).get("motd") or ""
+
+# 头像：接口返回 favicon 用图片，否则用 SVG 占位
+if favicon:
+    ava = '<img class="ava" src="%s" alt="">' % esc(favicon)
+else:
+    ava = '<span class="ava ph"></span>'
 
 if j is None:
     body_rows = '<div class="row"><span class="k">状态</span><span class="v">未配置服务器地址</span></div>'
@@ -32,16 +35,22 @@ else:
     else:
         body_rows = '<div class="row"><span class="k">状态</span><span class="v"><span class="dot unk"></span> 获取失败</span></div>'
 
-foot = ("更新于 " + ts_str + " · 每 5 分钟自动刷新") if ts_str else "状态数据由后台每 5 分钟代查"
+if motd:
+    desc_row = '<div class="desc">%s</div>' % esc(motd)
+else:
+    desc_row = ""
 
 TPL = """<!doctype html><html lang="zh"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>服务器状态</title><style>
 html,body{margin:0;height:100%;background:transparent;font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#d9f2e4}
 body{min-height:100%;display:flex}
-.wrap{flex:1;background:linear-gradient(165deg,rgba(15,52,35,.96),rgba(9,30,22,.98));border:1px solid rgba(139,199,166,.28);border-radius:16px;padding:18px 16px 14px;box-sizing:border-box;backdrop-filter:blur(10px);box-shadow:0 12px 34px rgba(0,0,0,.42)}
-.h{display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:800;margin-bottom:15px}
-.h .s{font-size:11px;letter-spacing:.14em;opacity:.55}
+.wrap{flex:1;background:linear-gradient(165deg,rgba(15,52,35,.96),rgba(9,30,22,.98));border:1px solid rgba(139,199,166,.28);border-radius:16px;padding:16px 16px 14px;box-sizing:border-box;backdrop-filter:blur(10px);box-shadow:0 12px 34px rgba(0,0,0,.42)}
+.h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ava{width:46px;height:46px;border-radius:10px;image-rendering:pixelated;background:rgba(255,255,255,.08);border:1px solid rgba(139,199,166,.3);flex:0 0 auto}
+.ava.ph{width:46px;height:46px;border-radius:10px;background:linear-gradient(145deg,#3d6b4f,#1f3b2b);display:inline-block;flex:0 0 auto}
+.nm{font-size:15px;font-weight:800;line-height:1.3}
+.nm .s{display:block;font-size:10px;letter-spacing:.16em;opacity:.5;font-weight:600}
 .dot{width:12px;height:12px;border-radius:50%;display:inline-block;vertical-align:-1px}
 .on{background:#3ddc84;box-shadow:0 0 12px #3ddc84}
 .off{background:#ff5d5d;box-shadow:0 0 12px #ff5d5d}
@@ -51,14 +60,15 @@ body{min-height:100%;display:flex}
 .k{opacity:.7;font-size:12.5px}
 .v{font-weight:700}
 .big{font-size:24px;font-weight:800}
-.foot{margin-top:13px;font-size:11px;opacity:.55;text-align:center}
+.desc{margin-top:12px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(139,199,166,.22);border-radius:10px;font-size:13px;line-height:1.55;opacity:.92}
 </style></head><body><div class="wrap">
-<div class="h"><span class="s">SERVER</span>乌龙茶的地盘</div>
-__ROWS__
-<div class="foot">__FOOT__</div>
+<div class="h">__AVA__<span class="nm"><span class="s">SERVER</span>乌龙茶的地盘</span></div>
+__ROWS____DESC__
 </div>
 <script>setTimeout(function(){location.replace(location.pathname+"?r="+Date.now())},300000);</script>
 </body></html>"""
 
-open("status.html", "w", encoding="utf-8").write(TPL.replace("__ROWS__", body_rows).replace("__FOOT__", foot))
-print("status.html generated:", j)
+open("status.html", "w", encoding="utf-8").write(
+    TPL.replace("__AVA__", ava).replace("__ROWS__", body_rows).replace("__DESC__", desc_row)
+)
+print("status.html generated, favicon:", bool(favicon), "motd:", motd)
