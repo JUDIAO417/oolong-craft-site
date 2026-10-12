@@ -723,11 +723,11 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
   .srv-empty{padding:1rem;color:var(--muted);font-size:.86rem;text-align:center}
   @media (max-width:640px){.srv-win{width:min(320px,calc(100vw - 2rem))}}
   </style>
-  <button class="srv-fab" id="srvFab" title="服务器状态" style="display:none"><span class="dot" id="srvDot"></span><span>服务器状态</span><span class="pcount" id="srvPc">—</span></button>
+  <button class="srv-fab" id="srvFab" title="服务器状态"><span>服务器状态</span><span class="pcount" id="srvPc">v10</span></button>
   <div class="srv-win" id="srvWin">
     <div class="srv-head" id="srvHead"><span class="t">SERVER</span><span class="lbl" id="srvLbl">乌龙茶的地盘</span><button class="srv-close" id="srvClose" aria-label="关闭">×</button></div>
-    <div class="srv-body" id="srvBody"><div class="srv-empty">正在获取服务器状态…</div></div>
-    <div class="srv-foot"><span class="ts" id="srvTs">状态窗 v9</span><button class="srv-ref" id="srvRef">刷新</button></div>
+    <div class="srv-body" id="srvBody"><iframe id="srvFrame" title="服务器状态" style="display:block;width:100%;height:344px;border:0;background:transparent"></iframe></div>
+    <div class="srv-foot"><span class="ts" id="srvTs"></span><button class="srv-ref" id="srvRef">刷新</button></div>
   </div>
 
 <!-- ===== 页脚 ===== -->
@@ -745,7 +745,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
             <path d="M9 6c2 1 2 3 0 4M15 6c2 1 2 3 0 4M21 6c2 1 2 3 0 4" stroke="#E8E2D4" stroke-width="2" fill="none" stroke-linecap="square"/>
           </svg>
           <span>
-            <span class="brand-name">乌龙茶的地盘</span><br>
+            <span class="brand-name">乌龙茶的地盘<span class="vbadge">v10</span></span><br>
             <span class="brand-en">OOLONG CRAFT</span>
           </span>
         </a>
@@ -910,191 +910,37 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
     .then(function(m){ renderGal(m); })
     .catch(function(){ renderGal([]); });
 
-  /* ===== 服务器状态悬浮窗 ===== */
-  var srvCfg=null, srvTimer=null;
-  var srvFab=document.getElementById("srvFab"), srvWin=document.getElementById("srvWin"),
-      srvDot=document.getElementById("srvDot"), srvPc=document.getElementById("srvPc"),
-      srvBody=document.getElementById("srvBody"), srvTs=document.getElementById("srvTs"),
-      srvLbl=document.getElementById("srvLbl"), srvRef=document.getElementById("srvRef");
-  function cleanMotd(a){
-    /* 去掉 § 色码 */
-    var t=(Array.isArray(a)?a.join(" "):String(a||""));
-    return t.replace(/\u00a7[0-9a-fk-or]/gi,"").trim();
-  }
-  /* 查询接口链：mcsrvstat.us → mcstatus.io → mcapi.us（国内可达性互补）；都失败＝状态未知（非离线） */
-  function srvApis(kind,host,port){
-    if(kind==="bedrock"){
-      return [
-        "https://api.mcsrvstat.us/bedrock/3/"+encodeURIComponent(host)+":"+(port||19132),
-        "https://api.mcstatus.io/v2/status/bedrock/"+encodeURIComponent(host)+":"+(port||19132)
-      ];
-    }
-    return [
-      "https://api.mcsrvstat.us/3/"+encodeURIComponent(host)+":"+(port||25565),
-      "https://api.mcstatus.io/v2/status/java/"+encodeURIComponent(host)+":"+(port||25565),
-      "https://mcapi.us/server/status?ip="+encodeURIComponent(host)+"&port="+(port||25565)
-    ];
-  }
-  function norm(d){
-    /* 统一各接口字段 */
-    if(!d || typeof d!=="object") return null;
-    if(d.status==="success"||("now" in (d.players||{}))){
-      /* mcapi.us */
-      return {online:!!d.online, cur:d.players?d.players.now:0, max:d.players?d.players.max:0, version:d.server&&d.server.name||(d.version&&d.version.name)||"", motd:(d.server&&d.server.name)||""};
-    }
-    return {online:!!d.online, cur:d.players?d.players.online:0, max:d.players?d.players.max:0, version:d.version&&(d.version.name_raw||d.version.name)||"", motd:cleanMotd(d.motd&&d.motd.clean)};
-  }
-  function querySrv(){
-    if(!srvCfg) return;
-    var rows=[];
-    var q=[];
-    if(srvCfg.java && srvCfg.java.host) q.push({key:"java",label:"Java 版",apis:srvApis("java",srvCfg.java.host,srvCfg.java.port)});
-    if(srvCfg.bedrock && srvCfg.bedrock.host) q.push({key:"bedrock",label:"基岩版",apis:srvApis("bedrock",srvCfg.bedrock.host,srvCfg.bedrock.port)});
-    if(!q.length){ srvBody.innerHTML='<div class="srv-empty">服务器地址尚未配置，请在管理页填写。</div>'; return; }
-    rows=q.map(function(x){ return {key:x.key,label:x.label,st:"checking",cur:0,max:0,version:"",motd:""}; });
-    function paint(){
-      srvBody.innerHTML=rows.map(function(r){
-        var h;
-        if(r.st==="checking") h='<span class="srv-badge" style="opacity:.7">查询中</span>';
-        else if(r.st==="on") h='<span class="srv-badge ok">在线</span>';
-        else if(r.st==="off") h='<span class="srv-badge bad">离线</span>';
-        else h='<span class="srv-badge" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18)">获取失败</span>';
-        var extra="";
-        if(r.st==="on") extra='<div class="srv-row"><span class="k">在线人数</span><span class="v mono">'+r.cur+' / '+r.max+'</span></div>'+(r.version?'<div class="srv-row"><span class="k">版本</span><span class="v">'+esc(r.version)+'</span></div>':'')+(r.motd?'<div class="srv-row"><span class="k">欢迎语</span><span class="v" style="font-weight:500">'+esc(r.motd)+'</span></div>':'');
-        return '<div class="srv-row"><span class="k">'+r.label+'</span><span class="v">'+h+'</span></div>'+extra;
-      }).join("");
-      var on=rows.filter(function(r){ return r.st==="on"; }).length;
-      var un=rows.filter(function(r){ return r.st==="unknown"; }).length;
-      if(on) srvDot.className="dot on";
-      else if(rows.length&&rows.length===un) srvDot.className="dot";
-      else srvDot.className="dot off";
-      if(rows.every(function(r){ return r.st!=="checking"; })){
-        if(un===rows.length && srvFail){
-          if(diag.length){
-            srvBody.innerHTML='<div class="srv-empty" style="text-align:left">服务器状态获取失败<br><div style="margin-top:.4rem;line-height:1.5">'+escHtml(diag.map(function(x){ return "· "+x; }).join("<br>"))+'</div><span style="font-size:.78rem;opacity:.7">请把这段文字截图发给站长定位</span></div>';
-          }else{
-            srvBody.innerHTML='<div class="srv-empty">服务器状态获取失败<br><span style="font-size:.78rem;opacity:.75">后台数据通道与直连接口均不可达，请检查网络后点「刷新」重试</span></div>';
-          }
-          srvDot.className="dot"; srvPc.textContent="—";
-          return;
+  /* ===== 服务器状态悬浮窗（后台生成 status.html，iframe 直接显示，零数据请求） ===== */
+  var srvWin=document.getElementById("srvWin"), srvFab=document.getElementById("srvFab"),
+      srvFrame=document.getElementById("srvFrame"), srvRef=document.getElementById("srvRef");
+  var SRV_PAGE="https://judiao417.github.io/oolong-craft-site/status.html";
+  var SRV_RAW="https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/status/status.html";
+  function loadSrv(){
+    var tried=false;
+    srvFrame.onload=function(){
+      if(tried) return;
+      try{
+        var t=srvFrame.contentDocument&&srvFrame.contentDocument.body?srvFrame.contentDocument.body.textContent:"";
+        if(t.indexOf("乌龙茶")<0&&(/404|page not found/i.test(t)||t.trim()==="")){
+          tried=true; srvFrame.src=SRV_RAW+"?r="+Date.now();
         }
-        var pc=rows.reduce(function(a,r){ return a+(r.st==="on"?r.cur:0); },0);
-        var pm=rows.reduce(function(a,r){ return a+(r.st==="on"?r.max:0); },0);
-        srvPc.textContent="—";
-        srvTs.textContent="更新于 "+new Date().toLocaleTimeString("zh-CN",{hour12:false});
-      }
-    }
-    /* 后台状态（GitHub Actions 每 5 分钟查询，运行在美国节点，国内网络读取 GitHub 必通） */
-    function paintFrom(d){
-      rows.forEach(function(r){
-        var st=d[r.key];
-        if(st===undefined||st===null){ r.st="unknown"; r.cur=0; r.max=0; r.version=""; r.motd=""; }
-        else if(st.online){ r.st="on"; r.cur=st.cur||0; r.max=st.max||0; r.version=st.version||""; r.motd=""; }
-        else{ r.st="off"; r.cur=0; r.max=0; r.version=""; r.motd=""; }
-      });
-      var ag=Math.max(0,Math.round((Date.now()/1000-(d.ts||0))/60));
-      srvTs.textContent="后台 "+(ag<1?"刚刚":(ag+" 分钟前"))+"更新 · 每 5 分钟自动刷新";
-      paint();
-    }
-    var srvFail=false;
-    function probe(x,row,ai){
-      if(ai>=x.apis.length){ row.st="unknown"; srvFail=true; paint(); return; }
-      var ctl=new AbortController(); var t=setTimeout(function(){ ctl.abort(); },8000);
-      fetch(x.apis[ai],{cache:"no-store",signal:ctl.signal})
-        .then(function(r){ return r.ok?r.json():Promise.reject(new Error("HTTP "+r.status)); })
-        .then(function(d){
-          clearTimeout(t);
-          var n=norm(d);
-          if(n && n.online!==undefined){ row.st=n.online?"on":"off"; row.cur=n.cur||0; row.max=n.max||0; row.version=n.version||""; row.motd=n.motd||""; srvTs.textContent="更新于 "+new Date().toLocaleTimeString("zh-CN",{hour12:false}); paint(); }
-          else{ probe(x,row,ai+1); }
-        })
-        .catch(function(){ clearTimeout(t); probe(x,row,ai+1); });
-    }
-    function directProbe(){
-      rows.forEach(function(row){
-        var x=q.filter(function(y){ return y.key===row.key; })[0];
-        probe(x,row,0);
-      });
-    }
-    /* 带通道诊断的状态读取（失败时把每条通道的具体原因显示给用户，便于定位） */
-    var diag=[];
-    function tryF(name,url){
-      return fetch(url,{cache:"no-store"})
-        .then(function(r){ if(!r.ok){ diag.push(name+"→HTTP"+r.status); throw new Error(r.status); } return r.json(); })
-        .catch(function(e){ var last=diag[diag.length-1]; if(!last||last.indexOf(name)!==0){ diag.push(name+"→网络不通"); } throw e; });
-    }
-    /* iframe 加载：与页面 HTML 同一加载通道（页面能打开则它必通），绕开部分环境对 fetch 的限制 */
-    function loadViaFrame(name,url){
-      return new Promise(function(resolve,reject){
-        var f=document.createElement("iframe");
-        f.style.display="none";
-        f.setAttribute("aria-hidden","true");
-        var done=false;
-        function fin(){ if(done) return; done=true; try{ f.remove(); }catch(e){} }
-        var timer=setTimeout(function(){ fin(); diag.push(name+"→超时"); reject(new Error("timeout")); },10000);
-        f.onload=function(){
-          clearTimeout(timer);
-          try{
-            var doc=f.contentDocument||f.contentWindow.document;
-            /* JSON 文档无 body，需读 documentElement */
-            var txt=(doc.body&&doc.body.textContent?doc.body.textContent:"")||(doc.documentElement?doc.documentElement.textContent:"")||"";
-            var d=JSON.parse(txt.replace(/^\s+|\s+$/g,""));
-            fin(); resolve(d);
-          }catch(e){ fin(); diag.push(name+"→解析失败"); reject(new Error("parse")); }
-        };
-        f.onerror=function(){ clearTimeout(timer); fin(); diag.push(name+"→加载失败"); reject(new Error("load")); };
-        f.src=url;
-        document.body.appendChild(f);
-      });
-    }
-    function readStatus(){
-      /* 1) 同源 fetch 本站（与首页 memorial.json 同一读取通道，页面正常即此通道必通） */
-      return fetch("https://judiao417.github.io/oolong-craft-site/server-status.json?t="+Date.now(),{cache:"no-store"})
-        .then(function(r){ if(!r.ok){ diag.push("本站→HTTP"+r.status); throw new Error(r.status); } return r.json(); })
-        .catch(function(e){ var last=diag[diag.length-1]; if(!last||last.indexOf("本站")!==0){ diag.push("本站→网络不通"); } throw e; })
-        /* 2) jsDelivr（带 CORS 头，浏览器可跨域 fetch） */
-        .catch(function(){ return tryF("jsDelivr","https://cdn.jsdelivr.net/gh/JUDIAO417/oolong-craft-site@status/server-status.json"); })
-        /* 3) 公共 CORS 代理读 raw status 分支 */
-        .catch(function(){ return tryF("CORS代理","https://api.allorigins.win/raw?url="+encodeURIComponent("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/status/server-status.json?ts="+Date.now())); })
-        /* 4) iframe 读本站（与 HTML 同加载通道；已修复 JSON 无 body 解析） */
-        .catch(function(){ return loadViaFrame("iframe兜底", "https://judiao417.github.io/oolong-craft-site/server-status.json?t="+Date.now()); })
-        /* 5) GitHub API */
-        .catch(function(){ return viaApi("server-status.json").catch(function(){ throw new Error(diag.join("；")); }); });
-    }
-    readStatus().then(function(d){
-      /* 后台状态为准：读到即显示，不允许后续直连失败覆盖（直连仅增强，失败保持后台结果） */
-      if(d && d.ts){ paintFrom(d); }
-      else{ directProbe(); }
-    }).catch(function(err){
-      diag.push("直连3接口均失败");
-      srvFail=true;
-      srvBody.innerHTML='<div class="srv-empty" style="text-align:left">服务器状态获取失败<br><div style="margin-top:.4rem;line-height:1.5">'+escHtml(diag.map(function(x){ return "· "+x; }).join("<br>"))+'</div><span style="font-size:.78rem;opacity:.7">请把这段文字截图发给站长定位</span></div>';
-      srvDot.className="dot"; srvPc.textContent="—";
-      /* 后台全通道失败时，直连兜底（任一接口可达则显示在线） */
-      directProbe();
-    });
+      }catch(e){ tried=true; srvFrame.src=SRV_RAW+"?r="+Date.now(); }
+    };
+    tried=false;
+    srvFrame.src=SRV_PAGE+"?r="+Date.now();
   }
-  function srvOpen(){
-    srvWin.classList.add("open");
-    querySrv();
-    clearInterval(srvTimer);
-    srvTimer=setInterval(querySrv,60000);
-  }
-  function srvClose(){
-    srvWin.classList.remove("open");
-    clearInterval(srvTimer); srvTimer=null;
-  }
+  function srvOpen(){ srvWin.classList.add("open"); loadSrv(); }
+  function srvClose(){ srvWin.classList.remove("open"); }
   srvFab.addEventListener("click",function(){ srvWin.classList.contains("open")?srvClose():srvOpen(); });
   var srvCloseBtn=document.getElementById("srvClose");
   srvCloseBtn.addEventListener("click",srvClose);
   srvCloseBtn.addEventListener("pointerup",function(e){ e.stopPropagation(); setTimeout(srvClose,0); });
-  srvRef.addEventListener("click",querySrv);
+  srvRef.addEventListener("click",loadSrv);
   /* 拖动窗口（桌面鼠标 + 手机触摸） */
   (function(){
     var hd=document.getElementById("srvHead"), sx=0, sy=0, ox=0, oy=0, drag=false;
     hd.addEventListener("pointerdown",function(e){
-      /* 点关闭按钮不进入拖动（否则移动端会吞掉点击） */
-      if(e.target && e.target.closest && e.target.closest(".srv-close")) return;
+      if(e.target&&e.target.closest&&e.target.closest(".srv-close")) return;
       drag=true; sx=e.clientX; sy=e.clientY;
       var r=srvWin.getBoundingClientRect(); ox=r.left; oy=r.top;
       hd.setPointerCapture(e.pointerId);
@@ -1109,8 +955,8 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
     hd.addEventListener("pointerup",function(){ drag=false; });
     hd.addEventListener("pointercancel",function(){ drag=false; });
   })();
-  /* 读取服务器配置（管理页可配置，存 server.json） */
-  rtJson("server.json").then(function(c){ srvCfg=c||null; if(srvCfg&&((srvCfg.java&&srvCfg.java.host)||(srvCfg.bedrock&&srvCfg.bedrock.host))){ srvFab.style.display="flex"; querySrv(); } else { srvFab.style.display="none"; } }).catch(function(){ srvFab.style.display="none"; });
+  /* 按钮常显（状态由 status.html 内联显示，不依赖前端读取） */
+  srvFab.style.display="flex";
 
   /* 灯箱 */
   var lb = document.getElementById("lb");
