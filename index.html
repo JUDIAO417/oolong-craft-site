@@ -986,6 +986,19 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
       srvTs.textContent="后台 "+(ag<1?"刚刚":(ag+" 分钟前"))+"更新 · 每 5 分钟自动刷新";
       paint();
     }
+    function probe(x,row,ai){
+      if(ai>=x.apis.length){ row.st="unknown"; paint(); return; }
+      var ctl=new AbortController(); var t=setTimeout(function(){ ctl.abort(); },8000);
+      fetch(x.apis[ai],{cache:"no-store",signal:ctl.signal})
+        .then(function(r){ return r.ok?r.json():Promise.reject(new Error("HTTP "+r.status)); })
+        .then(function(d){
+          clearTimeout(t);
+          var n=norm(d);
+          if(n && n.online!==undefined){ row.st=n.online?"on":"off"; row.cur=n.cur||0; row.max=n.max||0; row.version=n.version||""; row.motd=n.motd||""; srvTs.textContent="更新于 "+new Date().toLocaleTimeString("zh-CN",{hour12:false}); paint(); }
+          else{ probe(x,row,ai+1); }
+        })
+        .catch(function(){ clearTimeout(t); probe(x,row,ai+1); });
+    }
     function directProbe(){
       rows.forEach(function(row){
         var x=q.filter(function(y){ return y.key===row.key; })[0];
@@ -998,19 +1011,6 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
     }).catch(function(){ directProbe(); });
     /* 直连可达时即时覆盖为最新 */
     directProbe();
-  }
-  function probe(x,row,ai){
-    if(ai>=x.apis.length){ row.st="unknown"; paint(); return; }
-    var ctl=new AbortController(); var t=setTimeout(function(){ ctl.abort(); },8000);
-    fetch(x.apis[ai],{cache:"no-store",signal:ctl.signal})
-      .then(function(r){ return r.ok?r.json():Promise.reject(new Error("HTTP "+r.status)); })
-      .then(function(d){
-        clearTimeout(t);
-        var n=norm(d);
-        if(n && n.online!==undefined){ row.st=n.online?"on":"off"; row.cur=n.cur||0; row.max=n.max||0; row.version=n.version||""; row.motd=n.motd||""; srvTs.textContent="更新于 "+new Date().toLocaleTimeString("zh-CN",{hour12:false}); paint(); }
-        else{ probe(x,row,ai+1); }
-      })
-      .catch(function(){ clearTimeout(t); probe(x,row,ai+1); });
   }
   function srvOpen(){
     srvWin.classList.add("open");
