@@ -35,17 +35,14 @@ else:
     else:
         body_rows = '<div class="row"><span class="k">状态</span><span class="v"><span class="dot unk"></span> 获取失败</span></div>'
 
-if motd:
-    desc_row = '<div class="desc">%s</div>' % esc(motd)
-else:
-    desc_row = ""
+desc_row = '<div class="desc"><span class="rainbow">鲍茶的地盘</span></div>'  # 简介：乌龙茶的地盘
 
 TPL = """<!doctype html><html lang="zh"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>服务器状态</title><style>
 html,body{margin:0;height:100%;background:transparent;font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#d9f2e4}
-body{min-height:100%;display:flex}
-.wrap{flex:1;background:linear-gradient(165deg,rgba(15,52,35,.96),rgba(9,30,22,.98));border:1px solid rgba(139,199,166,.28);border-radius:16px;padding:16px 16px 14px;box-sizing:border-box;backdrop-filter:blur(10px);box-shadow:0 12px 34px rgba(0,0,0,.42)}
+body{min-height:100%;display:flex;overflow:hidden}
+.wrap{flex:1;background:linear-gradient(165deg,rgba(15,52,35,.96),rgba(9,30,22,.98));border:1px solid rgba(240,179,92,.45);border-radius:16px;padding:16px 16px 14px;box-sizing:border-box;backdrop-filter:blur(10px);box-shadow:0 12px 34px rgba(0,0,0,.42)}
 .h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .ava{width:46px;height:46px;border-radius:10px;image-rendering:pixelated;background:rgba(255,255,255,.08);border:1px solid rgba(139,199,166,.3);flex:0 0 auto}
 .ava.ph{width:46px;height:46px;border-radius:10px;background:linear-gradient(145deg,#3d6b4f,#1f3b2b);display:inline-block;flex:0 0 auto}
@@ -60,7 +57,9 @@ body{min-height:100%;display:flex}
 .k{opacity:.7;font-size:12.5px}
 .v{font-weight:700}
 .big{font-size:24px;font-weight:800}
-.desc{margin-top:12px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(139,199,166,.22);border-radius:10px;font-size:13px;line-height:1.55;opacity:.92}
+.desc{margin-top:12px;padding:10px 12px;background:rgba(240,179,92,.07);border:1px solid rgba(240,179,92,.3);border-radius:10px;font-size:15px;line-height:1.55;text-align:center}
+.rainbow{background:linear-gradient(90deg,#ff6b6b,#ffb86b,#ffe66b,#6bff9e,#6bb7ff,#c56bff,#ff6b6b);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;font-weight:800;animation:rain 3.5s linear infinite}
+@keyframes rain{to{background-position:200% center}}
 </style></head><body><div class="wrap">
 <div class="h">__AVA__<span class="nm"><span class="s">SERVER</span>乌龙茶的地盘</span></div>
 __ROWS____DESC__
