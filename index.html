@@ -969,9 +969,14 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
       else if(rows.length&&rows.length===un) srvDot.className="dot";
       else srvDot.className="dot off";
       if(rows.every(function(r){ return r.st!=="checking"; })){
+        if(un===rows.length && srvFail){
+          srvBody.innerHTML='<div class="srv-empty">服务器状态获取失败<br><span style="font-size:.78rem;opacity:.75">后台数据通道与直连接口均不可达，请检查网络后点「刷新」重试</span></div>';
+          srvDot.className="dot"; srvPc.textContent="—";
+          return;
+        }
         var pc=rows.reduce(function(a,r){ return a+(r.st==="on"?r.cur:0); },0);
         var pm=rows.reduce(function(a,r){ return a+(r.st==="on"?r.max:0); },0);
-        srvPc.textContent=(un===rows.length)?"—":(pc+"/"+pm);
+        srvPc.textContent="—";
         srvTs.textContent="更新于 "+new Date().toLocaleTimeString("zh-CN",{hour12:false});
       }
     }
@@ -987,8 +992,9 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
       srvTs.textContent="后台 "+(ag<1?"刚刚":(ag+" 分钟前"))+"更新 · 每 5 分钟自动刷新";
       paint();
     }
+    var srvFail=false;
     function probe(x,row,ai){
-      if(ai>=x.apis.length){ row.st="unknown"; paint(); return; }
+      if(ai>=x.apis.length){ row.st="unknown"; srvFail=true; paint(); return; }
       var ctl=new AbortController(); var t=setTimeout(function(){ ctl.abort(); },8000);
       fetch(x.apis[ai],{cache:"no-store",signal:ctl.signal})
         .then(function(r){ return r.ok?r.json():Promise.reject(new Error("HTTP "+r.status)); })
