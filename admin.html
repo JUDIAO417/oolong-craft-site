@@ -241,6 +241,20 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     <div class="file-list" id="mList"><div class="empty">暂无纪念馆作品</div></div>
 
     <div class="divider"></div>
+    <h2 style="font-size:1.2rem">服务器状态</h2>
+    <p class="sub">填写服务器地址后，首页右下角会出现「服务器状态」悬浮按钮，实时显示在线状态与人数。地址不会展示在页面上，只用于查询。</p>
+    <div class="g-inputs">
+      <input type="text" id="srvJava" placeholder="Java 版地址（IP 或域名），如 play.example.com">
+      <input type="text" id="srvJavaPort" placeholder="Java 端口，默认 25565" style="max-width:380px">
+      <input type="text" id="srvBed" placeholder="基岩版地址（PE），如 play.example.com">
+      <input type="text" id="srvBedPort" placeholder="基岩端口，默认 19132" style="max-width:380px">
+    </div>
+    <div class="up-row">
+      <button class="btn btn-primary btn-sm" id="saveSrv">保存服务器状态</button>
+      <span class="file-now" id="srvHint">地址仅用于查询，页面不展示 IP</span>
+    </div>
+
+    <div class="divider"></div>
     <h2 style="font-size:1.2rem">服务器玩家</h2>
     <p class="sub">最多 50 个。填写玩家游戏ID与一句话介绍，玩家页会同步展示。</p>
     <div class="g-inputs">
@@ -319,6 +333,10 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       pSkin=document.getElementById("pSkin"),
       pBody=document.getElementById("pBody"),
       pDesc=document.getElementById("pDesc"),
+      srvJava=document.getElementById("srvJava"),
+      srvJavaPort=document.getElementById("srvJavaPort"),
+      srvBed=document.getElementById("srvBed"),
+      srvBedPort=document.getElementById("srvBedPort"),
       pList=document.getElementById("pList"),
       addPlayerBtn=document.getElementById("addPlayer");
 
@@ -502,7 +520,8 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
         "groups.json":JSON.stringify(groups.slice(0,10)),
         "videos.json":JSON.stringify(videos.slice(0,50)),
         "memorial.json":JSON.stringify(memorial.slice(0,20)),
-        "players.json":JSON.stringify(players.slice(0,50))
+        "players.json":JSON.stringify(players.slice(0,50)),
+        "server.json":JSON.stringify(srvCfg)
       };
       var jobs=[];
       Object.keys(jsons).forEach(function(k){
@@ -620,7 +639,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   uploadBtn.addEventListener("click",uploadFile);
 
   /* ===== 粉丝群 / 教程视频 / 纪念馆 ===== */
-  var groups=[], videos=[], memorial=[], players=[], VTYPE="file", VCAT="pc";
+  var groups=[], videos=[], memorial=[], players=[], srvCfg={java:{host:"",port:25565},bedrock:{host:"",port:19132}}, VTYPE="file", VCAT="pc";
   vCatSeg.addEventListener("click",function(e){
     var b=e.target.closest(".seg-btn"); if(!b) return;
     VCAT=b.getAttribute("data-vcat");
@@ -642,11 +661,16 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   }
   function loadMeta(){
     /* 一律以 Gitee 权威数据为准，避免镜像滞后导致旧数据覆盖权威数据 */
-    return Promise.all([giteeGetRoot("groups.json"),giteeGetRoot("videos.json"),giteeGetRoot("memorial.json"),giteeGetRoot("pc.json"),giteeGetRoot("pe.json"),ghGet("players.json")])
+    return Promise.all([giteeGetRoot("groups.json"),giteeGetRoot("videos.json"),giteeGetRoot("memorial.json"),giteeGetRoot("pc.json"),giteeGetRoot("pe.json"),ghGet("players.json"),giteeGetRoot("server.json")])
       .then(function(r){
         groups=(r[0]||[]).slice(0,10);
         videos=(r[1]||[]).slice(0,50);
         memorial=(r[2]||[]).slice(0,20);
+        if(r[6] && typeof r[6]==="object"){
+          srvCfg={java:{host:(r[6].java&&r[6].java.host)||"",port:(r[6].java&&r[6].java.port)||25565},bedrock:{host:(r[6].bedrock&&r[6].bedrock.host)||"",port:(r[6].bedrock&&r[6].bedrock.port)||19132}};
+          srvJava.value=srvCfg.java.host; srvJavaPort.value=srvCfg.java.port||25565;
+          srvBed.value=srvCfg.bedrock.host; srvBedPort.value=srvCfg.bedrock.port||19132;
+        }
         extLinks.pc=(r[3]||[]).filter(function(x){ return x.url; });
         extLinks.pe=(r[4]||[]).filter(function(x){ return x.url; });
         players=(r[5]||[]).slice(0,50);
@@ -733,6 +757,13 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
 
   /* ===== 纪念馆 ===== */
   mFile.addEventListener("change",function(){ mFileName.textContent=mFile.files[0]?mFile.files[0].name:"未选择图片"; });
+  document.getElementById("saveSrv").addEventListener("click",function(){
+    var jh=srvJava.value.trim(), jp=parseInt(srvJavaPort.value.trim(),10)||25565;
+    var bh=srvBed.value.trim(), bp=parseInt(srvBedPort.value.trim(),10)||19132;
+    srvCfg={java:{host:jh,port:jp},bedrock:{host:bh,port:bp}};
+    publishAll();
+    toast("已保存服务器状态配置");
+  });
   function renderMem(){
     if(!memorial.length){ mList.innerHTML='<div class="empty">暂无纪念馆作品</div>'; return; }
     mList.innerHTML=memorial.map(function(m,i){
