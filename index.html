@@ -1019,11 +1019,37 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
         .then(function(r){ if(!r.ok){ diag.push(name+"→HTTP"+r.status); throw new Error(r.status); } return r.json(); })
         .catch(function(e){ var last=diag[diag.length-1]; if(!last||last.indexOf(name)!==0){ diag.push(name+"→网络不通"); } throw e; });
     }
+    /* iframe 加载：与页面 HTML 同一加载通道（页面能打开则它必通），绕开部分环境对 fetch 的限制 */
+    function loadViaFrame(name,url){
+      return new Promise(function(resolve,reject){
+        var f=document.createElement("iframe");
+        f.style.display="none";
+        f.setAttribute("aria-hidden","true");
+        var done=false;
+        function fin(){ if(done) return; done=true; try{ f.remove(); }catch(e){} }
+        var timer=setTimeout(function(){ fin(); diag.push(name+"→超时"); reject(new Error("timeout")); },10000);
+        f.onload=function(){
+          clearTimeout(timer);
+          try{
+            var doc=f.contentDocument||f.contentWindow.document;
+            var txt=(doc.body?doc.body.textContent:"")||"";
+            var d=JSON.parse(txt.replace(/^\s+|\s+$/g,""));
+            fin(); resolve(d);
+          }catch(e){ fin(); diag.push(name+"→解析失败"); reject(new Error("parse")); }
+        };
+        f.onerror=function(){ clearTimeout(timer); fin(); diag.push(name+"→加载失败"); reject(new Error("load")); };
+        f.src=url;
+        document.body.appendChild(f);
+      });
+    }
     function readStatus(){
-      /* 状态文件在 status 分支（Actions 每 5 分钟更新、不触发 Pages 构建，raw 匿名可读、国内可达） */
-      return tryF("raw", "https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/status/server-status.json?ts="+Date.now())
-        .catch(function(){ return tryF("本站", "https://judiao417.github.io/oolong-craft-site/server-status.json?t="+Date.now()); })
+      /* 1) iframe 读本站（与页面同通道，必通；status 分支已不触发 Pages 构建） */
+      return loadViaFrame("本站iframe", "https://judiao417.github.io/oolong-craft-site/server-status.json?t="+Date.now())
+        /* 2) raw status 分支（国内可达、独立通道） */
+        .catch(function(){ return tryF("raw", "https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/status/server-status.json?ts="+Date.now()); })
+        /* 3) jsDelivr */
         .catch(function(){ return tryF("jsDelivr","https://cdn.jsdelivr.net/gh/JUDIAO417/oolong-craft-site@status/server-status.json"); })
+        /* 4) GitHub API */
         .catch(function(){ return viaApi("server-status.json").catch(function(){ throw new Error(diag.join("；")); }); });
     }
     readStatus().then(function(d){
@@ -1032,7 +1058,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
     }).catch(function(err){
       diag.push("直连3接口均失败");
       srvFail=true;
-      srvBody.innerHTML='<div class="srv-empty">服务器状态获取失败<br><span style="font-size:.72rem;opacity:.8;word-break:break-all">'+escHtml(diag.join("；"))+'</span><br><span style="font-size:.78rem;opacity:.7">请把这段文字截图发给站长定位</span></div>';
+      srvBody.innerHTML='<div class="srv-empty" style="text-align:left">服务器状态获取失败<br><div style="margin-top:.4rem;line-height:1.5">'+escHtml(diag.map(function(x){ return "· "+x; }).join("<br>"))+'</div><span style="font-size:.78rem;opacity:.7">请把这段文字截图发给站长定位</span></div>';
       srvDot.className="dot"; srvPc.textContent="—";
     });
     /* 直连可达时即时覆盖为最新 */
