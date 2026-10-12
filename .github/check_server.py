@@ -54,16 +54,19 @@ for api in APIS:
     if best is None or (p["online"] and (p["cur"] > best["cur"] or not best["online"])):
         best = {"online": p["online"], "cur": p["cur"], "max": p["max"], "version": p["ver"], "favicon": p["favicon"], "motd": p["motd"], "source": api}
 
-# mcstatus.io 无 favicon 字段：从其他接口补充服务器头像
-if best and not best.get("favicon"):
-    for api2 in APIS:
-        try:
-            d2 = fetch(api2)
-            if isinstance(d2, dict) and d2.get("favicon"):
-                best["favicon"] = d2["favicon"]
-                break
-        except Exception:
+# 单接口缺字段时从其他接口补充：mcstatus.io 无 favicon；motd 个别情况下为空
+if best:
+    for k in ("favicon", "motd"):
+        if best.get(k):
             continue
+        for api2 in APIS:
+            try:
+                d2 = fetch(api2)
+                if isinstance(d2, dict) and d2.get(k):
+                    best[k] = d2[k]
+                    break
+            except Exception:
+                continue
 
 out = {"ts": int(time.time()), "java": best, "bedrock": None}
 with open("server-status.json", "w", encoding="utf-8") as f:
