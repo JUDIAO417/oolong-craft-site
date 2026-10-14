@@ -117,6 +117,7 @@ header.scrolled{background:rgba(10,14,12,.78);box-shadow:0 8px 30px rgba(0,0,0,.
 .file-ico{color:var(--tea);font-size:1rem;flex:none}
 .file-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
 .file-size{color:var(--muted);font-size:.85rem;flex:none}
+.file-meta{display:inline-flex;align-items:center;gap:.5rem;flex:none}
 .file-empty{color:var(--muted);background:rgba(255,255,255,.03);border:1px dashed var(--glass-line);border-radius:var(--r-lg);padding:1.6rem;text-align:center;font-size:.92rem;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .btn-sm{padding:.55rem 1rem;font-size:.88rem}
 .modal-mask{position:fixed;inset:0;z-index:100;background:rgba(5,10,7,.6);-webkit-backdrop-filter:blur(18px) saturate(110%);backdrop-filter:blur(18px) saturate(110%);display:flex;align-items:center;justify-content:center;padding:20px}
@@ -155,6 +156,15 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
 
 @media (max-width:860px){.dl-grid{grid-template-columns:1fr}.steps-strip{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .file-row{flex-direction:column;align-items:stretch;gap:.55rem;padding:.9rem 1.05rem}
+  .file-row:hover{transform:none}
+  .file-ico{display:none}
+  .file-name{flex:none;white-space:normal;word-break:break-all;overflow:visible;text-overflow:clip;font-size:.92rem;line-height:1.45}
+  .file-meta{align-self:flex-start;font-size:.8rem}
+  .file-row .btn{width:100%;justify-content:center}
+  .file-row .btn+.btn{margin-top:.4rem}
+}
 @media (max-width:560px){
   .foot-links{flex-direction:column;gap:.8rem}.dl-card{padding:1.8rem 1.4rem 1.7rem}
   .wrap.nav{padding:0 .8rem;gap:.5rem}
@@ -402,7 +412,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
       var href=it.url?it.url:rawUrl(cat,it.name);
       var tag=it.url?'<span class="file-size" style="color:var(--tea)">[外链]</span>':'';
       var acc=(it.url&&it.url.indexOf("github.com/")>-1)?'<button class="btn btn-sm" data-a="'+esc(it.url)+'">加速下载</button><button class="btn btn-sm" data-c="'+esc(href)+'">复制直链</button>':'';
-      return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span>'+tag+'<span class="file-size">'+(it.size==null?"—":fmt(it.size))+'</span><a class="btn btn-primary btn-sm" href="'+esc(href)+'" target="_blank" rel="noopener">下载</a>'+acc+'</div>';
+      return '<div class="file-row"><span class="file-ico">▚</span><span class="file-name">'+esc(it.name)+'</span><span class="file-meta">'+tag+'<span class="file-size">'+(it.size==null?"—":fmt(it.size))+'</span></span><a class="btn btn-primary btn-sm" href="'+esc(href)+'" target="_blank" rel="noopener">下载</a>'+acc+'</div>';
     }).join("");
     el.querySelectorAll("[data-a]").forEach(function(b){
       b.addEventListener("click",function(){ accel(b.getAttribute("data-a"),b); });
