@@ -285,6 +285,10 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
         <h3 class="fg-title"><span class="fg-badge">PE</span>PE 版文件</h3>
         <div class="file-list" id="peList"><div class="file-empty">正在读取文件列表…</div></div>
       </div>
+      <div>
+        <h3 class="fg-title"><span class="fg-badge">官方</span>官方软件</h3>
+        <div class="file-list" id="officialList"><div class="file-empty">正在读取文件列表…</div></div>
+      </div>
     </div>
   </div>
 </section>
@@ -371,7 +375,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
 
 /* ===== 文件下载区 + 粉丝群/教程弹窗（文件存 Gitee）===== */
 (function(){
-  var pcEl=document.getElementById("pcList"), peEl=document.getElementById("peList");
+  var pcEl=document.getElementById("pcList"), peEl=document.getElementById("peList"), officialEl=document.getElementById("officialList");
   if(!pcEl || !peEl) return;
   var GITEE_OWNER="sykjsj", GITEE_REPO="oolong-craft-files", GITEE_BRANCH="master";
   var groups=[], videos=[];
@@ -405,7 +409,8 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
   }
   function render(el, cat, files){
     files=(files||[]).filter(function(f){ return f && f.name; });
-    if(!files.length){ el.innerHTML='<div class="file-empty">'+cat+' 版文件暂未上传，稍后再来看看。</div>'; return; }
+    var cname={pc:"PC 版",pe:"PE 版",official:"官方软件"}[cat]||cat;
+    if(!files.length){ el.innerHTML='<div class="file-empty">'+cname+' 暂未上传，稍后再来看看。</div>'; return; }
     var tip=(files||[]).some(function(f){ return f.url&&f.url.indexOf("github.com/")>-1; })
       ? '<div class="file-tip">国内下载慢？点「复制直链」后粘贴到迅雷 / IDM（多线程）下载，速度可提升到几 MB/s。</div>':'';
     el.innerHTML=tip+files.map(function(it){
@@ -526,9 +531,9 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
         });
     });
   }
-  Promise.all([rtJson("pc.json"),rtJson("pe.json"),rtJson("groups.json"),rtJson("videos.json")])
+  Promise.all([rtJson("pc.json"),rtJson("pe.json"),rtJson("official.json"),rtJson("groups.json"),rtJson("videos.json")])
     .then(function(r){
-      render(pcEl,"pc",r[0]); render(peEl,"pe",r[1]);
+      render(pcEl,"pc",r[0]); render(peEl,"pe",r[1]); render(officialEl,"official",r[2]);
       groups=(r[2]||[]).slice(0,10); videos=(r[3]||[]).slice(0,50);
     })
     .catch(function(){
