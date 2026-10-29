@@ -73,7 +73,7 @@ header.scrolled{background:rgba(10,14,12,.78);box-shadow:0 8px 30px rgba(0,0,0,.
 .sec-title{font-family:var(--serif);font-weight:900;font-size:clamp(1.5rem,3vw,2rem);line-height:1.25;margin-bottom:1rem}
 
 .dl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.4rem;margin-top:2.4rem}
-.dl-grid:has(>article:only-child){grid-template-columns:1fr;max-width:720px}
+.dl-grid:has(>article:only-child){grid-template-columns:1fr;max-width:720px;margin-left:auto;margin-right:auto}
 .dl-card{background:var(--glass-bg);border:1px solid var(--glass-line);border-radius:var(--r-lg);padding:2.2rem 2rem 2.1rem;position:relative;transition:border-color .3s,transform .3s,box-shadow .3s;-webkit-backdrop-filter:blur(16px) saturate(115%);backdrop-filter:blur(16px) saturate(115%);box-shadow:var(--glass-hl);overflow:hidden}
 .dl-card:hover{border-color:var(--glass-line-strong);transform:translateY(-6px);box-shadow:var(--shadow-glass),var(--glass-hl)}
 .dl-card .icon{width:52px;height:52px;stroke:var(--tea);fill:none;stroke-width:1.5;margin-bottom:1.2rem}
@@ -93,6 +93,11 @@ header.scrolled{background:rgba(10,14,12,.78);box-shadow:0 8px 30px rgba(0,0,0,.
 .step-card p{color:var(--muted);font-size:.88rem}
 
 .note{background:var(--glass-bg);border:1px dashed var(--glass-line-strong);border-radius:var(--r-lg);padding:1.5rem 1.6rem;margin-top:2.4rem;display:flex;gap:1rem;align-items:flex-start;-webkit-backdrop-filter:blur(14px) saturate(115%);backdrop-filter:blur(14px) saturate(115%);box-shadow:var(--glass-hl)}
+.addr-strip{margin-top:2.2rem;background:var(--glass-bg);border:1px solid var(--glass-line-strong);border-radius:var(--r-lg);padding:1.15rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;-webkit-backdrop-filter:blur(14px) saturate(115%);backdrop-filter:blur(14px) saturate(115%);box-shadow:var(--glass-hl)}
+.addr-label{color:var(--tea);font-size:.92rem;letter-spacing:.04em}
+.addr-val{background:rgba(240,179,92,.12);border:1px solid var(--glass-line-strong);color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:1rem;padding:.5rem 1.05rem;border-radius:var(--r-md);cursor:pointer;transition:background .25s,transform .15s;letter-spacing:.02em}
+.addr-val:hover{background:rgba(240,179,92,.22)}
+.addr-val:active{transform:scale(.97)}
 .note svg{width:22px;height:22px;stroke:var(--tea);fill:none;stroke-width:1.8;flex:none;margin-top:.2rem}
 .note b{color:var(--ink)}
 .note p{color:var(--muted);font-size:.92rem}
@@ -156,7 +161,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
 .rv.in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
 
-@media (max-width:860px){.dl-grid{grid-template-columns:1fr}.steps-strip{grid-template-columns:1fr}}
+@media (max-width:860px){.dl-grid{grid-template-columns:1fr}.steps-strip{grid-template-columns:1fr}.addr-strip{flex-direction:column;align-items:stretch}.addr-val{text-align:center}}
 @media (max-width:640px){
   .file-row{flex-direction:column;align-items:stretch;gap:.55rem;padding:.9rem 1.05rem}
   .file-row:hover{transform:none}
@@ -250,6 +255,11 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
         <h4>进服开玩</h4>
         <p>多人游戏 → 进入乌龙茶的地盘 → 加入，出生点见。</p>
       </div>
+    </div>
+
+    <div class="addr-strip rv">
+      <span class="addr-label">服务器地址 · 点击下方即可复制</span>
+      <button type="button" class="addr-val" id="serverAddr" data-copy="s203.singsi.cn:19359">s203.singsi.cn:19359</button>
     </div>
   </div>
 </section>
@@ -433,6 +443,14 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
       } else { fallbackCopy(gid); toast("正在拉起 QQ 加群… 如未弹出，请复制群号到 QQ 搜索加入"); }
     },1800);
   }
+
+  var addrBtn=document.getElementById("serverAddr");
+  if(addrBtn){ addrBtn.addEventListener("click",function(){
+    var v=addrBtn.getAttribute("data-copy");
+    function ok(){ toast("服务器地址已复制："+v); }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(v).then(ok,function(){ fallbackCopy(v); ok(); }); }
+    else { fallbackCopy(v); ok(); }
+  }); }
 
   function renderGroups(){
     if(!groups.length){ mBody.innerHTML='<div class="modal-empty">粉丝群正在整理中，稍后再来。</div>'; return; }
