@@ -370,7 +370,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
   function fmt(n){ if(n>=1048576) return (n/1048576).toFixed(1)+" MB"; if(n>=1024) return (n/1024).toFixed(0)+" KB"; return n+" B"; }
   function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
   /* 国内加速镜像（GitHub Release 直链镜像代理，免费），依次探测可用 */
-  var MIRRORS=["https://ghfast.top/","https://gh.monlor.com/","https://gh-proxy.com/","https://ghproxy.net/"];
+  var MIRRORS=["https://v4.gh-proxy.org/","https://ghfast.top/","https://gh.monlor.com/","https://gh-proxy.com/","https://ghproxy.net/"];
   function accel(url,btn){
     if(btn.dataset.busy) return; btn.dataset.busy="1";
     var i=0;
