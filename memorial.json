@@ -33,5 +33,55 @@
     "title": "奶蛙",
     "desc": "站在玻璃台上的大家伙，得抬头才看得全。",
     "img": "assets/memorial-giant-frog.jpg"
+  },
+  {
+    "title": "幽链晶塔",
+    "desc": "夜里整座塔亮起来，像从海里长出来的一串灯。",
+    "img": "assets/memorial-you-chain-tower.jpg"
+  },
+  {
+    "title": "云澜境",
+    "desc": "浮在云上的中式楼阁，屋檐下挂满灯。",
+    "img": "assets/memorial-yun-lan-jing.jpg"
+  },
+  {
+    "title": "拉娜号",
+    "desc": "一整艘船就是一座塔，慢慢在水上开着。",
+    "img": "assets/memorial-lana-ship.jpg"
+  },
+  {
+    "title": "拉娜村",
+    "desc": "灰瓦连成一片，屋顶比墙还多。",
+    "img": "assets/memorial-lana-village.jpg"
+  },
+  {
+    "title": "酒桶私人酒馆",
+    "desc": "两层小楼，门口停着车，招牌挂得满满当当。",
+    "img": "assets/memorial-barrel-tavern.jpg"
+  },
+  {
+    "title": "雪糕店",
+    "desc": "粉色的小店，玻璃上贴满招牌与海报。",
+    "img": "assets/memorial-ice-cream-shop.jpg"
+  },
+  {
+    "title": "小型樱花树",
+    "desc": "院子里那棵樱花，开花的时候最热闹。",
+    "img": "assets/memorial-small-sakura.jpg"
+  },
+  {
+    "title": "现代别墅",
+    "desc": "白墙配落地玻璃，前面还有一池水。",
+    "img": "assets/memorial-modern-villa.jpg"
+  },
+  {
+    "title": "小吃街",
+    "desc": "红白棚子底下，摊子一个挨着一个。",
+    "img": "assets/memorial-food-street-a.jpg"
+  },
+  {
+    "title": "小吃街",
+    "desc": "沿着石板路往里走，两边全是小摊。",
+    "img": "assets/memorial-food-street-b.jpg"
   }
 ]
