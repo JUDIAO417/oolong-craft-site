@@ -2,86 +2,130 @@
   {
     "title": "红石工坊",
     "desc": "灯光亮起的地方，总有新机器在跑。",
+    "imgs": [
+      "assets/building-night-lake.jpg"
+    ],
     "img": "assets/building-night-lake.jpg"
   },
   {
     "title": "夜色建筑",
     "desc": "晚上亮灯的时候，是拍照最好看的角度。",
+    "imgs": [
+      "assets/building-night-creative.jpg"
+    ],
     "img": "assets/building-night-creative.jpg"
   },
   {
     "title": "性感母蟑螂",
     "desc": "性感母蟑螂的居所，服务器内第一个像模像样的建筑",
+    "imgs": [
+      "assets/memorial-mother-roach.jpg"
+    ],
     "img": "assets/memorial-mother-roach.jpg"
   },
   {
     "title": "服务器元老",
     "desc": "服务器的几个老古董，开服即在线",
+    "imgs": [
+      "assets/memorial-official-veteran.jpg"
+    ],
     "img": "assets/memorial-official-veteran.jpg"
   },
   {
     "title": "胆子真是肥嘟嘟",
     "desc": "你敢直视我，你的胆子还真是肥嘟嘟的",
+    "imgs": [
+      "assets/memorial-rabbit-lamp.jpg"
+    ],
     "img": "assets/memorial-rabbit-lamp.jpg"
   },
   {
     "title": "秋千",
     "desc": "樱花架下搭的秋千，风一吹就轻轻晃。",
+    "imgs": [
+      "assets/memorial-sakura-swing.jpg"
+    ],
     "img": "assets/memorial-sakura-swing.jpg"
   },
   {
     "title": "奶蛙",
     "desc": "站在玻璃台上的大家伙，得抬头才看得全。",
+    "imgs": [
+      "assets/memorial-giant-frog.jpg"
+    ],
     "img": "assets/memorial-giant-frog.jpg"
   },
   {
     "title": "幽链晶塔",
     "desc": "夜里整座塔亮起来，像从海里长出来的一串灯。",
+    "imgs": [
+      "assets/memorial-you-chain-tower.jpg"
+    ],
     "img": "assets/memorial-you-chain-tower.jpg"
   },
   {
     "title": "云澜境",
     "desc": "浮在云上的中式楼阁，屋檐下挂满灯。",
+    "imgs": [
+      "assets/memorial-yun-lan-jing.jpg"
+    ],
     "img": "assets/memorial-yun-lan-jing.jpg"
   },
   {
     "title": "拉娜号",
     "desc": "一整艘船就是一座塔，慢慢在水上开着。",
+    "imgs": [
+      "assets/memorial-lana-ship.jpg"
+    ],
     "img": "assets/memorial-lana-ship.jpg"
   },
   {
     "title": "拉娜村",
     "desc": "灰瓦连成一片，屋顶比墙还多。",
+    "imgs": [
+      "assets/memorial-lana-village.jpg"
+    ],
     "img": "assets/memorial-lana-village.jpg"
   },
   {
     "title": "酒桶私人酒馆",
     "desc": "两层小楼，门口停着车，招牌挂得满满当当。",
+    "imgs": [
+      "assets/memorial-barrel-tavern.jpg"
+    ],
     "img": "assets/memorial-barrel-tavern.jpg"
   },
   {
     "title": "雪糕店",
     "desc": "粉色的小店，玻璃上贴满招牌与海报。",
+    "imgs": [
+      "assets/memorial-ice-cream-shop.jpg"
+    ],
     "img": "assets/memorial-ice-cream-shop.jpg"
   },
   {
     "title": "小型樱花树",
     "desc": "院子里那棵樱花，开花的时候最热闹。",
+    "imgs": [
+      "assets/memorial-small-sakura.jpg"
+    ],
     "img": "assets/memorial-small-sakura.jpg"
   },
   {
     "title": "现代别墅",
     "desc": "白墙配落地玻璃，前面还有一池水。",
+    "imgs": [
+      "assets/memorial-modern-villa.jpg"
+    ],
     "img": "assets/memorial-modern-villa.jpg"
   },
   {
     "title": "小吃街",
-    "desc": "红白棚子底下，摊子一个挨着一个。",
+    "desc": "红白棚子底下摊子一个挨着一个，沿着石板路往里走，两边全是小摊。",
+    "imgs": [
+      "assets/memorial-food-street-a.jpg",
+      "assets/memorial-food-street-b.jpg"
+    ],
     "img": "assets/memorial-food-street-a.jpg"
-  },
-  {
-    "title": "小吃街",
-    "desc": "沿着石板路往里走，两边全是小摊。",
-    "img": "assets/memorial-food-street-b.jpg"
   }
 ]
