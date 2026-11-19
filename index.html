@@ -434,7 +434,7 @@ section[id]{scroll-margin-top:84px}
   -webkit-clip-path:url(#clipUp);clip-path:url(#clipUp)}
 .boot .dn{-webkit-clip-path:url(#clipDn);clip-path:url(#clipDn)}
 /* 中线发光曲线：从一条直线"生长"成波形 */
-.boot .tearline{position:absolute;inset:0;width:100%;height:100%;z-index:3;opacity:0;transform:scaleY(.05);transform-origin:50% 50%;
+.boot .tearline{position:absolute;inset:0;width:100%;height:100%;z-index:4;opacity:0;transform:scaleY(.05);transform-origin:50% 50%;
   filter:drop-shadow(0 0 13px rgba(240,179,92,.55));
   animation:lineRise .55s cubic-bezier(.16,1,.3,1) .04s forwards,
             lineDrift .85s cubic-bezier(.45,0,.55,1) .6s 1}
@@ -454,8 +454,37 @@ section[id]{scroll-margin-top:84px}
 @keyframes flowOn{to{opacity:1}}
 @keyframes flowOff{to{opacity:0}}
 .boot.split .flows{animation:flowOff .55s ease .08s forwards}
+/* 星空：星点 + 两团缓慢呼吸的星云 */
+.boot .stars{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;
+  animation:starIn 1.1s ease .2s forwards}
+.boot .stars i{position:absolute;border-radius:50%;background:#fff;
+  box-shadow:0 0 5px rgba(255,255,255,.65);
+  animation:twk var(--d,3s) ease-in-out infinite alternate}
+@keyframes twk{from{opacity:.15;transform:scale(.8)}to{opacity:1;transform:scale(1.3)}}
+@keyframes starIn{to{opacity:1}}
+.boot .neb{position:absolute;z-index:2;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  animation:nebIn 2.2s ease .35s forwards}
+.boot .neb.a{left:-12%;top:6%;width:74vw;height:56vh;
+  background:radial-gradient(ellipse at 40% 50%,rgba(78,203,141,.12),rgba(78,203,141,.04) 46%,rgba(78,203,141,0) 70%);
+  filter:blur(34px)}
+.boot .neb.b{right:-16%;top:38%;width:66vw;height:48vh;
+  background:radial-gradient(ellipse at 60% 50%,rgba(240,179,92,.14),rgba(240,179,92,.05) 44%,rgba(240,179,92,0) 70%);
+  filter:blur(38px)}
+@keyframes nebIn{to{opacity:1}}
+/* 丝线：一束细如发丝的曲线，各自相位与速度不同，横着缓缓淌 */
+.boot .silk{position:absolute;top:0;left:0;width:200%;height:100%;z-index:3;opacity:0;pointer-events:none;
+  animation:silkIn 1s ease .3s forwards,silkDrift 6s ease-in-out .3s infinite}
+@keyframes silkDrift{0%,100%{translate:0 0}50%{translate:0 -9px}}
+.boot .silk path{fill:none;stroke-linecap:round;stroke-linejoin:round;
+  animation-name:silkMove;animation-timing-function:linear;animation-iteration-count:infinite}
+@keyframes silkMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes silkIn{to{opacity:1}}
+@keyframes silkOff{to{opacity:0}}
+.boot.split .silk{animation:silkOff .45s ease forwards}
+.boot.split .stars{animation:silkOff .7s ease .05s forwards}
+.boot.split .neb{animation:silkOff .8s ease forwards}
 /* 沿曲线漂浮的粒子 */
-.boot .sparks{position:absolute;inset:0;z-index:4;pointer-events:none}
+.boot .sparks{position:absolute;inset:0;z-index:5;pointer-events:none}
 .boot .sparks i{position:absolute;border-radius:50%;opacity:0;
   background:radial-gradient(circle,#fff 0%,rgba(240,179,92,.95) 42%,rgba(240,179,92,0) 74%);
   box-shadow:0 0 9px 1px rgba(240,179,92,.75);
@@ -468,18 +497,18 @@ section[id]{scroll-margin-top:84px}
 @keyframes pOff{to{opacity:0}}
 .boot.split .sparks{animation:pOff .6s ease forwards}
 /* 撕开瞬间的一次性爆闪 */
-.boot .flash{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:0;
+.boot .flash{position:absolute;inset:0;z-index:8;pointer-events:none;opacity:0;
   background:radial-gradient(ellipse 62% 54% at 50% 50%,rgba(255,244,222,.5),rgba(240,179,92,.14) 46%,rgba(240,179,92,0) 74%)}
 .boot.split .flash{animation:flashUp .52s cubic-bezier(.2,.8,.3,1) forwards}
 @keyframes flashUp{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
 /* 撕开瞬间迸射的火星 */
-.boot .burst{position:absolute;inset:0;z-index:6;pointer-events:none}
+.boot .burst{position:absolute;inset:0;z-index:7;pointer-events:none}
 .boot .burst i{position:absolute;left:50%;top:50%;width:2px;height:2px;border-radius:50%;background:#fff;
   box-shadow:0 0 9px rgba(240,179,92,.95);opacity:0}
 .boot.split .burst i{animation:burstOut .95s cubic-bezier(.2,.7,.3,1) forwards}
 @keyframes burstOut{0%{opacity:0;transform:translate(0,0) scale(.3)}16%{opacity:1}100%{opacity:0;transform:translate(var(--bx),var(--by)) scale(1.15)}}
 .boot .boot-mark{
-  position:absolute;left:50%;top:calc(50% - 10.5vh);z-index:5;
+  position:absolute;left:50%;top:calc(50% - 10.5vh);z-index:6;
   transform:translate(-50%,calc(-50% + 16px));opacity:0;
   font-family:var(--serif);font-weight:700;font-size:clamp(1.05rem,2.2vw,1.55rem);letter-spacing:.2em;
   color:var(--tea);white-space:nowrap;text-shadow:0 0 26px rgba(240,179,92,.45);
@@ -597,6 +626,10 @@ section[id]{scroll-margin-top:84px}
     </defs>
     <path id="tearPath" d="M0 50 L100 50"></path>
   </svg>
+  <div class="stars" id="stars" aria-hidden="true"></div>
+  <div class="neb a" aria-hidden="true"></div>
+  <div class="neb b" aria-hidden="true"></div>
+  <svg class="silk" id="silk" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true"></svg>
   <div class="flows" aria-hidden="true">
     <svg class="w1" viewBox="0 0 200 100" preserveAspectRatio="none"><path id="flowA" d="M0 50 L100 50"/></svg>
     <svg class="w2" viewBox="0 0 200 100" preserveAspectRatio="none"><path id="flowB" d="M0 50 L100 50"/></svg>
@@ -1306,6 +1339,66 @@ section[id]{scroll-margin-top:84px}
       }
       /* 同一条曲线同时用于：发光线（SVG 百分比坐标）与上下两片的 SVG 裁剪（0-1 单位坐标） */
       bPath.setAttribute("d", list.map(function(p,i){ return (i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1); }).join(" "));
+
+      /* 星空：星点铺满幕布，各自闪烁节奏不同 */
+      var st = document.getElementById("stars");
+      if(st){
+        for(var si=0;si<150;si++){
+          var se = document.createElement("i");
+          var ss = 0.8 + Math.random()*2.0;
+          se.style.left = (Math.random()*100).toFixed(2) + "%";
+          se.style.top  = (Math.random()*100).toFixed(2) + "%";
+          se.style.width = ss.toFixed(2) + "px";
+          se.style.height = ss.toFixed(2) + "px";
+          se.style.opacity = "0";
+          var hue = Math.random();
+          if(hue < .22) se.style.background = "#CFE9D8";
+          else if(hue < .42) se.style.background = "#FFE3B8";
+          se.style.setProperty("--d", (2.2 + Math.random()*3.4).toFixed(2) + "s");
+          se.style.animationDelay = (Math.random()*3.2).toFixed(2) + "s";
+          if(Math.random() < .09){                        /* 少量亮星带光晕 */
+            se.style.boxShadow = "0 0 7px 1px rgba(255,255,255,.85)";
+          }
+          st.appendChild(se);
+        }
+      }
+
+      /* 丝线：一束细曲线，跨两屏、相位与速度各不相同 */
+      var slk = document.getElementById("silk");
+      if(slk){
+        var silkDefs = [
+          {off:-136, amp:24, freq:2.1, ph:.12, w:1.0, op:0.30, c:"#4ECB8D", dur:17, rev:1},
+          {off:-112, amp:32, freq:1.5, ph:.44, w:1.1, op:0.34, c:"#F0B35C", dur:24, rev:0},
+          {off:-86,  amp:26, freq:2.7, ph:.76, w:0.8, op:0.26, c:"#FFF4DE", dur:13, rev:1},
+          {off:-60,  amp:38, freq:1.7, ph:.20, w:1.2, op:0.32, c:"#F0B35C", dur:21, rev:0},
+          {off:-34,  amp:22, freq:3.0, ph:.56, w:0.9, op:0.24, c:"#4ECB8D", dur:29, rev:1},
+          {off:-10,  amp:44, freq:1.2, ph:.88, w:1.3, op:0.28, c:"#F0B35C", dur:26, rev:0},
+          {off:16,   amp:30, freq:2.5, ph:.34, w:1.0, op:0.26, c:"#4ECB8D", dur:18, rev:1},
+          {off:42,   amp:20, freq:3.3, ph:.66, w:0.8, op:0.22, c:"#FFF4DE", dur:15, rev:0},
+          {off:68,   amp:36, freq:1.6, ph:.98, w:1.2, op:0.30, c:"#F0B35C", dur:27, rev:1},
+          {off:92,   amp:26, freq:2.2, ph:.28, w:0.9, op:0.24, c:"#4ECB8D", dur:20, rev:0},
+          {off:118,  amp:30, freq:1.9, ph:.60, w:1.0, op:0.22, c:"#F0B35C", dur:23, rev:1},
+          {off:0,    amp:62, freq:1.1, ph:.90, w:2.6, op:0.15, c:"#F0B35C", dur:34, rev:0}
+        ];
+        silkDefs.forEach(function(q){
+          var pr = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          var d = "";
+          for(var j2=0;j2<=BN*2;j2++){
+            var tt2 = (j2/BN) % 1;
+            var x2 = j2*BW/BN;
+            var y2 = BH/2 + q.off + q.amp*Math.sin(2*Math.PI*(q.freq*tt2 + q.ph))*Math.sin(tt2*Math.PI);
+            d += (j2?"L":"M") + x2.toFixed(1) + " " + y2.toFixed(1) + " ";
+          }
+          pr.setAttribute("d", d);
+          pr.setAttribute("stroke", q.c);
+          pr.style.strokeWidth = q.w + "px";
+          pr.style.opacity = q.op;
+          pr.style.animationDuration = q.dur + "s";
+          if(q.rev) pr.style.animationDirection = "reverse";
+          slk.appendChild(pr);
+        });
+        slk.setAttribute("viewBox", "0 0 " + (BW*2) + " " + BH);
+      }
 
       /* 流波：同一波形铺两屏，便于横向循环 */
       var fA = document.getElementById("flowA"), fB = document.getElementById("flowB");
