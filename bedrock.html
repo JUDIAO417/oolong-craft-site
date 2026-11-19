@@ -206,6 +206,34 @@ footer .wrap{width:100%;max-width:none;padding:0 24px}  /* 底部栏真贴屏幕
 html,body,body *{cursor:url("assets/cat-cursor.png") 4 4,auto!important}
 input,textarea,select{cursor:text!important}
 </style>
+<style id="skin-tap">
+/* 禁止拖选 / 拖拽复制：整页文字不可被选中 */
+html,body,body *{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,select,[contenteditable="true"]{-webkit-user-select:text;-moz-user-select:text;user-select:text}
+img,a{-webkit-user-drag:none}
+
+/* 进入站点后，任何一次点击都有光效 */
+.tap-any{position:fixed;inset:0;z-index:240;pointer-events:none;overflow:hidden}
+.tap-any .ta-grp{position:absolute;left:0;top:0;width:0;height:0}
+.tap-any .ta-grp i{position:absolute;display:block;left:0;top:0}
+.tap-any .ta-ring{width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;
+  border:1.5px solid rgba(255,232,196,.85);
+  box-shadow:0 0 16px rgba(240,179,92,.6),inset 0 0 12px rgba(240,179,92,.35);
+  animation:taRing .58s cubic-bezier(.16,.9,.3,1) forwards}
+@keyframes taRing{0%{opacity:0;transform:scale(.35)}22%{opacity:1}100%{opacity:0;transform:scale(2.9)}}
+.tap-any .ta-ring.s{width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-color:rgba(78,203,141,.85);
+  box-shadow:0 0 14px rgba(78,203,141,.6);animation:taRingS .5s cubic-bezier(.16,.9,.3,1) .06s forwards}
+@keyframes taRingS{0%{opacity:0;transform:scale(.3)}24%{opacity:1}100%{opacity:0;transform:scale(2.2)}}
+.tap-any .ta-core{width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;
+  background:radial-gradient(circle,#FFF8E8,#F0B35C 60%,rgba(240,179,92,0));
+  box-shadow:0 0 18px 5px rgba(240,179,92,.42);animation:taCore .34s ease-out forwards}
+@keyframes taCore{0%{opacity:0;transform:scale(.4)}30%{opacity:1;transform:scale(1.4)}100%{opacity:0;transform:scale(2.1)}}
+.tap-any .ta-ray{width:1.5px;height:15px;margin:-15px 0 0 -.75px;border-radius:2px;
+  background:linear-gradient(180deg,rgba(255,240,214,0),rgba(255,238,205,.9));
+  transform-origin:50% 100%;animation:taRay .6s cubic-bezier(.16,.8,.3,1) forwards}
+@keyframes taRay{0%{opacity:0;transform:rotate(var(--a)) translateY(-2px) scaleY(.25)}
+  25%{opacity:.9}100%{opacity:0;transform:rotate(var(--a)) translateY(-92px) scaleY(1.1)}}
+</style>
 </head>
 <body>
 <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -572,6 +600,46 @@ document.addEventListener("keydown", function(e){
       b.appendChild(s); setTimeout(function(){ s.remove(); },650);
     });
   });
+</script>
+<div class="tap-any" id="tapAny" aria-hidden="true"></div>
+<script>
+(function(){
+  /* 禁止拖拽图片 / 拖选产生的 ghost */
+  document.addEventListener("dragstart", function(e){ e.preventDefault(); }, true);
+
+  /* 进入站点后，任意点击都撒一圈光环 + 星针 */
+  var wrap = document.getElementById("tapAny");
+  if(!wrap) return;
+  var boot = document.getElementById("boot");
+
+  function fire(x, y){
+    var g = document.createElement("div");
+    g.className = "ta-grp";
+    g.style.left = x + "px";
+    g.style.top  = y + "px";
+    var r1 = document.createElement("i"); r1.className = "ta-ring";
+    var r2 = document.createElement("i"); r2.className = "ta-ring s";
+    var co = document.createElement("i"); co.className = "ta-core";
+    g.appendChild(r1); g.appendChild(r2); g.appendChild(co);
+    for(var i = 0; i < 6; i++){
+      var ry = document.createElement("i"); ry.className = "ta-ray";
+      ry.style.setProperty("--a", (i * 60 + (Math.random() * 24 - 12)).toFixed(1) + "deg");
+      ry.style.animationDelay = (Math.random() * 0.05).toFixed(3) + "s";
+      g.appendChild(ry);
+    }
+    wrap.appendChild(g);
+    setTimeout(function(){ if(g.parentNode) g.parentNode.removeChild(g); }, 780);
+  }
+
+  var last = 0;
+  document.addEventListener("click", function(ev){
+    if(boot && getComputedStyle(boot).display !== "none") return;  /* 开屏有自己的撕裂特效 */
+    var now = Date.now();
+    if(now - last < 80) return;
+    last = now;
+    fire(ev.clientX, ev.clientY);
+  }, true);
+})();
 </script>
 </body>
 </html>
