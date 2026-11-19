@@ -428,16 +428,36 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
 /* 锚点跳转留出吸顶栏高度 */
 section[id]{scroll-margin-top:84px}
 
-/* ============ 开场动画（贝塞尔缓动 · 光刃扫描） ============ */
-.boot{position:fixed;inset:0;z-index:130;background:#070B09;display:grid;place-items:center;overflow:hidden;pointer-events:none}
-.boot .blade{position:absolute;left:0;right:0;top:50%;height:2px;background:linear-gradient(90deg,transparent,rgba(78,203,141,.15) 18%,rgba(78,203,141,.95) 48%,rgba(240,179,92,1) 58%,rgba(240,179,92,.2) 84%,transparent);transform:scaleX(0);transform-origin:50% 50%;box-shadow:0 0 34px rgba(240,179,92,.55);animation:blade .95s cubic-bezier(.16,1,.3,1) .12s forwards}
-.boot .boot-glow{position:absolute;left:50%;top:50%;width:70vmin;height:70vmin;border-radius:50%;transform:translate(-50%,-50%) scale(.4);background:radial-gradient(circle,rgba(240,179,92,.22),transparent 62%);opacity:0;animation:glowPulse 1.5s cubic-bezier(.16,1,.3,1) .2s forwards}
-.boot .boot-mark{position:absolute;left:50%;top:calc(50% - 40px);transform:translate(-50%,10px);font-family:var(--pixel);font-size:.6rem;letter-spacing:.34em;color:var(--tea);opacity:0;animation:markIn .8s cubic-bezier(.16,1,.3,1) .5s forwards}
-.boot.off{animation:bootOut .78s cubic-bezier(.72,0,.24,1) forwards}
-@keyframes blade{to{transform:scaleX(1)}}
-@keyframes glowPulse{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}45%{opacity:1}100%{opacity:.25;transform:translate(-50%,-50%) scale(1)}}
-@keyframes markIn{to{opacity:1;transform:translate(-50%,0)}}
-@keyframes bootOut{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-101%);opacity:1;visibility:hidden}}
+/* ============ 开场：波动曲线撕裂幕布 ============ */
+.boot{position:fixed;inset:0;z-index:130;overflow:hidden;pointer-events:none}
+.boot .mono{position:absolute;inset:0;background:#070B09;z-index:1;
+  -webkit-clip-path:url(#clipUp);clip-path:url(#clipUp)}
+.boot .dn{-webkit-clip-path:url(#clipDn);clip-path:url(#clipDn)}
+/* 中线发光曲线：从一条直线"生长"成波形 */
+.boot .tearline{position:absolute;inset:0;width:100%;height:100%;z-index:3;opacity:0;transform:scaleY(.05);transform-origin:50% 50%;
+  animation:lineRise .62s cubic-bezier(.16,1,.3,1) .04s forwards}
+.boot .tearline path{
+  fill:none;stroke:url(#tearGrad);stroke-width:3;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 14px rgba(240,179,92,.55));
+}
+.boot .boot-mark{
+  position:absolute;left:50%;top:calc(50% - 10.5vh);z-index:5;
+  transform:translate(-50%,calc(-50% + 16px));opacity:0;
+  font-family:var(--serif);font-weight:700;font-size:clamp(1.05rem,2.2vw,1.55rem);letter-spacing:.2em;
+  color:var(--tea);white-space:nowrap;text-shadow:0 0 26px rgba(240,179,92,.45);
+  animation:markIn .8s cubic-bezier(.16,1,.3,1) .26s forwards;
+}
+/* 撕裂：上下两片沿同一条曲线分开 */
+.boot.split .up{animation:splitUp .96s cubic-bezier(.6,0,.22,1) .06s forwards}
+.boot.split .dn{animation:splitDn .96s cubic-bezier(.6,0,.22,1) .06s forwards}
+.boot.split .tearline{animation:lineOut .42s ease .16s forwards}
+.boot.split .boot-mark{animation:markOut .42s ease forwards}
+@keyframes lineRise{from{opacity:0;transform:scaleY(.05)}to{opacity:1;transform:scaleY(1)}}
+@keyframes lineOut{from{opacity:1;transform:scaleY(1)}to{opacity:0;transform:scaleY(1.1)}}
+@keyframes markIn{to{opacity:1;transform:translate(-50%,-50%)}}
+@keyframes markOut{to{opacity:0;transform:translate(-50%,calc(-50% - 18px))}}
+@keyframes splitUp{to{transform:translateY(-103%)}}
+@keyframes splitDn{to{transform:translateY(103%)}}
 /* 首屏科技网格（开场后淡入） */
 .hero-grid{position:absolute;inset:0;z-index:-1;pointer-events:none;
   background-image:linear-gradient(rgba(78,203,141,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(78,203,141,.07) 1px,transparent 1px);
@@ -522,9 +542,23 @@ section[id]{scroll-margin-top:84px}
 </head>
 <body>
 <div class="boot" id="boot" aria-hidden="true">
-  <span class="boot-glow"></span>
-  <span class="blade"></span>
-  <span class="boot-mark">OOLONG CRAFT</span>
+  <div class="mono up"></div>
+  <div class="mono dn"></div>
+  <svg class="tearline" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="tearGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#4ECB8D" stop-opacity="0"/>
+        <stop offset="16%" stop-color="#4ECB8D" stop-opacity=".75"/>
+        <stop offset="50%" stop-color="#F0B35C" stop-opacity="1"/>
+        <stop offset="84%" stop-color="#F0B35C" stop-opacity=".75"/>
+        <stop offset="100%" stop-color="#F0B35C" stop-opacity="0"/>
+      </linearGradient>
+      <clipPath id="clipUp" clipPathUnits="objectBoundingBox"><path id="clipUpPath" d="M0 0 L1 0 L1 .5 L0 .5 Z"/></clipPath>
+      <clipPath id="clipDn" clipPathUnits="objectBoundingBox"><path id="clipDnPath" d="M0 1 L1 1 L1 .5 L0 .5 Z"/></clipPath>
+    </defs>
+    <path id="tearPath" d="M0 50 L100 50"></path>
+  </svg>
+  <span class="boot-mark" id="bootMark">乌龙茶的地盘</span>
 </div>
 <div class="scrollbar" id="scrollbar" aria-hidden="true"></div>
 <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -1204,19 +1238,35 @@ section[id]{scroll-margin-top:84px}
   });
 
   /* 开场动画：内容就绪后收起（最多等 2.4s，避免网络慢时卡住） */
+  /* 开场：中线曲线"生长"成波形，随后沿同一条曲线把幕布上下撕开（脚本只负责算形状与触发） */
   var bootEl = document.getElementById("boot");
   if(bootEl){
-    var bootOff = function(){ if(bootEl.classList.contains("off")) return; bootEl.classList.add("off"); setTimeout(function(){ bootEl.style.display="none"; }, 1000); };
-    if(prefersReduced){ bootEl.style.display="none"; }
+    if(prefersReduced){ bootEl.style.display = "none"; }
     else {
-      var started = Date.now();
-      var fire = function(){
-        var rest = Math.max(0, 1180 - (Date.now()-started));
-        setTimeout(bootOff, rest);
-      };
-      if(document.readyState === "complete") fire();
-      else window.addEventListener("load", fire, {once:true});
-      setTimeout(bootOff, 2000);
+      var bUp = bootEl.querySelector(".up"), bDn = bootEl.querySelector(".dn");
+      var bPath = document.getElementById("tearPath");
+      var BN = 30, BAMP = 7.6;
+      var list = [];
+      for(var i=0;i<=BN;i++){
+        var t = i/BN;
+        var taper = Math.sin(t*Math.PI);           /* 两端收窄，中间波幅最大 */
+        var y = 50 + BAMP*Math.sin(t*Math.PI*3.1)*taper;
+        list.push([t*100, y]);
+      }
+      /* 同一条曲线同时用于：发光线（SVG 百分比坐标）与上下两片的 SVG 裁剪（0-1 单位坐标） */
+      bPath.setAttribute("d", list.map(function(p,i){ return (i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2); }).join(" "));
+
+      var cUp = document.getElementById("clipUpPath");
+      var cDn = document.getElementById("clipDnPath");
+      if(cUp && cDn){
+        var pts = list.map(function(p){ return [(p[0]/100).toFixed(4), ((p[1]-0.3)/100).toFixed(4)]; });
+        var ptsD = list.map(function(p){ return [(p[0]/100).toFixed(4), ((p[1]+0.3)/100).toFixed(4)]; });
+        cUp.setAttribute("d", "M0 0" + pts.map(function(q){ return " L"+q[0]+" "+q[1]; }).join("") + " L1 0 Z");
+        cDn.setAttribute("d", "M1 1" + ptsD.slice().reverse().map(function(q){ return " L"+q[0]+" "+q[1]; }).join("") + " L0 1 Z");
+      }
+
+      setTimeout(function(){ bootEl.classList.add("split"); }, 900);
+      setTimeout(function(){ bootEl.style.display = "none"; }, 1820);
     }
   }
 })();
