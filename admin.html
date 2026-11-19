@@ -227,17 +227,17 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
 
     <div class="divider"></div>
     <h2 style="font-size:1.2rem">纪念馆</h2>
-    <p class="sub">最多 20 个。上传建筑截图，填写标题与一句话介绍，主页「纪念馆」区块会同步展示。</p>
+    <p class="sub">最多 20 个。每个作品可一次选多张截图：主页显示第一张，鼠标悬停可左右切换、点点可看大图。</p>
     <div class="g-inputs">
       <input type="text" id="mTitle" placeholder="作品标题，如：红石工坊">
       <input type="text" id="mDesc" placeholder="一句话介绍，如：灯光亮起的地方，总有新机器在跑。">
     </div>
     <div class="up-row">
-      <label class="btn btn-ghost btn-sm" for="mFile" style="cursor:pointer">选择建筑截图</label>
+      <label class="btn btn-ghost btn-sm" for="mFile" style="cursor:pointer">选择建筑截图（可多张）</label>
       <span class="file-now" id="mFileName">未选择图片</span>
       <button class="btn btn-primary btn-sm" id="addMem">添加作品</button>
     </div>
-    <input type="file" id="mFile" accept="image/*" style="display:none">
+    <input type="file" id="mFile" accept="image/*" multiple style="display:none">
     <div class="file-list" id="mList"><div class="empty">暂无纪念馆作品</div></div>
 
     <div class="divider"></div>
@@ -665,7 +665,7 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
       .then(function(r){
         groups=(r[0]||[]).slice(0,10);
         videos=(r[1]||[]).slice(0,50);
-        memorial=(r[2]||[]).slice(0,20);
+        memorial=(r[2]||[]).slice(0,20).map(normMem);
         if(r[6] && typeof r[6]==="object"){
           srvCfg={java:{host:(r[6].java&&r[6].java.host)||"",port:(r[6].java&&r[6].java.port)||25565},bedrock:{host:(r[6].bedrock&&r[6].bedrock.host)||"",port:(r[6].bedrock&&r[6].bedrock.port)||19132}};
           srvJava.value=srvCfg.java.host; srvJavaPort.value=srvCfg.java.port||25565;
@@ -756,7 +756,10 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   addVideoBtn.addEventListener("click",addVideo);
 
   /* ===== 纪念馆 ===== */
-  mFile.addEventListener("change",function(){ mFileName.textContent=mFile.files[0]?mFile.files[0].name:"未选择图片"; });
+  mFile.addEventListener("change",function(){
+    var fs=mFile.files||[];
+    mFileName.textContent=fs.length?(fs.length>1?("已选 "+fs.length+" 张"):fs[0].name):"未选择图片";
+  });
   document.getElementById("saveSrv").addEventListener("click",function(){
     var jh=srvJava.value.trim(), jp=parseInt(srvJavaPort.value.trim(),10)||25565;
     var bh=srvBed.value.trim(), bp=parseInt(srvBedPort.value.trim(),10)||19132;
@@ -764,10 +767,18 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
     publishAll();
     toast("已保存服务器状态配置");
   });
+  function normMem(m){
+    if(!m) return m;
+    if(!m.imgs || !m.imgs.length){ m.imgs = m.img?[m.img]:[]; }
+    if(!m.img && m.imgs.length){ m.img = m.imgs[0]; }
+    return m;
+  }
+  function memImgs(m){ return (m&&m.imgs&&m.imgs.length)?m.imgs:((m&&m.img)?[m.img]:[]); }
   function renderMem(){
     if(!memorial.length){ mList.innerHTML='<div class="empty">暂无纪念馆作品</div>'; return; }
     mList.innerHTML=memorial.map(function(m,i){
-      return '<div class="file-row"><span class="nm">'+esc(m.title)+'</span><span class="sz">'+esc(m.desc)+'</span><button class="btn btn-danger btn-sm" data-i="'+i+'">删除</button></div>';
+      var n=memImgs(m).length;
+      return '<div class="file-row"><span class="nm">'+esc(m.title)+'</span><span class="sz">'+n+' 张 · '+esc(m.desc)+'</span><button class="btn btn-danger btn-sm" data-i="'+i+'">删除</button></div>';
     }).join("");
     mList.querySelectorAll("[data-i]").forEach(function(b){
       b.addEventListener("click",function(){ delMem(+b.getAttribute("data-i")); });
@@ -776,42 +787,59 @@ header.scrolled{background:rgba(10,14,12,.8);box-shadow:0 8px 30px rgba(0,0,0,.2
   function delMem(i){
     var m=memorial[i]; if(!m) return;
     if(!confirm("删除纪念馆作品「"+m.title+"」？")) return;
-    if(m.img.indexOf("uploads/")===0){
-      var tail=m.img.slice(8);
-      giteeDelete("memorial",tail).catch(function(){});
-      ghDelete("uploads/"+tail).catch(function(){});
-    } else if(m.img.indexOf("gitee.com/")>=0){
-      var tail2=m.img.split("/raw/"+GITEE_BRANCH+"/")[1];
-      if(tail2) giteeDelete("memorial",tail2).catch(function(){});
-    }
+    memImgs(m).forEach(function(u){
+      if(u.indexOf("uploads/")===0){
+        var tail=u.slice(8);
+        giteeDelete("memorial",tail).catch(function(){});
+        ghDelete("uploads/"+tail).catch(function(){});
+      } else if(u.indexOf("gitee.com/")>=0){
+        var tail2=u.split("/raw/"+GITEE_BRANCH+"/")[1];
+        if(tail2) giteeDelete("memorial",tail2).catch(function(){});
+      }
+    });
     memorial.splice(i,1); renderMem(); publishAll();
   }
-  function addMem(){
-    var f=mFile.files[0];
-    if(!mTitle.value.trim() || !mDesc.value.trim()){ toast("请填写标题和介绍"); return; }
-    if(!f){ toast("请选择建筑截图"); return; }
-    if(memorial.length>=20){ toast("纪念馆最多 20 个作品"); return; }
-    if(f.size>5*1048576){ toast("截图请小于 5MB"); return; }
-    addMemBtn.disabled=true; addMemBtn.textContent="上传中…";
-    var name=Date.now()+"-"+f.name, b64=null;
+  function readB64(f,ok,err){
     var rd=new FileReader();
-    rd.onload=function(){
-      b64=String(rd.result).split(",")[1];
-      giteeWrite("memorial",name,b64,"upload memorial "+name)
-        .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
-        .then(function(){ return ghWriteB64("uploads/"+name, b64, "sync img "+name); })
-        .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
-        .catch(function(e){ notify("err","提醒：图片未同步到本站","作品「"+mTitle.value.trim()+"」已保存（玩家页暂不显示图片），原因："+(e&&e.message||"未知错误")+"\n可稍后在纪念馆列表中删除重传。"); return {ok:true}; })  /* 图片同步失败不阻断 JSON 发布 */
-        .then(function(){
-          memorial.push({title:mTitle.value.trim(), desc:mDesc.value.trim(), img:"uploads/"+name});
-          mTitle.value=""; mDesc.value=""; mFile.value=""; mFileName.textContent="未选择图片";
-          renderMem(); return publishAll();
-        })
-        .catch(function(e){ toast("上传失败："+(e&&e.message||"未知错误")); })
-        .finally(function(){ addMemBtn.disabled=false; addMemBtn.textContent="添加作品"; });
-    };
-    rd.onerror=function(){ toast("读取图片失败"); addMemBtn.disabled=false; addMemBtn.textContent="添加作品"; };
+    rd.onload=function(){ ok(String(rd.result).split(",")[1]); };
+    rd.onerror=err;
     rd.readAsDataURL(f);
+  }
+  function memBtnReset(){ addMemBtn.disabled=false; addMemBtn.textContent="添加作品"; }
+  function addMem(){
+    var files=Array.prototype.slice.call(mFile.files||[]);
+    var title=mTitle.value.trim(), desc=mDesc.value.trim();
+    if(!title || !desc){ toast("请填写标题和介绍"); return; }
+    if(!files.length){ toast("请选择建筑截图（可多张）"); return; }
+    if(memorial.length>=20){ toast("纪念馆最多 20 个作品"); return; }
+    for(var j=0;j<files.length;j++){ if(files[j].size>5*1048576){ toast("单张截图请小于 5MB"); return; } }
+    addMemBtn.disabled=true; addMemBtn.textContent="上传中…";
+    var paths=[], k=0;
+    function step(){
+      if(k>=files.length) return done();
+      var f=files[k]; k++;
+      var name=Date.now()+"-"+k+"-"+f.name.replace(/[^\w.\-]/g,"_");
+      mFileName.textContent="正在上传 "+k+"/"+files.length+" 张…";
+      readB64(f,function(b64){
+        giteeWrite("memorial",name,b64,"upload memorial "+name)
+          .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
+          .then(function(){ return ghWriteB64("uploads/"+name, b64, "sync img "+name); })
+          .then(function(r){ if(!r.ok) return r.json().then(function(d){ throw new Error(d.message||"HTTP "+r.status); }); })
+          .catch(function(e){
+            notify("err","提醒：有图片未同步到本站","作品「"+title+"」已保存，原因："+(e&&e.message||"未知错误")+"\n可稍后在纪念馆列表中删除重传。");
+          })
+          .then(function(){ paths.push("uploads/"+name); step(); });
+      },function(){ toast("读取图片失败"); memBtnReset(); });
+    }
+    function done(){
+      memorial.push({title:title, desc:desc, imgs:paths, img:paths[0]});
+      mTitle.value=""; mDesc.value=""; mFile.value=""; mFileName.textContent="未选择图片";
+      renderMem(); memBtnReset();
+      publishAll()
+        .then(function(){ toast("已添加「"+title+"」，共 "+paths.length+" 张图"); })
+        .catch(function(e){ toast("发布失败："+(e&&e.message||"未知错误")); });
+    }
+    step();
   }
   addMemBtn.addEventListener("click",addMem);
 
