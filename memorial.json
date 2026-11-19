@@ -91,7 +91,8 @@
     "title": "酒桶私人酒馆",
     "desc": "两层小楼，门口停着车，招牌挂得满满当当。",
     "imgs": [
-      "assets/memorial-barrel-tavern.jpg"
+      "assets/memorial-barrel-tavern.jpg",
+      "assets/memorial-barrel-tavern-b.jpg"
     ],
     "img": "assets/memorial-barrel-tavern.jpg"
   },
