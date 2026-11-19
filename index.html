@@ -442,6 +442,42 @@ section[id]{scroll-margin-top:84px}
   fill:none;stroke:url(#tearGrad);stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round;
   shape-rendering:geometricPrecision;
 }
+/* 流动光波：同一条波形铺两屏，横向循环淌动（只做光影，不参与撕缝） */
+.boot .flows{position:absolute;top:0;left:0;width:200%;height:100%;z-index:2;opacity:0;pointer-events:none;
+  animation:flowOn .7s ease .5s forwards}
+.boot .flows svg{position:absolute;top:0;left:0;width:100%;height:100%;display:block}
+.boot .flows path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.boot .w1 path{stroke:#F0B35C;stroke-width:1.6;opacity:.42;animation:flowMove 12s linear infinite}
+.boot .w2 path{stroke:#4ECB8D;stroke-width:10;opacity:.09;filter:blur(9px);animation:flowMove 19s linear infinite reverse}
+.boot .w3 path{stroke:#F0B35C;stroke-width:1.2;opacity:.2;animation:flowMove 26s linear infinite}
+@keyframes flowMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes flowOn{to{opacity:1}}
+@keyframes flowOff{to{opacity:0}}
+.boot.split .flows{animation:flowOff .55s ease .08s forwards}
+/* 沿曲线漂浮的粒子 */
+.boot .sparks{position:absolute;inset:0;z-index:4;pointer-events:none}
+.boot .sparks i{position:absolute;border-radius:50%;opacity:0;
+  background:radial-gradient(circle,#fff 0%,rgba(240,179,92,.95) 42%,rgba(240,179,92,0) 74%);
+  box-shadow:0 0 9px 1px rgba(240,179,92,.75);
+  animation:pIn .6s ease forwards,pBlink 2.6s ease-in-out infinite,pFloat 3.4s ease-in-out infinite}
+.boot .sparks i.g{background:radial-gradient(circle,#fff 0%,rgba(78,203,141,.95) 42%,rgba(78,203,141,0) 74%);
+  box-shadow:0 0 9px 1px rgba(78,203,141,.7)}
+@keyframes pIn{to{opacity:.95}}
+@keyframes pBlink{0%,100%{opacity:.3}50%{opacity:.95}}
+@keyframes pFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-22px) scale(1.35)}}
+@keyframes pOff{to{opacity:0}}
+.boot.split .sparks{animation:pOff .6s ease forwards}
+/* 撕开瞬间的一次性爆闪 */
+.boot .flash{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 62% 54% at 50% 50%,rgba(255,244,222,.5),rgba(240,179,92,.14) 46%,rgba(240,179,92,0) 74%)}
+.boot.split .flash{animation:flashUp .52s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes flashUp{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+/* 撕开瞬间迸射的火星 */
+.boot .burst{position:absolute;inset:0;z-index:6;pointer-events:none}
+.boot .burst i{position:absolute;left:50%;top:50%;width:2px;height:2px;border-radius:50%;background:#fff;
+  box-shadow:0 0 9px rgba(240,179,92,.95);opacity:0}
+.boot.split .burst i{animation:burstOut .95s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes burstOut{0%{opacity:0;transform:translate(0,0) scale(.3)}16%{opacity:1}100%{opacity:0;transform:translate(var(--bx),var(--by)) scale(1.15)}}
 .boot .boot-mark{
   position:absolute;left:50%;top:calc(50% - 10.5vh);z-index:5;
   transform:translate(-50%,calc(-50% + 16px));opacity:0;
@@ -561,6 +597,14 @@ section[id]{scroll-margin-top:84px}
     </defs>
     <path id="tearPath" d="M0 50 L100 50"></path>
   </svg>
+  <div class="flows" aria-hidden="true">
+    <svg class="w1" viewBox="0 0 200 100" preserveAspectRatio="none"><path id="flowA" d="M0 50 L100 50"/></svg>
+    <svg class="w2" viewBox="0 0 200 100" preserveAspectRatio="none"><path id="flowB" d="M0 50 L100 50"/></svg>
+    <svg class="w3" viewBox="0 0 200 100" preserveAspectRatio="none"><path id="flowC" d="M0 50 L100 50"/></svg>
+  </div>
+  <div class="flash" aria-hidden="true"></div>
+  <div class="sparks" id="sparks" aria-hidden="true"></div>
+  <div class="burst" id="burst" aria-hidden="true"></div>
   <span class="boot-mark" id="bootMark">乌龙茶的地盘</span>
 </div>
 <div class="scrollbar" id="scrollbar" aria-hidden="true"></div>
@@ -1262,6 +1306,55 @@ section[id]{scroll-margin-top:84px}
       }
       /* 同一条曲线同时用于：发光线（SVG 百分比坐标）与上下两片的 SVG 裁剪（0-1 单位坐标） */
       bPath.setAttribute("d", list.map(function(p,i){ return (i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1); }).join(" "));
+
+      /* 流波：同一波形铺两屏，便于横向循环 */
+      var fA = document.getElementById("flowA"), fB = document.getElementById("flowB");
+      if(fA && fB){
+        var fC = document.getElementById("flowC");
+        var offs = [22, -30, 46];                       /* 三条流波错开，形成层叠的淌动光带 */
+        [fA, fB, fC].forEach(function(el, idx){
+          if(!el) return;
+          var fd = "";
+          for(var j=0;j<=BN*2;j++){
+            var tt = (j/BN) % 1;
+            var fx = j*BW/BN;
+            var fy = BH/2 + offs[idx] + BH*(BAMP/100)*Math.sin(tt*Math.PI*3.1)*Math.sin(tt*Math.PI);
+            fd += (j?"L":"M") + fx.toFixed(1) + " " + fy.toFixed(1) + " ";
+          }
+          el.setAttribute("d", fd);
+          if(el.ownerSVGElement) el.ownerSVGElement.setAttribute("viewBox", "0 0 " + (BW*2) + " " + BH);
+        });
+      }
+
+      /* 沿曲线漂浮的粒子 */
+      var spr = document.getElementById("sparks");
+      if(spr){
+        for(var k=0;k<62;k++){
+          var e = document.createElement("i");
+          var ti = Math.floor(Math.random()*(BN+1));
+          var sz = 2.2 + Math.random()*2.9;
+          e.style.left = list[ti][0].toFixed(0) + "px";
+          e.style.top  = (list[ti][1] + (Math.random()*2-1)*46).toFixed(0) + "px";
+          e.style.width = sz.toFixed(1) + "px";
+          e.style.height = sz.toFixed(1) + "px";
+          e.style.animationDelay = (0.28+Math.random()*0.72).toFixed(2)+"s, "+(Math.random()*2.6).toFixed(2)+"s, "+(Math.random()*3).toFixed(2)+"s";
+          e.style.animationDuration = ".6s, "+(2.2+Math.random()*1.6).toFixed(2)+"s, "+(2.6+Math.random()*1.8).toFixed(2)+"s";
+          if(Math.random()<0.34) e.className = "g";
+          spr.appendChild(e);
+        }
+      }
+
+      /* 撕开瞬间迸射的火星 */
+      var bst = document.getElementById("burst");
+      if(bst){
+        for(var k2=0;k2<28;k2++){
+          var be = document.createElement("i");
+          be.style.setProperty("--bx", ((Math.random()*2-1)*46).toFixed(0)+"vw");
+          be.style.setProperty("--by", ((Math.random()<.5?-1:1)*(14+Math.random()*34)).toFixed(0)+"vh");
+          be.style.animationDelay = (Math.random()*0.14).toFixed(2)+"s";
+          bst.appendChild(be);
+        }
+      }
 
       var cUp = document.getElementById("clipUpPath");
       var cDn = document.getElementById("clipDnPath");
