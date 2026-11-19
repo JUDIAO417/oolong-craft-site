@@ -169,14 +169,14 @@ header.scrolled{background:rgba(10,14,12,.78);box-shadow:0 8px 30px rgba(0,0,0,.
 .hero-inner{flex:1 1 auto;width:100%;padding-top:6.5rem;padding-bottom:8rem}  /* flex 子项占满整行：容器宽度由 wrap(1160px) 决定，内容左对齐 */
 .hero-inner .chips,.hero-inner .hero-cta,.hero-inner .hero-links{justify-content:flex-start}  /* 按钮行靠左 */
 .hero-inner{text-align:left}
-/* 首屏入场序列 */
-.hero-inner>*{opacity:0;transform:translateY(26px);animation:heroIn .8s cubic-bezier(.2,.7,.3,1) forwards}
-.hero-inner>*:nth-child(1){animation-delay:.15s}
-.hero-inner>*:nth-child(2){animation-delay:.3s}
-.hero-inner>*:nth-child(3){animation-delay:.45s}
-.hero-inner>*:nth-child(4){animation-delay:.6s}
-.hero-inner>*:nth-child(5){animation-delay:.75s}
-@keyframes heroIn{to{opacity:1;transform:none}}
+/* 首屏入场序列（开场动画结束后接管） */
+.hero-inner>*{opacity:0;transform:translateY(34px);filter:blur(8px);animation:heroIn 1.05s cubic-bezier(.16,1,.3,1) forwards}
+.hero-inner>*:nth-child(1){animation-delay:1s}
+.hero-inner>*:nth-child(2){animation-delay:1.14s}
+.hero-inner>*:nth-child(3){animation-delay:1.28s}
+.hero-inner>*:nth-child(4){animation-delay:1.42s}
+.hero-inner>*:nth-child(5){animation-delay:1.56s}
+@keyframes heroIn{to{opacity:1;transform:none;filter:none}}
 @media (prefers-reduced-motion:reduce){.hero-inner>*{opacity:1;transform:none;animation:none}}
 .hero-kicker{
   font-family:var(--pixel);font-size:.62rem;color:var(--jade);
@@ -256,7 +256,7 @@ h2.sec-title{
 }
 .sec-lead{color:var(--muted);max-width:56ch;font-size:1.02rem}
 /* 滚动揭示（带轻微模糊消散） */
-.rv{opacity:0;transform:translateY(22px);filter:blur(6px);transition:opacity .7s ease,transform .7s ease,filter .7s ease}
+.rv{opacity:0;transform:translateY(26px);filter:blur(7px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .95s cubic-bezier(.16,1,.3,1),filter .8s cubic-bezier(.16,1,.3,1)}
 .rv.in{opacity:1;transform:none;filter:none}
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;filter:none;transition:none}}
 
@@ -331,6 +331,8 @@ h2.sec-title{
   padding:2.2rem 1.6rem;gap:1rem;border-radius:var(--r-lg);transition:background .3s;
 }
 .gal-cta:hover{background:rgba(255,255,255,.06)}
+.gal-cta.wide{grid-column:span 2}
+@media (max-width:960px){.gal-cta.wide{grid-column:auto}}
 .gal-cta .pixel{font-size:.55rem;color:var(--jade)}
 .gal-cta h3{font-family:var(--serif);font-weight:900;font-size:1.25rem}
 .gal-cta p{color:var(--muted);font-size:.9rem;max-width:24em}
@@ -423,6 +425,77 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
 }
 .lb button:hover{background:rgba(240,179,92,.16)}
 
+/* 锚点跳转留出吸顶栏高度 */
+section[id]{scroll-margin-top:84px}
+
+/* ============ 开场动画（贝塞尔缓动 · 光刃扫描） ============ */
+.boot{position:fixed;inset:0;z-index:130;background:#070B09;display:grid;place-items:center;overflow:hidden;pointer-events:none}
+.boot .blade{position:absolute;left:0;right:0;top:50%;height:2px;background:linear-gradient(90deg,transparent,rgba(78,203,141,.15) 18%,rgba(78,203,141,.95) 48%,rgba(240,179,92,1) 58%,rgba(240,179,92,.2) 84%,transparent);transform:scaleX(0);transform-origin:50% 50%;box-shadow:0 0 34px rgba(240,179,92,.55);animation:blade .95s cubic-bezier(.16,1,.3,1) .12s forwards}
+.boot .boot-glow{position:absolute;left:50%;top:50%;width:70vmin;height:70vmin;border-radius:50%;transform:translate(-50%,-50%) scale(.4);background:radial-gradient(circle,rgba(240,179,92,.22),transparent 62%);opacity:0;animation:glowPulse 1.5s cubic-bezier(.16,1,.3,1) .2s forwards}
+.boot .boot-mark{position:absolute;left:50%;top:calc(50% - 40px);transform:translate(-50%,10px);font-family:var(--pixel);font-size:.6rem;letter-spacing:.34em;color:var(--tea);opacity:0;animation:markIn .8s cubic-bezier(.16,1,.3,1) .5s forwards}
+.boot.off{animation:bootOut .78s cubic-bezier(.72,0,.24,1) forwards}
+@keyframes blade{to{transform:scaleX(1)}}
+@keyframes glowPulse{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}45%{opacity:1}100%{opacity:.25;transform:translate(-50%,-50%) scale(1)}}
+@keyframes markIn{to{opacity:1;transform:translate(-50%,0)}}
+@keyframes bootOut{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-101%);opacity:1;visibility:hidden}}
+/* 首屏科技网格（开场后淡入） */
+.hero-grid{position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(rgba(78,203,141,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(78,203,141,.07) 1px,transparent 1px);
+  background-size:68px 68px;opacity:0;transform:scale(1.06);
+  -webkit-mask-image:radial-gradient(ellipse at 26% 38%,rgba(0,0,0,.95),transparent 74%);
+  mask-image:radial-gradient(ellipse at 26% 38%,rgba(0,0,0,.95),transparent 74%);
+  animation:gridIn 1.9s cubic-bezier(.16,1,.3,1) 1.15s forwards}
+@keyframes gridIn{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .boot{display:none}
+  .hero-grid{opacity:1;transform:none;animation:none}
+}
+
+/* ============ 纪念馆多图轮播 ============ */
+.gal .slides{position:relative;aspect-ratio:4/3;overflow:hidden;
+  background:linear-gradient(100deg,#0B1210 18%,#131C16 42%,#0B1210 66%);background-size:220% 100%;
+  animation:shimmer 1.9s linear infinite}
+.gal .slides.ready{animation:none;background:#0B1210}
+@keyframes shimmer{to{background-position:-220% 0}}
+@media (prefers-reduced-motion:reduce){.gal .slides{animation:none}}
+.gal .slides>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:translateX(9%) scale(1.05);
+  transition:opacity .55s cubic-bezier(.22,1,.36,1),transform .9s cubic-bezier(.22,1,.36,1);will-change:opacity,transform}
+.gal .slides>img.on{opacity:1;transform:translateX(0) scale(1);z-index:2}
+.gal .slides>img.out{opacity:0;transform:translateX(-9%) scale(1.03);z-index:1}
+.gal .slides.rv-left>img{transform:translateX(-9%) scale(1.05)}
+.gal .slides.rv-left>img.on{transform:translateX(0) scale(1)}
+.gal .slides.rv-left>img.out{transform:translateX(9%) scale(1.03)}
+.gal .thumb.multi{cursor:default}
+.gal .thumb:not(.multi):hover img.on{transform:scale(1.06);transition:transform .7s cubic-bezier(.16,1,.3,1)}
+.gal .thumb.multi .zoom{cursor:zoom-in}
+.gal .gnav{position:absolute;top:50%;z-index:5;width:38px;height:38px;margin-top:-19px;display:grid;place-items:center;
+  border-radius:50%;border:1px solid var(--glass-line-strong);background:rgba(8,12,10,.52);color:var(--tea);cursor:pointer;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font-size:1rem;line-height:1;
+  opacity:0;transform:translateX(-6px);transition:opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1),background .25s}
+.gal .gnav.prev{left:10px}
+.gal .gnav.next{right:10px;transform:translateX(6px)}
+.gal .thumb:hover .gnav,.gal .thumb:focus-within .gnav{opacity:1;transform:translateX(0)}
+.gal .gnav:hover{background:rgba(240,179,92,.2)}
+.gal .dots{position:absolute;left:12px;bottom:11px;z-index:5;display:flex;gap:6px;align-items:center}
+.gal .dots i{width:6px;height:6px;border-radius:2px;background:rgba(242,236,217,.32);transition:background .35s,transform .45s cubic-bezier(.16,1,.3,1)}
+.gal .dots i.on{background:var(--tea);transform:scale(1.5)}
+.gal .cnt{position:absolute;right:12px;bottom:9px;z-index:5;font-family:var(--pixel);font-size:.46rem;letter-spacing:.08em;color:var(--ink);
+  background:rgba(8,12,10,.55);border:1px solid var(--glass-line);border-radius:4px;padding:4px 6px}
+@media (hover:none){
+  .gal .gnav{opacity:1;transform:none}
+}
+/* 灯箱多图 */
+.lb .lb-img{transition:opacity .35s cubic-bezier(.22,1,.36,1),transform .45s cubic-bezier(.22,1,.36,1)}
+.lb.swap .lb-img{opacity:.15;transform:scale(.985)}
+.lb .lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.06);border:1px solid var(--glass-line-strong);color:var(--tea);cursor:pointer;font-size:1.1rem;z-index:3;
+  transition:background .25s,transform .35s cubic-bezier(.16,1,.3,1)}
+.lb .lb-nav:hover{background:rgba(240,179,92,.2);transform:translateY(-50%) scale(1.06)}
+.lb .lb-nav.p{left:14px}
+.lb .lb-nav.n{right:14px}
+.lb .lb-cnt{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);font-family:var(--pixel);font-size:.5rem;letter-spacing:.14em;
+  color:var(--muted);background:rgba(8,12,10,.6);border:1px solid var(--glass-line);border-radius:5px;padding:6px 10px}
+
 /* ============ 响应式 ============ */
 @media (max-width:960px){
   .about-grid{grid-template-columns:1fr}
@@ -448,6 +521,11 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
 </style>
 </head>
 <body>
+<div class="boot" id="boot" aria-hidden="true">
+  <span class="boot-glow"></span>
+  <span class="blade"></span>
+  <span class="boot-mark">OOLONG CRAFT</span>
+</div>
 <div class="scrollbar" id="scrollbar" aria-hidden="true"></div>
 <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
 
@@ -500,6 +578,7 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
 <!-- ===== 首屏 ===== -->
 <section class="hero">
   <div class="hero-bg" role="img" aria-label="黄昏下由方块构成的梯田茶园与小屋"></div>
+  <div class="hero-grid" aria-hidden="true"></div>
   <span class="cube" style="width:16px;height:16px;top:22%;left:12%;background:rgba(240,179,92,.5);animation-delay:.2s"></span>
   <span class="cube" style="width:10px;height:10px;top:64%;left:6%;background:rgba(141,174,156,.55);animation-delay:1.1s"></span>
   <span class="cube" style="width:22px;height:22px;top:30%;right:14%;background:rgba(240,179,92,.28);animation-delay:2s"></span>
@@ -772,7 +851,10 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
 
 <!-- ===== 灯箱 ===== -->
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="图片预览">
-  <img id="lb-img" src="" alt="">
+  <img id="lb-img" class="lb-img" src="" alt="">
+  <button class="lb-nav p" id="lb-prev" type="button" aria-label="上一张" style="display:none">‹</button>
+  <button class="lb-nav n" id="lb-next" type="button" aria-label="下一张" style="display:none">›</button>
+  <span class="lb-cnt" id="lb-cnt" style="display:none"></span>
   <button id="lb-close" aria-label="关闭预览">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M5 5l14 14M19 5L5 19"/></svg>
       </button>
@@ -864,35 +946,121 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
     if(u.indexOf("assets/")===0) return GAL_ACC+GAL_REL+u.slice(7);
     return u;
   }
+  /* 一条作品可挂多张图：优先 imgs 数组，兼容旧数据的 img 单图 */
+  function galList(m){
+    var a=(m&&m.imgs)||[];
+    if(a.length) return a.filter(function(x){ return !!x; });
+    return (m&&m.img)?[m.img]:[];
+  }
   function renderGal(items){
     items=(items||[]).slice(0,20);
     var html="";
     items.forEach(function(m){
-      var u=galImg(m.img);
-      html+='<figure class="gal rv"><div class="thumb" data-lb="'+escAttr(u)+'" role="button" tabindex="0" aria-label="查看大图：'+escAttr(m.title)+'"><img src="'+escAttr(u)+'" data-mirror="'+escAttr(m.img)+'" alt="'+escAttr(m.title)+'" loading="lazy"></div><figcaption><h3>'+escHtml(m.title)+'</h3><p>'+escHtml(m.desc)+'</p></figcaption></figure>';
+      var list=galList(m); if(!list.length) return;
+      var urls=list.map(galImg), n=urls.length;
+      var slides=urls.map(function(u,i){
+        return '<img class="'+(i===0?"on":"")+'" src="'+escAttr(u)+'" data-mirror="'+escAttr(list[i])+'" alt="'+escAttr(m.title+(n>1?" 第"+(i+1)+" 张":""))+'" loading="lazy">';
+      }).join("");
+      html+='<figure class="gal rv"><div class="thumb'+(n>1?" multi":"")+'" data-idx="0" data-srcs="'+escAttr(urls.join("|"))+'" data-mirrors="'+escAttr(list.join("|"))+'" role="button" tabindex="0" aria-label="查看大图：'+escAttr(m.title)+'">';
+      html+='<div class="slides">'+slides+'</div>';
+      if(n>1){
+        html+='<button class="gnav prev" type="button" aria-label="上一张">‹</button>';
+        html+='<button class="gnav next" type="button" aria-label="下一张">›</button>';
+        html+='<div class="dots">'+urls.map(function(_,i){ return '<i'+(i===0?' class="on"':'')+'></i>'; }).join("")+'</div>';
+        html+='<span class="cnt">1/'+n+'</span>';
+      }
+      html+='</div><figcaption><h3>'+escHtml(m.title)+'</h3><p>'+escHtml(m.desc)+'</p></figcaption></figure>';
     });
     if(!items.length){
       html='<div class="gal rv" style="grid-column:1/-1;text-align:center;color:var(--muted);padding:2.5rem 1rem;border:1px dashed var(--glass-line-strong);border-radius:2px">纪念馆正在装修，第一件展品在路上。</div>';
     }
     var cta=galGrid.querySelector(".gal-cta");
+    if(cta) cta.classList.toggle("wide", items.length % 3 === 1 && items.length > 0);
     var holder=document.createElement("div");
     holder.style.display="contents";
     holder.innerHTML=html;
     galGrid.insertBefore(holder,cta);
+
+    /* 加速链失败 → 回退本站相对路径（同时同步灯箱用的地址表） */
     holder.querySelectorAll("img[data-mirror]").forEach(function(img){
+      img.addEventListener("load",function(){
+        var sl=img.closest(".slides"); if(sl) sl.classList.add("ready");
+      });
       img.addEventListener("error",function(){
         if(img.getAttribute("data-fb")) return;
         img.setAttribute("data-fb","1");
         var fb=img.getAttribute("data-mirror");
         img.src=fb;
         var th=img.closest(".thumb");
-        if(th) th.setAttribute("data-lb",fb);
+        if(th&&th.getAttribute("data-srcs")){
+          var arr=th.getAttribute("data-srcs").split("|");
+          var idx=Array.prototype.indexOf.call(img.parentNode.children,img);
+          if(idx>=0){ arr[idx]=fb; th.setAttribute("data-srcs",arr.join("|")); }
+        }
       });
     });
-    holder.querySelectorAll(".thumb[data-lb]").forEach(function(t){
-      t.addEventListener("click",function(){ openLb(t.getAttribute("data-lb")); });
-      t.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openLb(t.getAttribute("data-lb")); } });
+
+    /* 多图切换（贝塞尔滑入滑出） */
+    function setSlide(th,to,back){
+      var slidesEl=th.querySelector(".slides");
+      var imgs=slidesEl?slidesEl.querySelectorAll("img"):[];
+      if(!imgs.length) return;
+      var cur=parseInt(th.getAttribute("data-idx"),10)||0;
+      if(to<0) to=imgs.length-1;
+      if(to>=imgs.length) to=0;
+      if(to===cur) return;
+      if(back) slidesEl.classList.add("rv-left"); else slidesEl.classList.remove("rv-left");
+      imgs[cur].classList.remove("on"); imgs[cur].classList.add("out");
+      imgs[to].classList.add("on"); imgs[to].classList.remove("out");
+      setTimeout(function(){ imgs[cur].classList.remove("out"); },1000);
+      th.setAttribute("data-idx",to);
+      var dots=th.querySelectorAll(".dots i");
+      for(var i=0;i<dots.length;i++) dots[i].classList.toggle("on",i===to);
+      var cnt=th.querySelector(".cnt");
+      if(cnt) cnt.textContent=(to+1)+"/"+imgs.length;
+    }
+    function openFromThumb(th){
+      var srcs=(th.getAttribute("data-srcs")||"").split("|");
+      var mirs=(th.getAttribute("data-mirrors")||"").split("|");
+      if(!srcs[0]) return;
+      openLb(srcs,mirs,parseInt(th.getAttribute("data-idx"),10)||0);
+    }
+
+    holder.querySelectorAll(".thumb[data-srcs]").forEach(function(th){
+      var nx=th.querySelector(".gnav.next"), pv=th.querySelector(".gnav.prev");
+      if(nx) nx.addEventListener("click",function(e){ e.stopPropagation(); setSlide(th,(parseInt(th.getAttribute("data-idx"),10)||0)+1,false); });
+      if(pv) pv.addEventListener("click",function(e){ e.stopPropagation(); setSlide(th,(parseInt(th.getAttribute("data-idx"),10)||0)-1,true); });
+      th.addEventListener("mouseenter",function(){
+        th.querySelectorAll("img").forEach(function(im){ if(!im.complete) im.loading="eager"; });
+      },{once:true});
+      th.addEventListener("click",function(){ openFromThumb(th); });
+      th.addEventListener("keydown",function(e){
+        if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openFromThumb(th); }
+        else if(e.key==="ArrowRight"&&nx){ e.preventDefault(); nx.click(); }
+        else if(e.key==="ArrowLeft"&&pv){ e.preventDefault(); pv.click(); }
+      });
+      /* 手机左右滑动切换 */
+      var sx=0,sy=0,drag=false;
+      th.addEventListener("touchstart",function(e){ if(e.touches.length!==1) return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; drag=true; },{passive:true});
+      th.addEventListener("touchend",function(e){
+        if(!drag) return; drag=false;
+        var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+        if(Math.abs(dx)<42||Math.abs(dx)<Math.abs(dy)) return;
+        var idx=parseInt(th.getAttribute("data-idx"),10)||0;
+        if(dx<0) setSlide(th,idx+1,false); else setSlide(th,idx-1,true);
+      },{passive:true});
     });
+
+    /* 加速链长时间无响应（既不成功也不报错）→ 6 秒后统一切回本站 */
+    setTimeout(function(){
+      holder.querySelectorAll("img[data-mirror]").forEach(function(img){
+        if(img.getAttribute("data-fb")) return;
+        if(img.complete && img.naturalWidth > 0) return;
+        img.setAttribute("data-fb","1");
+        img.src=img.getAttribute("data-mirror");
+      });
+    },6000);
+
     if("IntersectionObserver" in window && !prefersReduced){
       var io2=new IntersectionObserver(function(es){
         es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add("in"); io2.unobserve(en.target); } });
@@ -979,25 +1147,78 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
   /* 按钮常显（状态由 status.html 内联显示，不依赖前端读取） */
   srvFab.style.display="flex";
 
-  /* 灯箱 */
+  /* 灯箱（支持多图浏览） */
   var lb = document.getElementById("lb");
   var lbImg = document.getElementById("lb-img");
-  function openLb(src){
-    lbImg.src = src;
+  var lbPrev = document.getElementById("lb-prev"), lbNextB = document.getElementById("lb-next"), lbCnt = document.getElementById("lb-cnt");
+  var lbState = {list:[], mir:[], i:0};
+  function lbSync(){
+    var multi = lbState.list.length > 1;
+    lbPrev.style.display = multi ? "grid" : "none";
+    lbNextB.style.display = multi ? "grid" : "none";
+    lbCnt.style.display = multi ? "block" : "none";
+    if(multi) lbCnt.textContent = (lbState.i+1) + " / " + lbState.list.length;
+  }
+  function lbShow(i){
+    lbState.i = (i + lbState.list.length) % lbState.list.length;
+    lbImg.removeAttribute("data-fb");
+    lbImg.onerror = function(){
+      if(lbImg.getAttribute("data-fb")) return;
+      var m = lbState.mir[lbState.i];
+      if(!m) return;
+      lbImg.setAttribute("data-fb","1");
+      lbImg.src = m;
+    };
+    lbImg.src = lbState.list[lbState.i];
+    lbSync();
+  }
+  function openLb(list, mirs, i){
+    lbState.list = (list||[]).filter(Boolean);
+    lbState.mir = (mirs||list||[]).slice();
+    if(!lbState.list.length) return;
+    lbShow(i||0);
     lb.classList.add("open");
     document.body.style.overflow = "hidden";
+  }
+  function lbGo(d){
+    if(lbState.list.length < 2) return;
+    lb.classList.add("swap");
+    setTimeout(function(){
+      lbShow(lbState.i + d);
+      lb.classList.remove("swap");
+    },170);
   }
   function closeLb(){
     lb.classList.remove("open");
     document.body.style.overflow = "";
   }
-  document.querySelectorAll(".thumb[data-lb]").forEach(function(t){
-    t.addEventListener("click", function(){ openLb(t.getAttribute("data-lb")); });
-    t.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openLb(t.getAttribute("data-lb")); } });
-  });
+  lbPrev.addEventListener("click", function(e){ e.stopPropagation(); lbGo(-1); });
+  lbNextB.addEventListener("click", function(e){ e.stopPropagation(); lbGo(1); });
   lb.addEventListener("click", function(e){ if(e.target === lb) closeLb(); });
   document.getElementById("lb-close").addEventListener("click", closeLb);
-  document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeLb(); });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") closeLb();
+    else if(!lb.classList.contains("open")) return;
+    else if(e.key === "ArrowRight") lbGo(1);
+    else if(e.key === "ArrowLeft") lbGo(-1);
+  });
+
+  /* 开场动画：内容就绪后收起（最多等 2.4s，避免网络慢时卡住） */
+  var bootEl = document.getElementById("boot");
+  if(bootEl){
+    var bootOff = function(){ if(bootEl.classList.contains("off")) return; bootEl.classList.add("off"); setTimeout(function(){ bootEl.style.display="none"; }, 1000); };
+    if(prefersReduced){ bootEl.style.display="none"; }
+    else {
+      var started = Date.now();
+      var fire = function(){
+        var rest = Math.max(0, 1180 - (Date.now()-started));
+        setTimeout(bootOff, rest);
+      };
+      if(document.readyState === "complete") fire();
+      else window.addEventListener("load", fire, {once:true});
+      setTimeout(bootOff, 2000);
+    }
+  }
 })();
 </script>
 </body>
