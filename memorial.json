@@ -128,5 +128,10 @@
       "assets/memorial-food-street-b.jpg"
     ],
     "img": "assets/memorial-food-street-a.jpg"
+  },
+  {
+    "title": "落樱亭",
+    "desc": "悬在云上的一座小亭，樱花从亭心往上长。",
+    "img": "assets/memorial-sakura-pavilion.jpg"
   }
 ]
