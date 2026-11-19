@@ -438,7 +438,7 @@ section[id]{scroll-margin-top:84px}
   filter:drop-shadow(0 0 13px rgba(240,179,92,.55));
   animation:lineRise .62s cubic-bezier(.16,1,.3,1) .04s forwards}
 .boot .tearline path{
-  fill:none;stroke:url(#tearGrad);stroke-width:3.2;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round;
+  fill:none;stroke:url(#tearGrad);stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;
   shape-rendering:geometricPrecision;
 }
 .boot .boot-mark{
@@ -545,7 +545,7 @@ section[id]{scroll-margin-top:84px}
 <div class="boot" id="boot" aria-hidden="true">
   <div class="mono up"></div>
   <div class="mono dn"></div>
-  <svg class="tearline" viewBox="0 0 100 100" preserveAspectRatio="none">
+  <svg class="tearline" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
     <defs>
       <linearGradient id="tearGrad" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0%" stop-color="#4ECB8D" stop-opacity="0"/>
@@ -1246,22 +1246,26 @@ section[id]{scroll-margin-top:84px}
     else {
       var bUp = bootEl.querySelector(".up"), bDn = bootEl.querySelector(".dn");
       var bPath = document.getElementById("tearPath");
-      var BN = 96, BAMP = 7.6;
-      var list = [];
+      var BW = bootEl.clientWidth || window.innerWidth;
+      var BH = bootEl.clientHeight || window.innerHeight;
+      var BN = 90, BAMP = 7.6;                       /* 振幅按高度的百分比 */
+      var svgEl = document.querySelector(".boot .tearline");
+      if(svgEl) svgEl.setAttribute("viewBox", "0 0 " + BW + " " + BH);
+      var list = [];                                  /* 像素坐标 */
       for(var i=0;i<=BN;i++){
         var t = i/BN;
-        var taper = Math.sin(t*Math.PI);           /* 两端收窄，中间波幅最大 */
-        var y = 50 + BAMP*Math.sin(t*Math.PI*3.1)*taper;
-        list.push([t*100, y]);
+        var taper = Math.sin(t*Math.PI);              /* 两端收窄，中间波幅最大 */
+        var yy = BH/2 + BH*(BAMP/100)*Math.sin(t*Math.PI*3.1)*taper;
+        list.push([t*BW, yy]);
       }
       /* 同一条曲线同时用于：发光线（SVG 百分比坐标）与上下两片的 SVG 裁剪（0-1 单位坐标） */
-      bPath.setAttribute("d", list.map(function(p,i){ return (i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2); }).join(" "));
+      bPath.setAttribute("d", list.map(function(p,i){ return (i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1); }).join(" "));
 
       var cUp = document.getElementById("clipUpPath");
       var cDn = document.getElementById("clipDnPath");
       if(cUp && cDn){
-        var pts = list.map(function(p){ return [(p[0]/100).toFixed(4), ((p[1]-0.3)/100).toFixed(4)]; });
-        var ptsD = list.map(function(p){ return [(p[0]/100).toFixed(4), ((p[1]+0.3)/100).toFixed(4)]; });
+        var pts = list.map(function(p){ return [(p[0]/BW).toFixed(4), (p[1]/BH - 0.003).toFixed(4)]; });
+        var ptsD = list.map(function(p){ return [(p[0]/BW).toFixed(4), (p[1]/BH + 0.003).toFixed(4)]; });
         cUp.setAttribute("d", "M0 0" + pts.map(function(q){ return " L"+q[0]+" "+q[1]; }).join("") + " L1 0 Z");
         cDn.setAttribute("d", "M1 1" + ptsD.slice().reverse().map(function(q){ return " L"+q[0]+" "+q[1]; }).join("") + " L0 1 Z");
       }
