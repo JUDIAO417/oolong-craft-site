@@ -638,21 +638,46 @@ section[id]{scroll-margin-top:84px}
 ::-webkit-scrollbar-corner{background:#050907}
 
 /* 鼠标：一只小黑猫（热点在左上爪尖） */
-html,body,body *{cursor:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzNiIgaGVpZ2h0PSIzNiIgdmlld0JveD0iMCAwIDM2IDM2Ij48ZyBmaWxsPSIjMEEwRjBEIiBzdHJva2U9IiNFRkNCOTMiIHN0cm9rZS13aWR0aD0iMS4wNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48cGF0aCBkPSJNNy4xIDguNCBMNS41IDIuMyBMMTEuOSA2LjQiLz48cGF0aCBkPSJNMTkuNyA4LjQgTDIxLjMgMi4zIEwxNC45IDYuNCIvPjxjaXJjbGUgY3g9IjEzLjQiIGN5PSIxMS42IiByPSI4LjUiLz48cGF0aCBkPSJNMjEuNCAyOS42IEMyOC4zIDMwLjggMjkuNiAyMi4yIDI0LjIgMjEiLz48ZWxsaXBzZSBjeD0iMTMuNCIgY3k9IjI2LjQiIHJ4PSI4LjQiIHJ5PSI3LjQiLz48ZWxsaXBzZSBjeD0iMTAuMiIgY3k9IjMyLjYiIHJ4PSIyLjYiIHJ5PSIxLjQiLz48ZWxsaXBzZSBjeD0iMTYuOCIgY3k9IjMyLjYiIHJ4PSIyLjYiIHJ5PSIxLjQiLz48L2c+PGcgZmlsbD0iI0ZGRjdFNCI+PGVsbGlwc2UgY3g9IjEwLjYiIGN5PSIxMC45IiByeD0iMS4yIiByeT0iMS40Ii8+PGVsbGlwc2UgY3g9IjE2LjIiIGN5PSIxMC45IiByeD0iMS4yIiByeT0iMS40Ii8+PC9nPjxwYXRoIGQ9Ik0xMi42IDE0LjIgTDE0LjIgMTQuMiBMMTMuNCAxNS40IFoiIGZpbGw9IiNFRkNCOTMiLz48L3N2Zz4=") 3 3,auto!important}
+html,body,body *{cursor:url("assets/cat-cursor.png") 4 4,auto!important}
 input,textarea,select{cursor:text!important}
+
+/* 点击特效：光环 + 星针 + 中心闪光 */
+.boot .tap-fx{position:absolute;left:50%;top:50%;z-index:7;width:0;height:0;pointer-events:none}
+.boot .tap-fx i{position:absolute;display:block;opacity:0}
+.boot .tap-fx .ring{left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;
+  border:1.5px solid rgba(255,232,196,.92);
+  box-shadow:0 0 20px rgba(240,179,92,.8),inset 0 0 16px rgba(240,179,92,.45)}
+.boot .tap-fx .ring.s{width:14px;height:14px;margin:-7px 0 0 -7px;border-color:rgba(78,203,141,.9);
+  box-shadow:0 0 16px rgba(78,203,141,.7)}
+.boot .tap-fx.go .ring{animation:ringOut .72s cubic-bezier(.16,.9,.3,1) forwards}
+.boot .tap-fx.go .ring.s{animation:ringOutS .64s cubic-bezier(.16,.9,.3,1) .08s forwards}
+@keyframes ringOut{0%{opacity:0;transform:scale(.3)}16%{opacity:1}100%{opacity:0;transform:scale(4.1)}}
+@keyframes ringOutS{0%{opacity:0;transform:scale(.3)}20%{opacity:1}100%{opacity:0;transform:scale(2.7)}}
+.boot .tap-fx .core{left:0;top:0;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;
+  background:radial-gradient(circle,#FFF8E8,#F0B35C 58%,rgba(240,179,92,0) 100%);
+  box-shadow:0 0 26px 7px rgba(240,179,92,.5)}
+.boot .tap-fx.go .core{animation:corePop .36s ease-out forwards}
+@keyframes corePop{0%{opacity:0;transform:scale(.4)}28%{opacity:1;transform:scale(1.45)}100%{opacity:0;transform:scale(2.4)}}
+.boot .tap-fx .ray{left:0;top:0;width:2px;height:24px;margin:-24px 0 0 -1px;border-radius:2px;
+  background:linear-gradient(180deg,rgba(255,240,214,0),rgba(255,238,205,.95));
+  transform-origin:50% 100%}
+.boot .tap-fx.go .ray{animation:rayOut .68s cubic-bezier(.16,.8,.3,1) forwards}
+@keyframes rayOut{
+  0%{opacity:0;transform:rotate(var(--a)) translateY(-2px) scaleY(.25)}
+  24%{opacity:.95}
+  100%{opacity:0;transform:rotate(var(--a)) translateY(-152px) scaleY(1.15)}}
 
 /* 点击进入的一瞬：一只小黑猫闪动一下 */
 .boot .boot-cat{position:absolute;left:50%;top:50%;z-index:9;
-  width:clamp(86px,8.4vw,118px);opacity:0;pointer-events:none;
-  transform:translate(-50%,-50%) scale(.4)}
-.boot .boot-cat svg{display:block;width:100%;height:auto;
-  filter:drop-shadow(0 0 14px rgba(240,179,92,.55)) drop-shadow(0 0 40px rgba(78,203,141,.20))}
+  opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(.4)}
+.boot .boot-cat img{display:block;height:clamp(72px,6.4vw,92px);width:auto;
+  filter:drop-shadow(0 0 14px rgba(240,179,92,.55)) drop-shadow(0 0 38px rgba(78,203,141,.22))}
 .boot .boot-cat .cat-meow{position:absolute;left:50%;top:-20%;transform:translateX(-50%);
   font-family:var(--serif);font-style:normal;font-weight:700;font-size:clamp(.9rem,1.05vw,1.02rem);
   letter-spacing:.16em;color:#FFE3B8;
   text-shadow:0 0 12px rgba(240,179,92,.9),0 0 34px rgba(240,179,92,.5);white-space:nowrap;opacity:0}
-.boot.split .boot-cat{animation:catFlash .82s cubic-bezier(.16,.9,.3,1) forwards}
-.boot.split .boot-cat .cat-meow{animation:meowUp .82s ease .05s forwards}
+.boot.split .boot-cat{animation:catFlash .68s cubic-bezier(.16,.9,.3,1) forwards}
+.boot.split .boot-cat .cat-meow{animation:meowUp .68s ease .05s forwards}
 @keyframes catFlash{
   0%{opacity:0;transform:translate(-50%,-50%) scale(.36) rotate(-7deg)}
   11%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(0deg)}
@@ -674,13 +699,13 @@ input,textarea,select{cursor:text!important}
 }
 
 /* 滚动条旁趴着的小黑猫：随滚动上下跟手（只在内容可滚动时出现） */
-.edge-cat{position:fixed;right:1px;top:0;z-index:200;width:46px;pointer-events:none;
+.edge-cat{position:fixed;right:3px;top:0;z-index:200;pointer-events:none;
   transform:translateY(0);will-change:transform;
   transition:transform .2s cubic-bezier(.22,.9,.3,1);opacity:0}
 .edge-cat.on{opacity:1}
 .edge-cat .ec-in{display:block;animation:ecBob 4.4s ease-in-out infinite;
   filter:drop-shadow(0 0 12px rgba(240,179,92,.45))}
-.edge-cat .ec-in svg{display:block;width:100%;height:auto}
+.edge-cat .ec-in img{display:block;height:46px;width:auto}
 @keyframes ecBob{0%,100%{translate:0 0}50%{translate:0 -3px}}
 @media (max-width:760px){.edge-cat{display:none}}
 </style>
@@ -713,31 +738,13 @@ input,textarea,select{cursor:text!important}
     <svg class="w3" viewBox="0 0 200 100" preserveAspectRatio="none"><path id="flowC" d="M0 50 L100 50"/></svg>
   </div>
   <div class="flash" aria-hidden="true"></div>
+  <div class="tap-fx" id="tapFx" aria-hidden="true"></div>
   <div class="sparks" id="sparks" aria-hidden="true"></div>
   <div class="burst" id="burst" aria-hidden="true"></div>
   <span class="boot-mark" id="bootMark">乌龙茶的地盘</span>
   <span class="boot-hint" id="bootHint">点击任意处进入</span>
   <span class="boot-cat" id="bootCat" aria-hidden="true">
-    <svg viewBox="0 0 36 36" aria-hidden="true">
-      <g fill="#0A0F0D" stroke="#EFCB93" stroke-width="1.05" stroke-linejoin="round" stroke-linecap="round">
-        <path d="M7.1 8.4 L5.5 2.3 L11.9 6.4"/>
-        <path d="M19.7 8.4 L21.3 2.3 L14.9 6.4"/>
-        <circle cx="13.4" cy="11.6" r="8.5"/>
-        <path d="M21.4 29.6 C28.3 30.8 29.6 22.2 24.2 21"/>
-        <ellipse cx="13.4" cy="26.4" rx="8.4" ry="7.4"/>
-        <ellipse cx="10.2" cy="32.6" rx="2.6" ry="1.4"/>
-        <ellipse cx="16.8" cy="32.6" rx="2.6" ry="1.4"/>
-      </g>
-      <g fill="#FFF7E4">
-        <ellipse cx="10.6" cy="10.9" rx="1.25" ry="1.45"/>
-        <ellipse cx="16.2" cy="10.9" rx="1.25" ry="1.45"/>
-      </g>
-      <g fill="#0A0F0D">
-        <ellipse cx="10.6" cy="11.15" rx=".62" ry=".95"/>
-        <ellipse cx="16.2" cy="11.15" rx=".62" ry=".95"/>
-      </g>
-      <path d="M12.6 14.2 L14.2 14.2 L13.4 15.4 Z" fill="#EFCB93"/>
-    </svg>
+    <img src="assets/cat-black.png" alt="">
     <em class="cat-meow">喵～</em>
   </span>
 </div>
@@ -1561,63 +1568,26 @@ input,textarea,select{cursor:text!important}
 
       /* 开屏停在这里等用户：点击（或按键）后星光幕布撕开、小黑猫闪一下喵一声；久不点则自动进入兜底 */
       var bootCat = document.getElementById("bootCat");
-      var mctx = null;
-
-      /* 用 Web Audio 现搓一声「喵」，不依赖任何外部音频文件 */
-      function meowSound(delay){
-        try{
-          var AC = window.AudioContext || window.webkitAudioContext;
-          if(!AC) return;
-          if(!mctx) mctx = new AC();
-          if(mctx.state === "suspended"){ var pz = mctx.resume(); if(pz && pz.catch) pz.catch(function(){}); }
-          var ac = mctx, dur = 0.62, t0 = ac.currentTime + 0.015 + (delay || 0);
-          var master = ac.createGain(); master.gain.value = 0.34; master.connect(ac.destination);
-
-          /* 基频走 m → i → ao 的滑落与回勾 */
-          var osc = ac.createOscillator(); osc.type = "sawtooth";
-          var NR = 64, fv = new Float32Array(NR), pts = [[0,470],[0.12,720],[0.28,782],[0.42,598],[0.62,418],[0.76,468],[1,298]];
-          var i, j, a, b, k, p;
-          for(i=0;i<NR;i++){
-            p = i/(NR-1); j = 0;
-            while(j < pts.length-2 && p > pts[j+1][0]) j++;
-            a = pts[j]; b = pts[j+1];
-            k = (p-a[0])/(b[0]-a[0]); k = k<0?0:k>1?1:k;
-            fv[i] = a[1] + (b[1]-a[1])*k;
-          }
-          osc.frequency.setValueCurveAtTime(fv, t0, dur);
-
-          var lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2400; lp.Q.value = 0.7;
-          var pk = ac.createBiquadFilter(); pk.type = "peaking"; pk.frequency.value = 1150; pk.Q.value = 1.1; pk.gain.value = 7;
-          var hp = ac.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 300;
-          var g = ac.createGain();
-          g.gain.setValueAtTime(0.0001, t0);
-          g.gain.exponentialRampToValueAtTime(0.9, t0+0.07);
-          g.gain.exponentialRampToValueAtTime(0.56, t0+0.30);
-          g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
-          osc.connect(lp).connect(pk).connect(hp).connect(g).connect(master);
-
-          /* 起音那一下鼻音「m」 */
-          var nb = ac.createBuffer(1, Math.floor(ac.sampleRate*0.1), ac.sampleRate);
-          var nd = nb.getChannelData(0), q;
-          for(q=0;q<nd.length;q++) nd[q] = (Math.random()*2-1)*Math.pow(1-q/nd.length,2);
-          var ns = ac.createBufferSource(); ns.buffer = nb;
-          var nf = ac.createBiquadFilter(); nf.type = "lowpass"; nf.frequency.value = 520; nf.Q.value = 4;
-          var ng = ac.createGain();
-          ng.gain.setValueAtTime(0.001, t0);
-          ng.gain.linearRampToValueAtTime(0.22, t0+0.03);
-          ng.gain.linearRampToValueAtTime(0.001, t0+0.10);
-          ns.connect(nf).connect(ng).connect(master);
-
-          /* 尾音加一点颤，别太机械 */
-          var lfo = ac.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 27;
-          var lg = ac.createGain();
-          lg.gain.setValueAtTime(0, t0);
-          lg.gain.linearRampToValueAtTime(14, t0+dur);
-          lfo.connect(lg).connect(osc.frequency);
-
-          osc.start(t0); lfo.start(t0); ns.start(t0);
-          osc.stop(t0+dur+0.06); lfo.stop(t0+dur+0.06);
-        }catch(e){}
+      /* 点击落点的一圈光效：光环 ×2、星针 ×12、中心一闪 */
+      function tapFX(x, y){
+        var fx = document.getElementById("tapFx");
+        if(!fx) return;
+        fx.style.left = x + "px";
+        fx.style.top  = y + "px";
+        fx.innerHTML = "";
+        var r1 = document.createElement("i"); r1.className = "ring";
+        var r2 = document.createElement("i"); r2.className = "ring s";
+        var co = document.createElement("i"); co.className = "core";
+        fx.appendChild(r1); fx.appendChild(r2); fx.appendChild(co);
+        for(var i = 0; i < 16; i++){
+          var ry = document.createElement("i"); ry.className = "ray";
+          ry.style.setProperty("--a", (i * 22.5) + "deg");
+          ry.style.animationDelay = ((i % 3) * 0.025).toFixed(3) + "s";
+          fx.appendChild(ry);
+        }
+        fx.classList.remove("go");
+        void fx.offsetWidth;
+        fx.classList.add("go");
       }
 
       var bDone = false;
@@ -1625,15 +1595,16 @@ input,textarea,select{cursor:text!important}
         if(bDone) return;
         bDone = true;
         clearTimeout(bFallback);
-        if(bootCat && typeof x === "number"){
-          var cw = bootEl.clientWidth || BW, ch = bootEl.clientHeight || BH;
-          x = Math.max(90, Math.min(cw - 90, x));
-          y = Math.max(120, Math.min(ch - 120, y));
+        var cw = bootEl.clientWidth || BW, ch = bootEl.clientHeight || BH;
+        if(typeof x !== "number"){ x = cw / 2; y = ch * 0.46; }
+        x = Math.max(90, Math.min(cw - 90, x));
+        y = Math.max(120, Math.min(ch - 120, y));
+        if(bootCat){
           bootCat.style.left = x + "px";
           bootCat.style.top  = y + "px";
         }
+        tapFX(x, y);
         bootEl.classList.add("split");
-        meowSound(0.05);
         setTimeout(function(){ bootEl.style.display = "none"; }, 1150);
       }
       bootEl.style.pointerEvents = "auto";
@@ -1650,20 +1621,7 @@ input,textarea,select{cursor:text!important}
 })();
 </script>
 <!-- 滚动条旁的一只小黑猫：跟着滚动上下溜达 -->
-<div class="edge-cat" id="edgeCat" aria-hidden="true"><span class="ec-in"><svg viewBox="0 0 36 36" aria-hidden="true">
-        <g fill="#0A0F0D" stroke="#EFCB93" stroke-width="1.15" stroke-linejoin="round" stroke-linecap="round">
-          <path d="M7.1 8.4 L5.5 2.3 L11.9 6.4"/>
-          <path d="M19.7 8.4 L21.3 2.3 L14.9 6.4"/>
-          <circle cx="13.4" cy="11.6" r="8.5"/>
-          <path d="M21.4 29.6 C28.3 30.8 29.6 22.2 24.2 21"/>
-          <ellipse cx="13.4" cy="26.4" rx="8.4" ry="7.4"/>
-          <ellipse cx="10.2" cy="32.6" rx="2.6" ry="1.4"/>
-          <ellipse cx="16.8" cy="32.6" rx="2.6" ry="1.4"/>
-        </g>
-        <g fill="#FFF7E4"><ellipse cx="10.6" cy="10.9" rx="1.25" ry="1.45"/><ellipse cx="16.2" cy="10.9" rx="1.25" ry="1.45"/></g>
-        <g fill="#0A0F0D"><ellipse cx="10.6" cy="11.15" rx=".62" ry=".95"/><ellipse cx="16.2" cy="11.15" rx=".62" ry=".95"/></g>
-        <path d="M12.6 14.2 L14.2 14.2 L13.4 15.4 Z" fill="#EFCB93"/>
-      </svg></span></div>
+<div class="edge-cat" id="edgeCat" aria-hidden="true"><span class="ec-in"><img src="assets/cat-black.png" alt=""></span></div>
 <script>
 (function(){
   var cat = document.getElementById("edgeCat");
