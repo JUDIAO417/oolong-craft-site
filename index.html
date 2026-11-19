@@ -514,6 +514,18 @@ section[id]{scroll-margin-top:84px}
   color:var(--tea);white-space:nowrap;text-shadow:0 0 26px rgba(240,179,92,.45);
   animation:markIn .8s cubic-bezier(.16,1,.3,1) .26s forwards;
 }
+/* 停在开屏等待点击：下方一行浅色小字 */
+.boot .boot-hint{position:absolute;left:50%;bottom:9vh;transform:translateX(-50%);z-index:6;
+  font-family:var(--sans,inherit);font-size:clamp(.72rem,1.05vw,.86rem);letter-spacing:.3em;
+  color:rgba(240,232,214,.5);white-space:nowrap;opacity:0;pointer-events:none;
+  animation:hintIn 1s ease 1.15s forwards,hintBreath 2.8s ease-in-out 2.15s infinite}
+.boot .boot-hint::before,.boot .boot-hint::after{content:"";display:inline-block;width:26px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(240,232,214,.45));vertical-align:middle;margin:0 14px 0 0}
+.boot .boot-hint::after{background:linear-gradient(270deg,transparent,rgba(240,232,214,.45));margin:0 0 0 14px}
+@keyframes hintIn{to{opacity:1}}
+@keyframes hintBreath{0%,100%{opacity:.62}50%{opacity:1}}
+@keyframes hintOff{to{opacity:0}}
+.boot.split .boot-hint{animation:hintOff .3s ease forwards}
 /* 撕裂：上下两片沿同一条曲线分开 */
 .boot.split .up{animation:splitUp .96s cubic-bezier(.6,0,.22,1) .06s forwards}
 .boot.split .dn{animation:splitDn .96s cubic-bezier(.6,0,.22,1) .06s forwards}
@@ -639,6 +651,7 @@ section[id]{scroll-margin-top:84px}
   <div class="sparks" id="sparks" aria-hidden="true"></div>
   <div class="burst" id="burst" aria-hidden="true"></div>
   <span class="boot-mark" id="bootMark">乌龙茶的地盘</span>
+  <span class="boot-hint" id="bootHint">点击任意处进入</span>
 </div>
 <div class="scrollbar" id="scrollbar" aria-hidden="true"></div>
 <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -1458,8 +1471,22 @@ section[id]{scroll-margin-top:84px}
         cDn.setAttribute("d", "M1 1" + ptsD.slice().reverse().map(function(q){ return " L"+q[0]+" "+q[1]; }).join("") + " L0 1 Z");
       }
 
-      setTimeout(function(){ bootEl.classList.add("split"); }, 1450);
-      setTimeout(function(){ bootEl.style.display = "none"; }, 2500);
+      /* 开屏停在这里等用户：点击（或按键）后金光撕开幕布进入；久不点则自动进入兜底 */
+      var bDone = false;
+      function enterSite(){
+        if(bDone) return;
+        bDone = true;
+        clearTimeout(bFallback);
+        bootEl.classList.add("split");
+        setTimeout(function(){ bootEl.style.display = "none"; }, 1150);
+      }
+      bootEl.style.pointerEvents = "auto";
+      bootEl.querySelector(".boot-hint").style.pointerEvents = "none";
+      bootEl.addEventListener("click", enterSite);
+      window.addEventListener("keydown", function(ev){
+        if(ev.key === "Enter" || ev.key === " " || ev.key === "Escape") enterSite();
+      });
+      var bFallback = setTimeout(enterSite, 12000);
     }
   }
 })();
