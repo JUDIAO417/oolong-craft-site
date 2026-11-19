@@ -853,16 +853,23 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
   var galGrid=document.getElementById("galGrid");
   function escHtml(s){ var d=document.createElement("div"); d.textContent=(s==null?"":String(s)); return d.innerHTML; }
   function escAttr(s){ return escHtml(s).replace(/"/g,"&quot;"); }
+  /* 纪念馆图片加速：assets/ 图同步存了一份到 Release，前端优先走加速通道，失败回退本站相对路径 */
+  var GAL_REL="https://github.com/JUDIAO417/oolong-craft-site/releases/download/memorial-images-1.0/";
+  var GAL_ACC="https://v4.gh-proxy.org/";
   function galImg(u){
-    /* uploads/ 前缀（管理页上传的图/视频镜像）→ GitHub raw 直链，首次访问即生效 */
-    return (u&&u.indexOf("uploads/")===0)?("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+u):u;
+    if(!u) return u;
+    /* uploads/ 前缀（管理页上传的原图/视频镜像）→ GitHub raw 直链 */
+    if(u.indexOf("uploads/")===0) return "https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+u;
+    /* assets/ 前缀 → Release 加速通道 */
+    if(u.indexOf("assets/")===0) return GAL_ACC+GAL_REL+u.slice(7);
+    return u;
   }
   function renderGal(items){
     items=(items||[]).slice(0,20);
     var html="";
     items.forEach(function(m){
       var u=galImg(m.img);
-      html+='<figure class="gal rv"><div class="thumb" data-lb="'+escAttr(u)+'" role="button" tabindex="0" aria-label="查看大图：'+escAttr(m.title)+'"><img src="'+escAttr(u)+'" alt="'+escAttr(m.title)+'" loading="lazy"></div><figcaption><h3>'+escHtml(m.title)+'</h3><p>'+escHtml(m.desc)+'</p></figcaption></figure>';
+      html+='<figure class="gal rv"><div class="thumb" data-lb="'+escAttr(u)+'" role="button" tabindex="0" aria-label="查看大图：'+escAttr(m.title)+'"><img src="'+escAttr(u)+'" data-mirror="'+escAttr(m.img)+'" alt="'+escAttr(m.title)+'" loading="lazy"></div><figcaption><h3>'+escHtml(m.title)+'</h3><p>'+escHtml(m.desc)+'</p></figcaption></figure>';
     });
     if(!items.length){
       html='<div class="gal rv" style="grid-column:1/-1;text-align:center;color:var(--muted);padding:2.5rem 1rem;border:1px dashed var(--glass-line-strong);border-radius:2px">纪念馆正在装修，第一件展品在路上。</div>';
@@ -872,6 +879,16 @@ footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-directio
     holder.style.display="contents";
     holder.innerHTML=html;
     galGrid.insertBefore(holder,cta);
+    holder.querySelectorAll("img[data-mirror]").forEach(function(img){
+      img.addEventListener("error",function(){
+        if(img.getAttribute("data-fb")) return;
+        img.setAttribute("data-fb","1");
+        var fb=img.getAttribute("data-mirror");
+        img.src=fb;
+        var th=img.closest(".thumb");
+        if(th) th.setAttribute("data-lb",fb);
+      });
+    });
     holder.querySelectorAll(".thumb[data-lb]").forEach(function(t){
       t.addEventListener("click",function(){ openLb(t.getAttribute("data-lb")); });
       t.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openLb(t.getAttribute("data-lb")); } });
