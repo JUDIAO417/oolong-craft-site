@@ -796,7 +796,7 @@ img,a{-webkit-user-drag:none}
 .sg-orb{position:absolute;left:50%;top:50%;width:min(680px,96vw);height:min(470px,62vh);
   transform:translate(-50%,-50%);pointer-events:none;z-index:1;opacity:.9;
   animation:sgOrbSpin 30s linear infinite}
-@keyframes sgOrbSpin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes sgOrbSpin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(-360deg)}}
 .sg-orb i{position:absolute;width:3px;height:3px;border-radius:50%;transform:translate(-50%,-50%);
   background:#FFF4DE;box-shadow:0 0 9px 2px rgba(240,179,92,.7),0 0 22px 7px rgba(126,86,255,.3);
   animation:sgTw 2.6s ease-in-out infinite}
@@ -876,10 +876,10 @@ img,a{-webkit-user-drag:none}
   background:conic-gradient(from 200deg,
   rgba(240,179,92,0) 0deg,rgba(240,179,92,.3) 44deg,rgba(255,244,222,.34) 96deg,
   rgba(150,110,255,.28) 152deg,rgba(0,0,0,0) 224deg,rgba(240,179,92,.18) 300deg,rgba(240,179,92,0) 360deg);
-  animation:sgBhSpin 26s linear infinite reverse}
+  animation:sgBhSpin 26s linear infinite}
 .bh-halo{position:absolute;inset:8%;border-radius:50%;pointer-events:none;
   background:radial-gradient(circle,rgba(0,0,0,0) 0 46%,rgba(150,120,255,.06) 62%,rgba(120,90,255,.04) 70%,rgba(0,0,0,0) 82%)}
-@keyframes sgBhSpin{to{transform:rotate(360deg)}}
+@keyframes sgBhSpin{to{transform:rotate(-360deg)}}
 .sg.jump .sg-bh{animation:sgBhGrow 2.7s cubic-bezier(.33,0,.5,.42) .12s forwards}
 @keyframes sgBhGrow{
   0%{opacity:0;transform:translate(-50%,-50%) scale(.26)}
@@ -901,7 +901,7 @@ img,a{-webkit-user-drag:none}
   0%{transform:rotate(var(--a)) translateX(var(--r)) scale(.95);opacity:0}
   14%{opacity:.95}
   62%{opacity:.8}
-  100%{transform:rotate(calc(var(--a) + 190deg)) translateX(.8vmin) scale(.16);opacity:0}
+  100%{transform:rotate(calc(var(--a) - 190deg)) translateX(.8vmin) scale(.16);opacity:0}
 }
 /* 星空：半透明星云缓缓铺开 */
 .sg-stars{position:absolute;inset:-15%;pointer-events:none;z-index:5;opacity:0;
@@ -932,11 +932,14 @@ img,a{-webkit-user-drag:none}
 .sg.jump .sg-veil{animation:sgVeilOut 2.2s ease 1s forwards}
 @keyframes sgVeilOut{to{opacity:0}}
 /* 整页缓慢被吸进旋涡：先被拽近，再缩小旋转卷走 */
-body.sg-warp > :not(.sg){transform-origin:50% 44%;animation:sgWarp 2.7s cubic-bezier(.4,0,.85,.35) forwards}
+body.sg-warp > :not(.sg):not(script):not(style){transform-origin:50% 50%;will-change:transform,filter;
+  animation:sgWarp var(--wd,2.6s) cubic-bezier(.42,0,.86,.34) var(--wdl,0s) forwards}
 @keyframes sgWarp{
-  0%{transform:none;filter:none;opacity:1}
-  32%{transform:scale(1.09) rotate(-1.3deg);filter:blur(2px) brightness(.92);opacity:1}
-  100%{transform:scale(.32) rotate(12deg);filter:blur(15px) saturate(.32) brightness(.28);opacity:.05}
+  0%{transform:translate(0,0) scale(1) rotate(0) skew(0,0);filter:none;opacity:1}
+  26%{transform:translate(calc(var(--tx,0px)*.18),calc(var(--ty,0px)*.18)) scale(.92) rotate(-4deg) skewX(-2deg);filter:blur(1.5px) brightness(.9);opacity:1}
+  62%{transform:translate(calc(var(--tx,0px)*.62),calc(var(--ty,0px)*.62)) scale(.6) rotate(-16deg) skewX(-6deg) skewY(3deg);filter:blur(6px) saturate(.6) brightness(.6);opacity:.55}
+  100%{transform:translate(var(--tx,0px),var(--ty,0px)) scale(.18) rotate(-34deg) skewX(-11deg) skewY(5deg);
+       filter:blur(17px) saturate(.26) brightness(.24);opacity:.03}
 }
 @media (max-width:1080px){.nav-god{font-size:.84rem;padding:.46rem .88rem}}
 @media (max-width:900px){.nav-god{font-size:.8rem;padding:.42rem .8rem}.ng-ring{width:calc(100% + 12px);height:calc(100% + 12px)}}
@@ -1982,8 +1985,24 @@ body.sg-warp > :not(.sg){transform-origin:50% 44%;animation:sgWarp 2.7s cubic-be
       (2.6+Math.random()*1.7).toFixed(2)+"s;--dl:"+(Math.random()*3.2).toFixed(2)+"s;--sz:"+(2+Math.random()*2.4).toFixed(1)+"px";
     vx.appendChild(el);
   }}
+  function alignToHole(){
+    var W=window.innerWidth, H=window.innerHeight, cx=W/2, cy=H/2, k=0;
+    Array.prototype.forEach.call(document.body.children, function(e){
+      if(e===sg || e.tagName==="SCRIPT" || e.tagName==="STYLE") return;
+      var r=e.getBoundingClientRect();
+      if(!r.width || !r.height) return;
+      var L=Math.max(r.left,0), R=Math.min(r.right,W), T=Math.max(r.top,0), B=Math.min(r.bottom,H);
+      if(R-L<2 || B-T<2) return;
+      var mx=(L+R)/2, my=(T+B)/2;
+      e.style.setProperty("--tx",(cx-mx).toFixed(1)+"px");
+      e.style.setProperty("--ty",(cy-my).toFixed(1)+"px");
+      e.style.setProperty("--wdl",(k*0.13).toFixed(2)+"s");
+      k++;
+    });
+  }
   function go(){
     if(jumped) return; jumped=true;
+    alignToHole();
     sg.classList.add("jump"); document.body.classList.add("sg-warp");
     setTimeout(function(){ try{ location.href="https://wuyecn.uniquetalentmap.com/sponsor"; }catch(e){} },3600);
   }
