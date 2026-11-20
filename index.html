@@ -929,17 +929,21 @@ img,a{-webkit-user-drag:none}
 .sg.jump .sg-orb{animation:sgOut 1.4s ease forwards}
 .sg.jump .sg-sky{animation:sgOut 1.6s ease .15s forwards}
 @keyframes sgOut{to{opacity:0}}
-.sg.jump .sg-veil{animation:sgVeilOut 2.2s ease 1s forwards}
+.sg.jump .sg-veil{animation:sgVeilOut 1.7s ease .3s forwards}
 @keyframes sgVeilOut{to{opacity:0}}
 /* 整页缓慢被吸进旋涡：先被拽近，再缩小旋转卷走 */
 body.sg-warp > :not(.sg):not(script):not(style){transform-origin:50% 50%;will-change:transform,filter;
   animation:sgWarp var(--wd,2.6s) cubic-bezier(.42,0,.86,.34) var(--wdl,0s) forwards}
 @keyframes sgWarp{
-  0%{transform:translate(0,0) scale(1) rotate(0) skew(0,0);filter:none;opacity:1}
-  26%{transform:translate(calc(var(--tx,0px)*.18),calc(var(--ty,0px)*.18)) scale(.92) rotate(-4deg) skewX(-2deg);filter:blur(1.5px) brightness(.9);opacity:1}
-  62%{transform:translate(calc(var(--tx,0px)*.62),calc(var(--ty,0px)*.62)) scale(.6) rotate(-16deg) skewX(-6deg) skewY(3deg);filter:blur(6px) saturate(.6) brightness(.6);opacity:.55}
-  100%{transform:translate(var(--tx,0px),var(--ty,0px)) scale(.18) rotate(-34deg) skewX(-11deg) skewY(5deg);
-       filter:blur(17px) saturate(.26) brightness(.24);opacity:.03}
+  0%{transform:translate(0,0) rotate(0) scale(1,1) skew(0,0);filter:none;opacity:1}
+  28%{transform:translate(calc(var(--tx,0px)*.08),calc(var(--ty,0px)*.08)) rotate(calc(var(--ang,0deg) - 2deg)) scale(1.06,.72) skewX(-5deg);
+      filter:blur(.6px);opacity:1}
+  56%{transform:translate(calc(var(--tx,0px)*.44),calc(var(--ty,0px)*.44)) rotate(calc(var(--ang,0deg) - 13deg)) scale(1.95,.3) skewX(-11deg);
+      filter:blur(3px) saturate(.85) brightness(.8);opacity:.8}
+  80%{transform:translate(calc(var(--tx,0px)*.8),calc(var(--ty,0px)*.8)) rotate(calc(var(--ang,0deg) - 24deg)) scale(2.8,.12) skewX(-16deg);
+      filter:blur(7px) saturate(.55) brightness(.55);opacity:.4}
+  100%{transform:translate(var(--tx,0px),var(--ty,0px)) rotate(calc(var(--ang,0deg) - 34deg)) scale(3.3,.03) skewX(-20deg);
+       filter:blur(12px) saturate(.3) brightness(.32);opacity:0}
 }
 @media (max-width:1080px){.nav-god{font-size:.84rem;padding:.46rem .88rem}}
 @media (max-width:900px){.nav-god{font-size:.8rem;padding:.42rem .8rem}.ng-ring{width:calc(100% + 12px);height:calc(100% + 12px)}}
@@ -1996,6 +2000,7 @@ body.sg-warp > :not(.sg):not(script):not(style){transform-origin:50% 50%;will-ch
       var mx=(L+R)/2, my=(T+B)/2;
       e.style.setProperty("--tx",(cx-mx).toFixed(1)+"px");
       e.style.setProperty("--ty",(cy-my).toFixed(1)+"px");
+      e.style.setProperty("--ang",(Math.atan2(cy-my,cx-mx)*180/Math.PI).toFixed(1)+"deg");
       e.style.setProperty("--wdl",(k*0.13).toFixed(2)+"s");
       k++;
     });
