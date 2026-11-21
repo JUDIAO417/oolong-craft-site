@@ -1873,16 +1873,19 @@ body.cyber .neon-rails i:nth-child(3){animation:ncTube 7.6s var(--ease-breathe) 
 body.cyber .neon-rails i:nth-child(4){animation:ncTube 6.2s var(--ease-breathe) 2.2s infinite}
 
 /* 红蓝灯条：双层交叉淡入淡出（平滑换色，无硬切） */
-body.cyber .neon-rails i.rb{will-change:opacity}
-body.cyber .neon-rails i.rb::before{left:3%;right:3%;top:50%;bottom:auto;width:auto;height:1px;transform:none;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);opacity:.55}
-body.cyber .neon-rails i.rb::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  background:linear-gradient(90deg,#19A7FF,#8AF0FF 62%,rgba(25,167,255,.14));
+body.cyber .neon-rails i.rb::after{content:"";position:absolute;inset:0;width:auto;height:auto;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(180deg,transparent 42%,rgba(255,255,255,.34) 50%,transparent 58%),
+             linear-gradient(90deg,#19A7FF,#8AF0FF 62%,rgba(25,167,255,.14));
   box-shadow:0 0 16px rgba(25,167,255,.85),0 0 40px rgba(0,240,255,.38);
   opacity:0}
-body.cyber .neon-rails i.rb{animation:ncSwapA 4.6s var(--ease-breathe) infinite}
+body.cyber .neon-rails i.rb{background:none;box-shadow:none;animation:none}
+body.cyber .neon-rails i.rb::before{content:"";position:absolute;inset:0;width:auto;height:auto;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(180deg,transparent 42%,rgba(255,255,255,.55) 50%,transparent 58%),
+             linear-gradient(90deg,#FF2E52,#FF8A4A 64%,rgba(255,46,82,.14));
+  box-shadow:0 0 16px rgba(255,46,82,.9),0 0 40px rgba(255,46,82,.42);
+  opacity:1;animation:ncSwapA 4.6s var(--ease-breathe) infinite}
 body.cyber .neon-rails i.rb::after{animation:ncSwapB 4.6s var(--ease-breathe) infinite}
-body.cyber .neon-rails i.rb2{animation-delay:1.7s}
+body.cyber .neon-rails i.rb2::before{animation-delay:1.7s}
 body.cyber .neon-rails i.rb2::after{animation-delay:1.7s}
 
 /* 扫描光带：线性匀速（读作"扫描"），加一层极淡的深度呼吸 */
