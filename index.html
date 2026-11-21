@@ -1126,7 +1126,7 @@ body.halloween .btn-primary{animation:hnPulse 3.6s ease-in-out infinite}
 body.halloween .chip{color:#FFD9B4;border-color:rgba(255,164,84,.32);
   background:linear-gradient(180deg,rgba(58,26,16,.42),rgba(36,16,34,.3))}
 
-body.halloween .feat::after{width:40px;height:40px;top:-1px;right:-1px;opacity:.55;border-radius:0;
+body.halloween .feat::after{width:40px;height:40px;top:2px;right:2px;opacity:.55;border-radius:0;
   background-color:transparent;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23D6BCF4%22%20stroke-width%3D%221.05%22%3E%3Cpath%20d%3D%22M40.0%2C0.0%20L29.2%2C50.9%20M40.0%2C0.0%20L6.6%2C39.8%20M40.0%2C0.0%20L-8.2%2C19.5%20M40.0%2C0.0%20L-11.7%2C-5.4%22%20stroke-opacity%3D%22.92%22%2F%3E%3Cpath%20d%3D%22M36.3%2C17.6%20Q33.7%2C12.9%2028.4%2C13.8%20M28.4%2C13.8%20Q28.4%2C8.5%2023.3%2C6.7%20M23.3%2C6.7%20Q25.7%2C2.0%2022.1%2C-1.9%20M33.8%2C29.3%20Q29.5%2C21.6%2020.7%2C23.0%20M20.7%2C23.0%20Q20.6%2C14.1%2012.2%2C11.2%20M12.2%2C11.2%20Q16.2%2C3.3%2010.2%2C-3.1%22%20stroke-opacity%3D%22.72%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
   background-size:contain;background-repeat:no-repeat}
 body.halloween .feat:hover,body.halloween .gal .thumb:hover{
@@ -1134,7 +1134,7 @@ body.halloween .feat:hover,body.halloween .gal .thumb:hover{
   box-shadow:0 22px 54px rgba(255,116,26,.16),inset 0 0 0 1px rgba(255,158,74,.14)}
 
 .hn-badge{display:none}
-body.halloween .hn-badge{display:inline-flex;align-items:center;gap:.52rem;margin:0 0 .95rem;
+body.halloween .hn-badge{display:flex;width:max-content;align-items:center;gap:.52rem;margin:0 0 1.1rem;
   padding:.36rem .8rem;border-radius:999px;border:1px solid rgba(255,164,84,.34);
   background:linear-gradient(180deg,rgba(70,30,16,.62),rgba(38,16,32,.42));
   color:#FFD6A8;font-size:.72rem;letter-spacing:.17em;font-family:var(--sans);
@@ -1153,7 +1153,7 @@ body.halloween .kicker::before{width:32px;height:18px;
 
 /* 万圣节 · 纪念馆缩略图角饰 */
 body.halloween .gal .thumb::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23D6BCF4%22%20stroke-width%3D%221.05%22%3E%3Cpath%20d%3D%22M40.0%2C0.0%20L29.2%2C50.9%20M40.0%2C0.0%20L6.6%2C39.8%20M40.0%2C0.0%20L-8.2%2C19.5%20M40.0%2C0.0%20L-11.7%2C-5.4%22%20stroke-opacity%3D%22.92%22%2F%3E%3Cpath%20d%3D%22M36.3%2C17.6%20Q33.7%2C12.9%2028.4%2C13.8%20M28.4%2C13.8%20Q28.4%2C8.5%2023.3%2C6.7%20M23.3%2C6.7%20Q25.7%2C2.0%2022.1%2C-1.9%20M33.8%2C29.3%20Q29.5%2C21.6%2020.7%2C23.0%20M20.7%2C23.0%20Q20.6%2C14.1%2012.2%2C11.2%20M12.2%2C11.2%20Q16.2%2C3.3%2010.2%2C-3.1%22%20stroke-opacity%3D%22.72%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") no-repeat top right/44px 44px,
+  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23D6BCF4%22%20stroke-width%3D%221.05%22%3E%3Cpath%20d%3D%22M40.0%2C0.0%20L29.2%2C50.9%20M40.0%2C0.0%20L6.6%2C39.8%20M40.0%2C0.0%20L-8.2%2C19.5%20M40.0%2C0.0%20L-11.7%2C-5.4%22%20stroke-opacity%3D%22.92%22%2F%3E%3Cpath%20d%3D%22M36.3%2C17.6%20Q33.7%2C12.9%2028.4%2C13.8%20M28.4%2C13.8%20Q28.4%2C8.5%2023.3%2C6.7%20M23.3%2C6.7%20Q25.7%2C2.0%2022.1%2C-1.9%20M33.8%2C29.3%20Q29.5%2C21.6%2020.7%2C23.0%20M20.7%2C23.0%20Q20.6%2C14.1%2012.2%2C11.2%20M12.2%2C11.2%20Q16.2%2C3.3%2010.2%2C-3.1%22%20stroke-opacity%3D%22.72%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") no-repeat top 2px right 2px/42px 42px,
     radial-gradient(ellipse at 50% 130%,rgba(255,118,30,.16),rgba(255,118,30,0) 62%);
   box-shadow:inset 0 0 46px rgba(24,8,34,.55);
   opacity:.92}
@@ -1169,6 +1169,13 @@ body.halloween .hn-web.c2::after{content:"";position:absolute;left:33%;top:9%;wi
   transform-origin:50% 0;
   animation:hnSpider 6.5s ease-in-out infinite alternate}
 @keyframes hnSpider{0%{transform:translateY(0) rotate(-1.3deg)}100%{transform:translateY(7px) rotate(1.3deg)}}
+
+/* 万圣节 · 首屏文字配色 */
+body.halloween .hero-kicker{color:#C9A6E8}
+body.halloween .hero-kicker::before{background:linear-gradient(90deg,rgba(255,138,50,.92),rgba(185,140,255,.45))}
+body.halloween .hero h1{text-shadow:0 0 46px rgba(170,116,238,.22),0 2px 0 rgba(20,6,28,.5)}
+body.halloween .tagline{color:#BCAAD2}
+body.halloween .hl.hl-jade{color:#9FE7C6}
 /* ============ 新年模式：飘雪 · 檐上积雪 · 整页雪景 ============ */
 #snowfall{position:fixed;inset:0;pointer-events:none;z-index:126;display:none;opacity:.95}
 body.winter #snowfall{display:block}
@@ -1464,7 +1471,7 @@ body.quake .qk-hint{display:inline-flex}
   <span class="cube" style="width:22px;height:22px;top:30%;right:14%;background:rgba(240,179,92,.28);animation-delay:2s"></span>
   <span class="cube" style="width:12px;height:12px;bottom:24%;right:26%;background:rgba(237,228,207,.35);animation-delay:.7s"></span>
   <div class="wrap hero-inner">
-    <div class="hn-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="13.7" rx="8.5" ry="6.2" fill="#FF9A32"/><path d="M10.3,8.3 L11.1,5.3 L13.5,5.1 L13.1,8.2 Z" fill="#5C7D2A"/><path d="M7.5,11.9 L9.2,9.3 L10.7,11.9 Z" fill="#3A1604"/><path d="M13.3,11.9 L14.8,9.3 L16.5,11.9 Z" fill="#3A1604"/><path d="M7,15.1 L9.2,17.4 L11,15.1 L12.9,17.4 L14.7,15.1 L16.6,17.2 L17,14.9 Z" fill="#3A1604"/></svg><span>Halloween · Trick or Treat</span></div>
+    <div class="hn-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="13.7" rx="8.5" ry="6.2" fill="#FF9A32"/><path d="M10.3,8.3 L11.1,5.3 L13.5,5.1 L13.1,8.2 Z" fill="#5C7D2A"/><path d="M7.5,11.9 L9.2,9.3 L10.7,11.9 Z" fill="#3A1604"/><path d="M13.3,11.9 L14.8,9.3 L16.5,11.9 Z" fill="#3A1604"/><path d="M7,15.1 L9.2,17.4 L11,15.1 L12.9,17.4 L14.7,15.1 L16.6,17.2 L17,14.9 Z" fill="#3A1604"/></svg><span>万圣节限定 · Trick or Treat</span></div>
     <span class="hero-kicker">OOLONG CRAFT · JAVA EDITION 26.2</span>
     <h1>乌龙茶的地盘</h1>
     <p class="tagline">在方块与茶香之间，建一个家。这里不赶进度、不卷排名，种田、搭房、玩红石，或者只是找个角落看日出——慢慢来，壶里的水总是热的。</p>
@@ -2887,7 +2894,7 @@ body.quake .qk-hint{display:inline-flex}
   }
   function autoTheme(){
     var md = mdNow();
-    if(md >= 1018 && md <= 1103) return "halloween";
+    if(md >= 1018 && md <= 1130) return "halloween";
     if(md >= 110 && md <= 215) return "winter";
     return "";
   }
