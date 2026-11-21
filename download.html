@@ -140,6 +140,9 @@ header.scrolled{background:rgba(10,14,12,.78);box-shadow:0 8px 30px rgba(0,0,0,.
 .vcard:hover{transform:translateY(-3px);border-color:var(--glass-line-strong)}
 .v-title{flex:1;min-width:200px;font-weight:700}
 .vcard video{width:100%;margin-top:.6rem;flex-basis:100%;border-radius:2px}
+.v-line{flex-basis:100%;display:flex;align-items:center;gap:.7rem;margin:.1rem 0 0;font-size:.76rem;color:var(--ink-dim,rgba(230,236,228,.58));letter-spacing:.04em}
+.v-sw{margin-left:auto;font-size:.72rem;padding:.3rem .7rem;border-radius:999px;border:1px solid var(--glass-line);background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer;transition:border-color .2s,color .2s}
+.v-sw:hover{border-color:var(--glass-line-strong);color:var(--tea)}
 #toast{position:fixed;left:50%;bottom:2.2rem;transform:translateX(-50%) translateY(20px);background:rgba(20,26,22,.8);border:1px solid var(--glass-line-strong);color:var(--ink);padding:.7rem 1.3rem;border-radius:var(--r-md);font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:200;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
 #toast.show{opacity:1;transform:translateX(-50%)}
 
@@ -485,6 +488,7 @@ img,a{-webkit-user-drag:none}
   function toast(msg){ toastEl.textContent=msg; toastEl.classList.add("show"); clearTimeout(tt); tt=setTimeout(function(){ toastEl.classList.remove("show"); },2400); }
   function closeModal(){
     /* 关闭弹窗同时停止所有播放中的视频 */
+    if(typeof stopAllVideos==="function"){ stopAllVideos(); }
     var vds=document.querySelectorAll("#modalMask video");
     for(var i=0;i<vds.length;i++){ vds[i].pause(); vds[i].removeAttribute("src"); vds[i].load(); }
     mask.hidden=true; document.body.style.overflow="";
@@ -522,6 +526,62 @@ img,a{-webkit-user-drag:none}
       el.addEventListener("click",function(){ joinQQ(el.getAttribute("data-gid")); });
     });
   }
+  /* ===== 视频线路：多源自动测速换线（国内网络选最快的一条） ===== */
+  var VLINES=[
+    {k:"pages",label:"本站线路",u:function(n){ return "https://judiao417.github.io/oolong-craft-site/uploads/"+n; }},
+    {k:"jsd",  label:"jsDelivr CDN",u:function(n){ return "https://cdn.jsdelivr.net/gh/JUDIAO417/oolong-craft-site@main/uploads/"+n; }},
+    {k:"ghf",  label:"国内加速通道",u:function(n){ return "https://ghfast.top/https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/uploads/"+n; }},
+    {k:"raw",  label:"源站直连",u:function(n){ return "https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/uploads/"+n; }}
+  ];
+  function lineOrder(){
+    var pref=null; try{ pref=localStorage.getItem("vline"); }catch(e){}
+    var cut=0;
+    for(var i=0;i<VLINES.length;i++){ if(VLINES[i].k===pref) cut=i; }
+    return VLINES.slice(cut).concat(VLINES.slice(0,cut));   /* 上次成功的线路排第一 */
+  }
+  function stopAllVideos(){
+    var cards=document.querySelectorAll("#modalMask .vcard");
+    for(var c=0;c<cards.length;c++){ if(typeof cards[c]._stop==="function"){ try{ cards[c]._stop(); }catch(e){} } }
+    var vds=document.querySelectorAll("#modalMask video");
+    for(var i=0;i<vds.length;i++){ vds[i].pause(); vds[i].removeAttribute("src"); vds[i].load(); }
+  }
+  function mountVideo(box,v){
+    var name=v.src, order=lineOrder(), li=0, dead=false, timer=null, ok=false;
+    box.innerHTML='<div class="v-title">'+esc(v.title)+'</div>'
+      +'<video controls autoplay playsinline preload="auto"></video>'
+      +'<p class="v-line"><span class="v-ln">线路：'+esc(order[0].label)+'</span><button class="v-sw" type="button">换线路</button></p>';
+    var vd=box.querySelector("video"), ln=box.querySelector(".v-ln"), sw=box.querySelector(".v-sw");
+    function next(){
+      li++;
+      if(li>=order.length){ li=0; ln.textContent="当前网络下各线路都较慢，建议改用「打开视频」在浏览器里播放"; return; }
+      tryLine(true);
+    }
+    function tryLine(auto){
+      if(dead) return;
+      clearTimeout(timer);
+      var line=order[li % order.length];
+      ok=false;
+      ln.textContent="线路："+line.label+(auto?"（自动切换）":"");
+      vd.onloadeddata=null; vd.onerror=null;
+      vd.src=line.u(name);
+      try{ vd.load(); }catch(e){}
+      vd.onloadeddata=function(){
+        ok=true; clearTimeout(timer);
+        ln.textContent="线路："+line.label+" · 已就绪";
+        try{ localStorage.setItem("vline",line.k); }catch(e){}
+      };
+      vd.onerror=function(){ if(dead||ok) return; next(); };
+      /* 6.5 秒还没有任何画面数据就换线，避免在国内网络下干等 */
+      timer=setTimeout(function(){
+        if(dead||ok) return;
+        if(vd.readyState>=2 || (vd.buffered && vd.buffered.length>0)) return;
+        next();
+      },6500);
+    }
+    sw.addEventListener("click",function(){ li++; if(li>=order.length) li=0; tryLine(false); });
+    tryLine(false);
+    box._stop=function(){ dead=true; clearTimeout(timer); };
+  }
   function renderVideos(cat){
     var list=videos.filter(function(v){ return !v.cat || v.cat===cat; });
     if(!list.length){ mBody.innerHTML='<div class="modal-empty">'+(cat==="pc"?"PC 版":"PE 版")+' 教程视频整理中，稍后再来。</div>'; return; }
@@ -539,15 +599,8 @@ img,a{-webkit-user-drag:none}
         var idx=+btn.parentNode.getAttribute("data-i");
         var list2=videos.filter(function(v){ return !v.cat || v.cat===cat; });
         var v=list2[idx];
-        btn.parentNode.innerHTML='<div class="v-title">'+esc(v.title)+'</div><video controls autoplay playsinline preload="auto" src="'+(v.type==="file"?ghUrl(v.src):esc(v.src))+'"></video><p class="v-tip">视频加载慢或黑屏时，稍等片刻或点右下角重试。</p>';
-        var vd=btn.parentNode.querySelector("video");
-        if(vd && v.type==="file"){
-          /* 播放源三级回退：Pages(部署中可能404) → jsDelivr(MIME对) → raw(最后兜底) */
-          vd.addEventListener("error",function(){
-            if(!vd.dataset.fb1){ vd.dataset.fb1="1"; vd.src=ghJsd(v.src); vd.load(); return; }
-            if(!vd.dataset.fb2){ vd.dataset.fb2="1"; vd.src=ghRaw(v.src); vd.load(); }
-          },{once:false});
-        }
+        if(v.type==="file"){ mountVideo(btn.parentNode,v); return; }
+        btn.parentNode.innerHTML='<div class="v-title">'+esc(v.title)+'</div><video controls autoplay playsinline preload="auto" src="'+esc(v.src)+'"></video><p class="v-tip">视频加载慢或黑屏时，稍等片刻或点右下角重试。</p>';
       });
     });
   }
