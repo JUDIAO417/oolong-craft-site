@@ -1179,6 +1179,27 @@ body.quake.qk-word-on .qk-word{display:flex}
 body.quake.qk-word-out .qk-word{animation:qkWordOut .6s ease-in both}
 @keyframes qkWordOut{from{opacity:1}to{opacity:0}}
 
+/* 快速归位（按 X 跳过时用） */
+.qk-rise-fast{animation:qkRiseFast .5s cubic-bezier(.2,.9,.3,1) forwards !important;filter:none !important}
+@keyframes qkRiseFast{
+  0%{transform:translateY(var(--dy)) rotate(var(--rot)) scale(.86);opacity:.3}
+  100%{transform:translateY(0) rotate(0) scale(1);opacity:1}
+}
+/* 左上角跳过提示 */
+.qk-hint{position:fixed;left:1.4rem;top:5.6rem;z-index:235;display:none;align-items:center;gap:.55rem;
+  padding:.52rem .9rem .52rem .62rem;border-radius:10px;
+  background:rgba(10,14,18,.86);border:1px solid rgba(240,179,92,.6);
+  color:#F4EEE2;font-family:var(--sans);font-size:.8rem;letter-spacing:.04em;
+  box-shadow:0 10px 28px rgba(0,0,0,.55),0 0 0 1px rgba(240,179,92,.12) inset;
+  animation:qkHintPulse 1.5s ease-in-out infinite}
+body.quake .qk-hint{display:inline-flex}
+.qk-hint kbd{display:inline-flex;align-items:center;justify-content:center;min-width:1.5rem;height:1.5rem;padding:0 .35rem;
+  border-radius:6px;background:#F0B35C;color:#151006;font-family:var(--pixel),var(--sans);font-size:.72rem;font-weight:700;
+  box-shadow:0 2px 0 rgba(0,0,0,.35)}
+.qk-hint em{font-style:normal;color:#C9B79C;font-size:.74rem}
+@keyframes qkHintPulse{0%,100%{transform:translateY(0);box-shadow:0 10px 28px rgba(0,0,0,.55)}
+  50%{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.6),0 0 18px rgba(240,179,92,.28)}}
+
 /* 模式提示 */
 .winter-toast{position:fixed;left:50%;bottom:24px;z-index:250;transform:translate(-50%,10px);
   padding:.55rem 1.05rem;border-radius:999px;white-space:nowrap;
@@ -2516,6 +2537,7 @@ body.quake.qk-word-out .qk-word{animation:qkWordOut .6s ease-in both}
 })();
 </script>
 
+<div class="qk-hint" id="qkHint"><kbd>X</kbd> 跳过动画<em>按一下立刻恢复页面</em></div>
 <!-- 5·12 纪念动画层 -->
 <div class="qk-layer" id="qkLayer" aria-hidden="true">
   <svg class="qk-cracks" id="qkCracks" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
@@ -2589,29 +2611,68 @@ body.quake.qk-word-out .qk-word{animation:qkWordOut .6s ease-in both}
     });
   }
 
+  function isVis(el){
+    var cs=getComputedStyle(el);
+    if(cs.display==="none"||cs.visibility==="hidden") return false;
+    if(parseFloat(cs.opacity)===0) return false;
+    var r=el.getBoundingClientRect();
+    return r.width>2&&r.height>2;
+  }
+  function isCard(el){
+    var cs=getComputedStyle(el);
+    var br=parseFloat(cs.borderTopLeftRadius)||0;
+    var bg=cs.backgroundColor||"";
+    var bw=parseFloat(cs.borderTopWidth)||0;
+    return br>=5||bw>0||(bg&&bg!=="rgba(0, 0, 0, 0)"&&bg!=="transparent")||cs.boxShadow!=="none";
+  }
   function collect(){
-    var sels=["header .wrap > *","header .nav a","header .nav-god","header .btn",
-      ".hero-inner > *",".chip",".hero-cta .btn",".gal-switch .chip",
-      ".gal",".faq",".srv-fab",".winter-fab",".quake-fab"];
-    var cand=[], seen=[];
-    sels.forEach(function(sel){
-      document.querySelectorAll(sel).forEach(function(el){
-        if(seen.indexOf(el)>=0) return; seen.push(el);
-        var r=el.getBoundingClientRect(), cs=getComputedStyle(el);
-        if(cs.display==="none"||cs.visibility==="hidden"||parseFloat(cs.opacity)===0) return;
-        if(r.width<10||r.height<10) return;
-        if(r.top>innerHeight+40||r.bottom<-40) return;
-        cand.push({el:el,r:r,h:r.height});
+    var out=[];
+    function walk(el){
+      if(!isVis(el)) return;
+      if(el.hasAttribute&&el.hasAttribute("data-qk-skip")) return;
+      if(el.classList&&(el.classList.contains("qk-hint")||el.classList.contains("qk-layer")||el.classList.contains("qk-word"))) return;
+      var r=el.getBoundingClientRect();
+      if(r.width<40||r.height<18) return;
+      if(isCard(el)){ out.push(el); return; }
+      var tag=el.tagName;
+      if(tag==="SECTION"||tag==="MAIN"||(el.classList&&el.classList.contains("wrap"))){
+        Array.prototype.forEach.call(el.children, walk); return;
+      }
+      var kids=[];
+      Array.prototype.forEach.call(el.children,function(k){ if(isVis(k)) kids.push(k); });
+      if(!kids.length){ out.push(el); return; }
+      var blocks=kids.filter(function(k){
+        var r2=k.getBoundingClientRect();
+        return r2.width>=26&&r2.height>=13;
       });
+      if(blocks.length>=2){ blocks.forEach(walk); return; }
+      out.push(el);
+    }
+    var hs=document.querySelectorAll("header");
+    Array.prototype.forEach.call(hs,function(h){ Array.prototype.forEach.call(h.children, walk); });
+    var ms=document.querySelectorAll("main");
+    Array.prototype.forEach.call(ms,function(m){ walk(m); });
+    var fs=document.querySelectorAll("footer");
+    Array.prototype.forEach.call(fs,function(f){ Array.prototype.forEach.call(f.children, walk); });
+    ["srvFab","winterFab","quakeFab"].forEach(function(id){
+      var e=document.getElementById(id);
+      if(e&&isVis(e)&&out.indexOf(e)<0) out.push(e);
     });
-    return cand.slice(0,44);
+    var near=out.filter(function(el){
+      var r=el.getBoundingClientRect();
+      return r.top<innerHeight*2&&r.bottom>-innerHeight;
+    });
+    return near.slice(0,96).map(function(el){
+      var r=el.getBoundingClientRect();
+      return {el:el,r:r,h:r.height};
+    });
   }
   function prep(list){
     QK.items=list;
     list.forEach(function(it){
-      var dy=Math.max(90, innerHeight-it.r.top-Math.min(it.h,110)*0.4);
+      var dy=Math.max(90, innerHeight-it.r.top-Math.min(it.h,110)*0.42);
       it.el.style.setProperty("--dy", Math.round(dy)+"px");
-      it.el.style.setProperty("--rot", rnd(-22,22).toFixed(1)+"deg");
+      it.el.style.setProperty("--rot", rnd(-20,20).toFixed(1)+"deg");
     });
   }
 
@@ -2628,27 +2689,27 @@ body.quake.qk-word-out .qk-word{animation:qkWordOut .6s ease-in both}
 
     t(520,function(){ body.classList.remove("qk-a"); body.classList.add("qk-b"); });
 
-    var startDrop=1080, gap=76;
+    var startDrop=1150, gap=58;
     list.forEach(function(it,i){
       t(startDrop+i*gap, function(){ it.el.classList.add("qk-fall"); });
     });
     var dropEnd=startDrop+list.length*gap;
 
-    t(dropEnd+340, function(){ body.classList.add("qk-word-on"); });
+    t(dropEnd+400, function(){ body.classList.add("qk-word-on"); });
 
-    t(dropEnd+2360, function(){
+    t(dropEnd+400+10000, function(){
       body.classList.remove("qk-word-on");
       body.classList.add("qk-word-out");
       body.classList.remove("qk-a","qk-b");
       healCracks();
       var rev=list.slice().reverse();
       rev.forEach(function(it,i){
-        t(140+i*68, function(){
+        t(160+i*62, function(){
           it.el.classList.remove("qk-fall");
           it.el.classList.add("qk-rise");
         });
       });
-      t(140+rev.length*68+880, finish);
+      t(160+rev.length*62+900, finish);
     });
   }
 
@@ -2668,7 +2729,7 @@ body.quake.qk-word-out .qk-word{animation:qkWordOut .6s ease-in both}
     var body=document.body;
     body.classList.remove("quake","qk-a","qk-b","qk-dusty","qk-word-on","qk-word-out");
     QK.items.forEach(function(it){
-      it.el.classList.remove("qk-fall","qk-rise");
+      it.el.classList.remove("qk-fall","qk-rise","qk-rise-fast");
       it.el.style.removeProperty("--dy");
       it.el.style.removeProperty("--rot");
     });
@@ -2677,6 +2738,22 @@ body.quake.qk-word-out .qk-word{animation:qkWordOut .6s ease-in both}
     QK.timers.forEach(clearTimeout); QK.timers=[];
     QK.items=[]; QK.running=false;
   }
+
+  function skip(){
+    if(!QK.running) return;
+    QK.timers.forEach(clearTimeout); QK.timers=[];
+    document.body.classList.remove("qk-word-on","qk-word-out","qk-a","qk-b");
+    QK.items.forEach(function(it){
+      it.el.classList.remove("qk-fall");
+      it.el.classList.add("qk-rise-fast");
+    });
+    QK.cracks.forEach(function(p){ p.style.animation="qkCrackOut .4s ease-in forwards"; });
+    t(560, finish);
+  }
+  document.addEventListener("keydown", function(e){
+    if(!QK.running) return;
+    if(e.key==="x"||e.key==="X"||e.code==="KeyX"){ e.preventDefault(); skip(); }
+  });
 
   fab=document.getElementById("quakeFab");
   if(fab) fab.addEventListener("click", function(){ if(QK.running) return; run(); });
