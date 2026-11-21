@@ -309,6 +309,52 @@ h2.sec-title{
 
 /* ============ 画廊（液体玻璃卡） ============ */
 .gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:3rem}
+/* 纪念馆视图切换：卡片列表 / 地图导览 */
+.gal-switch{display:inline-flex;gap:.35rem;margin-top:2.1rem;padding:.3rem;border-radius:999px;
+  background:rgba(255,255,255,.045);border:1px solid var(--glass-line)}
+.gal-switch button{font-family:inherit;font-size:.82rem;padding:.4rem .95rem;border-radius:999px;cursor:pointer;
+  color:var(--muted);background:none;border:0;transition:color .2s,background .2s,box-shadow .2s}
+.gal-switch button:hover{color:var(--ink)}
+.gal-switch button.on{color:#1A1006;font-weight:700;background:linear-gradient(135deg,#F7D69C,#EBA84F);
+  box-shadow:0 6px 18px -8px rgba(240,179,92,.8)}
+.gal-map{margin-top:1.5rem}
+.gm-stage{position:relative;width:100%;aspect-ratio:1600/1067;border-radius:var(--r-lg);overflow:hidden;
+  border:1px solid rgba(240,179,92,.22);
+  box-shadow:0 24px 56px -28px rgba(0,0,0,.9),0 0 0 1px rgba(255,244,222,.05) inset;background:#0b0f0c}
+.gm-bg{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.94) saturate(1.03)}
+.gm-stage::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 78% 62% at 50% 46%,transparent 52%,rgba(6,9,7,.6) 100%)}
+.gm-pin{position:absolute;transform:translate(-50%,-50%);border:0;background:none;padding:0;cursor:pointer;z-index:2}
+.gm-pin i{display:block;width:16px;height:16px;border-radius:3px;border:1px solid rgba(255,244,222,.85);
+  background:linear-gradient(145deg,#FFF6DF,#F0B35C);
+  box-shadow:0 0 0 3px rgba(240,179,92,.14),0 0 14px 3px rgba(240,179,92,.5),0 4px 10px rgba(0,0,0,.5);
+  transition:transform .22s cubic-bezier(.2,1,.3,1),box-shadow .22s}
+.gm-pin.w i{background:linear-gradient(145deg,#E7FBFF,#5FD4E8);
+  box-shadow:0 0 0 3px rgba(95,212,232,.14),0 0 14px 3px rgba(95,212,232,.5),0 4px 10px rgba(0,0,0,.5)}
+.gm-pin.p i{background:linear-gradient(145deg,#FFEAF2,#F97CB8);
+  box-shadow:0 0 0 3px rgba(249,124,184,.16),0 0 14px 3px rgba(249,124,184,.5),0 4px 10px rgba(0,0,0,.5)}
+.gm-pin.s i{background:linear-gradient(145deg,#F2EEFF,#B78BFF);
+  box-shadow:0 0 0 3px rgba(183,139,255,.16),0 0 16px 4px rgba(183,139,255,.55),0 4px 10px rgba(0,0,0,.5)}
+.gm-pin:hover i,.gm-pin:focus-visible i{transform:scale(1.36);
+  box-shadow:0 0 0 4px rgba(240,179,92,.22),0 0 20px 6px rgba(240,179,92,.75)}
+.gm-pin b{position:absolute;left:50%;top:calc(100% + 7px);transform:translate(-50%,-4px);
+  font-weight:400;font-size:.72rem;line-height:1;padding:.24rem .44rem;border-radius:4px;white-space:nowrap;
+  color:#FFF6E4;background:rgba(10,14,12,.86);border:1px solid rgba(240,179,92,.3);
+  opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;box-shadow:0 6px 16px rgba(0,0,0,.55)}
+.gm-pin:hover b,.gm-pin:focus-visible b{opacity:1;transform:translate(-50%,0)}
+.gm-legend{display:flex;gap:1.1rem;flex-wrap:wrap;margin-top:.9rem;font-size:.75rem;color:var(--muted)}
+.gm-legend span{display:inline-flex;align-items:center;gap:.4rem}
+.gm-legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.gm-legend i.g{background:linear-gradient(145deg,#FFF6DF,#F0B35C)}
+.gm-legend i.w{background:linear-gradient(145deg,#E7FBFF,#5FD4E8)}
+.gm-legend i.p{background:linear-gradient(145deg,#FFEAF2,#F97CB8)}
+.gm-legend i.s{background:linear-gradient(145deg,#F2EEFF,#B78BFF)}
+.gm-tip{margin-top:.7rem;font-size:.74rem;color:var(--dim);line-height:1.75}
+@media (max-width:760px){
+  .gal-map{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .gm-stage{min-width:620px}
+  .gal-switch{width:100%;justify-content:center}
+}
 .gal{background:var(--glass-bg);border:1px solid var(--glass-line);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;-webkit-backdrop-filter:blur(16px) saturate(115%);backdrop-filter:blur(16px) saturate(115%);box-shadow:var(--glass-hl);transition:transform .3s,border-color .3s,box-shadow .3s}
 .gal:hover{transform:translateY(-6px);border-color:var(--glass-line-strong);box-shadow:var(--shadow-glass),var(--glass-hl)}
 .gal figcaption{padding:1.1rem 1.2rem 1.25rem}
@@ -1180,6 +1226,25 @@ body.sg-warp > .ambient, body.sg-warp > .ambient *{animation:none!important}
   <div class="wrap">
     <span class="kicker rv">纪念馆</span>
     <h2 class="sec-title rv">夜里亮灯的地方，都是有人安家的证据</h2>
+    <div class="gal-switch rv" id="galSwitch" role="tablist" aria-label="纪念馆浏览方式">
+      <button type="button" class="on" data-view="grid" role="tab" aria-selected="true">全部藏品</button>
+      <button type="button" data-view="map" role="tab" aria-selected="false">地图导览</button>
+    </div>
+
+    <div class="gal-map" id="galMap" hidden>
+      <div class="gm-stage">
+        <img class="gm-bg" id="gmBg" data-src="assets/map-oolong.jpg" alt="乌龙茶的世界地图，纪念馆地标分布" loading="lazy" decoding="async">
+        <div class="gm-pins" id="gmPins"></div>
+      </div>
+      <div class="gm-legend">
+        <span><i class="g"></i>建筑 · 遗迹</span>
+        <span><i class="p"></i>樱花坡</span>
+        <span><i class="w"></i>水域</span>
+        <span><i class="s"></i>浮空之地</span>
+      </div>
+      <p class="gm-tip">鼠标移上去看名字，点一下直接开大图。地图只是导览示意，真实坐标还得进服自己找。</p>
+    </div>
+
     <div class="gal-grid" id="galGrid">
       <div class="gal-cta rv">
         <span class="pixel">YOUR BUILD</span>
@@ -1576,6 +1641,56 @@ body.sg-warp > .ambient, body.sg-warp > .ambient *{animation:none!important}
     } else {
       holder.querySelectorAll(".rv").forEach(function(el){ el.classList.add("in"); });
     }
+
+    buildGalMap(items);
+  }
+
+  /* 纪念馆地图导览：标题 → 地图坐标（百分比）、配色（g 建筑/w 水域/p 樱花/s 浮空） */
+  var MAP_POS={
+    "红石工坊":[12,29,"g"],"夜色建筑":[21,38,"g"],"性感母蟑螂":[8,47,"g"],
+    "服务器元老":[17,53,"g"],"胆子真是肥嘟嘟":[26,28,"g"],"拉娜村":[29,45,"g"],
+    "酒桶私人酒馆":[33,57,"g"],"现代别墅":[21,63,"g"],"拉娜号":[45,50,"w"],
+    "幽链晶塔":[50,62,"w"],"秋千":[60,30,"p"],"小型樱花树":[55,43,"p"],
+    "奶蛙":[68,50,"p"],"雪糕店":[57,62,"p"],"小吃街":[63,73,"p"],
+    "云澜境":[70,11,"s"],"落樱亭":[84,19,"s"]
+  };
+  /* 没登记坐标的新藏品：按顺序落到这些空位上，保证地图上不丢东西 */
+  var MAP_FREE=[[38,35,"g"],[43,68,"w"],[72,68,"p"],[30,72,"g"],[15,68,"g"],[80,45,"s"],[46,30,"w"],[66,38,"p"],[25,20,"g"],[52,22,"w"]];
+  function buildGalMap(items){
+    var pins=document.getElementById("gmPins"); if(!pins) return;
+    pins.innerHTML="";
+    var extra=0;
+    (items||[]).forEach(function(m){
+      var list=galList(m); if(!list.length) return;
+      var pos=MAP_POS[m.title] || MAP_FREE[(extra++)%MAP_FREE.length];
+      var urls=list.map(galImg);
+      var b=document.createElement("button");
+      b.type="button";
+      b.className="gm-pin"+(pos[2]==="w"?" w":pos[2]==="p"?" p":pos[2]==="s"?" s":"");
+      b.style.left=pos[0]+"%";
+      b.style.top=pos[1]+"%";
+      b.setAttribute("aria-label","查看纪念馆："+m.title);
+      b.innerHTML='<i></i><b>'+escHtml(m.title)+'</b>';
+      b.addEventListener("click",function(){ openLb(urls,list.slice(),0); });
+      pins.appendChild(b);
+    });
+  }
+  var galSwitch=document.getElementById("galSwitch"), galMap=document.getElementById("galMap");
+  if(galSwitch && galMap){
+    galSwitch.addEventListener("click",function(e){
+      var btn=e.target.closest?e.target.closest("button[data-view]"):null;
+      if(!btn) return;
+      var v=btn.getAttribute("data-view"), showMap=(v==="map");
+      Array.prototype.forEach.call(galSwitch.querySelectorAll("button"),function(x){
+        var on=(x===btn); x.classList.toggle("on",on); x.setAttribute("aria-selected",on?"true":"false");
+      });
+      galMap.hidden=!showMap;
+      galGrid.style.display=showMap?"none":"";
+      if(showMap){
+        var bg=document.getElementById("gmBg");
+        if(bg && !bg.getAttribute("src")) bg.src=bg.getAttribute("data-src");
+      }
+    });
   }
   /* 数据实时读取：优先 GitHub raw（推送后即时生效），失败回退本站镜像 */
   /* 数据实时读取：GitHub Pages 优先（用户访问官网的域名，必然可达，ts 绕 CDN 缓存）
