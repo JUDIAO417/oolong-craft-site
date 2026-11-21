@@ -1219,6 +1219,57 @@ body.halloween .th-btn{border-color:rgba(255,150,64,.42);color:#FFD7AC;backgroun
 body.winter .th-btn{border-color:rgba(170,205,255,.4);color:#DCEBFF;background:rgba(12,18,28,.7)}
 @media (max-width:700px){.theme-dock{left:12px;top:76px}.th-btn{padding:.4rem .66rem .42rem;font-size:.7rem}}
 
+/* ============ 四少女主题：拉娜 · 酒桶 · 石墨 · 方方 ============ */
+body.girls .th-btn{border-color:rgba(232,99,127,.44);color:#FFD6DE;background:rgba(26,12,16,.72)}
+.th-item[data-t="girls"] .sw{background:linear-gradient(135deg,#E8637F,#F0913F)}
+body.girls{
+  --bg:#0B0708;--bg-soft:#110B0C;
+  --tea:#E8637F;--tea-deep:#BE3F58;
+  --jade:#F0913F;
+  --ink:#F8F0E7;--muted:#C0ADAA;--dim:#8E7A78;
+  --glass-line:rgba(232,99,127,.20);--glass-line-strong:rgba(232,99,127,.44);
+}
+body.girls .ambient span{filter:blur(82px)}
+body.girls .ambient span:nth-child(1){width:580px;height:580px;top:-210px;left:-50px;
+  background:radial-gradient(circle,rgba(232,99,127,.24),transparent 66%);animation-duration:13s}
+body.girls .ambient span:nth-child(2){width:660px;height:660px;top:10%;right:-250px;
+  background:radial-gradient(circle,rgba(240,145,63,.17),transparent 66%);animation-duration:16s}
+body.girls .ambient span:nth-child(3){width:520px;height:520px;bottom:-210px;left:32%;
+  background:radial-gradient(circle,rgba(168,36,74,.20),transparent 66%);animation-duration:20s}
+body.girls .ambient::after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
+  background:radial-gradient(62% 42% at 16% 10%,rgba(232,99,127,.13),transparent 70%),
+             radial-gradient(52% 40% at 84% 26%,rgba(240,145,63,.09),transparent 72%),
+             radial-gradient(70% 46% at 50% 104%,rgba(168,36,74,.14),transparent 72%)}
+body.girls .hero-bg{background-image:url(assets/hero-girls.jpg);filter:saturate(1.02) brightness(.96) contrast(1.03)}
+body.girls .hero-inner{position:relative;z-index:2}
+body.girls .hero .scroll-hint{z-index:2}
+body.girls .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(66% 52% at 20% 16%,rgba(232,99,127,.16),transparent 68%),
+             radial-gradient(48% 38% at 80% 30%,rgba(240,145,63,.14),transparent 72%),
+             radial-gradient(60% 30% at 50% 100%,rgba(168,36,74,.18),transparent 74%),
+             linear-gradient(180deg,rgba(11,7,8,.34) 0%,rgba(11,7,8,.06) 34%,rgba(11,7,8,.8) 82%,var(--bg) 100%)}
+
+
+.girls-sign{display:none}
+body.girls .girls-sign{display:flex;align-items:center;gap:.5rem;margin-top:1.3rem;font-size:.66rem;letter-spacing:.28em;color:var(--muted)}
+body.girls .girls-sign i{width:7px;height:7px;border-radius:50%;display:block;background:currentColor;box-shadow:0 0 9px currentColor;opacity:.95}
+body.girls .girls-sign span{margin-left:.35rem;opacity:.85}
+/* 四人签名色（拉娜玫红 · 酒桶炭灰 · 石墨晨橙 · 方方酒红）落到版式细节上 */
+#petals{position:fixed;inset:0;pointer-events:none;z-index:126;display:none;opacity:.9}
+body.girls #petals{display:block}
+body.girls header{border-bottom-color:transparent}
+body.girls header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,rgba(232,99,127,0),rgba(232,99,127,.5) 18%,rgba(142,139,136,.45) 42%,rgba(240,145,63,.5) 66%,rgba(168,36,74,.45) 88%,rgba(168,36,74,0))}
+body.girls footer{position:relative;border-top:0}
+body.girls footer::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;pointer-events:none;
+  background:linear-gradient(90deg,#E8637F,#8E8B88,#F0913F,#A8244A)}
+body.girls .kicker::before{width:28px;height:3px;
+  background:linear-gradient(90deg,#E8637F,#F0913F 55%,#A8244A);box-shadow:0 0 10px rgba(232,99,127,.42)}
+body.girls .btn-primary{background:linear-gradient(135deg,#E8637F,#C0425F 62%,#A8244A);
+  border-color:rgba(255,214,222,.28);box-shadow:0 10px 26px rgba(232,99,127,.24)}
+body.girls .btn-primary:hover{box-shadow:0 14px 34px rgba(232,99,127,.34)}
+body.girls .feat:hover{border-color:rgba(240,145,63,.36)}
+
 /* ============ 新年模式：飘雪 · 檐上积雪 · 整页雪景 ============ */
 #snowfall{position:fixed;inset:0;pointer-events:none;z-index:126;display:none;opacity:.95}
 body.winter #snowfall{display:block}
@@ -1420,6 +1471,7 @@ body.quake .qk-hint{display:inline-flex}
     <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t=""><i class="sw"></i><span class="tt">原版主题</span><span class="ck">✓</span></button>
     <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t="halloween"><i class="sw"></i><span class="tt">万圣节</span><span class="ck">✓</span></button>
     <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t="winter"><i class="sw"></i><span class="tt">新年</span><span class="ck">✓</span></button>
+    <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t="girls"><i class="sw"></i><span class="tt">四少女</span><span class="ck">✓</span></button>
   </div>
 </div>
 <div class="boot" id="boot" aria-hidden="true">
@@ -1545,6 +1597,7 @@ body.quake .qk-hint{display:inline-flex}
       <a class="hl hl-rose" href="https://judiao417.github.io/toupiao/" target="_blank" rel="noopener">画廊 · 反馈 ↗</a>
       <a class="hl hl-jade" href="commands.html">指令大全 ↗</a>
     </div>
+    <div class="girls-sign" aria-hidden="true"><i style="color:#E8637F"></i><i style="color:#8E8B88"></i><i style="color:#F0913F"></i><i style="color:#A8244A"></i><span>拉娜 · 酒桶 · 石墨 · 方方</span></div>
   </div>
   <div class="scroll-hint">SCROLL</div>
 </section>
@@ -2919,6 +2972,71 @@ body.quake .qk-hint{display:inline-flex}
   function startEmbers(){ ensureEmbers(); drawEmbers(); if(reduce()) return; if(!eraf) eraf = requestAnimationFrame(tickEmbers); }
   function stopEmbers(){ if(eraf){ cancelAnimationFrame(eraf); eraf = 0; } if(ectx) ectx.clearRect(0,0,eW,eH); }
 
+  /* ---------- 四少女：四人花信（拉娜 / 酒桶 / 石墨 / 方方）缓慢飘落 ---------- */
+  var plcv=null, plctx=null, plW=0, plH=0, pls=[], plraf=0, plSpr=[];
+  var PLCOL=["#E8637F","#F0913F","#A8244A","#F6EDE2"];
+  function mkPetal(col){
+    var s=44, c=document.createElement("canvas");
+    c.width=s; c.height=s;
+    var x=c.getContext("2d");
+    x.translate(s/2, s/2); x.rotate(-0.42);
+    var g=x.createLinearGradient(0,-16,0,17);
+    g.addColorStop(0, col); g.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle=g;
+    x.beginPath();
+    x.moveTo(0,-16); x.bezierCurveTo(12,-10, 11,9, 0,16);
+    x.bezierCurveTo(-11,9, -12,-10, 0,-16);
+    x.fill();
+    return c;
+  }
+  function newPetal(seed){
+    return { x:Math.random()*plW, y:seed?Math.random()*plH:-24, sc:0.4+Math.random()*0.6,
+      vy:0.32+Math.random()*0.85, ph:Math.random()*6.283, sw:0.55+Math.random()*1.4,
+      rot:Math.random()*6.283, rv:(Math.random()-0.5)*0.012, a:0.28+Math.random()*0.44,
+      ci:Math.floor(Math.random()*4) };
+  }
+  function resizePetals(){
+    if(!plcv) return;
+    var dpr=Math.min(window.devicePixelRatio||1,2);
+    plW=window.innerWidth; plH=window.innerHeight;
+    plcv.width=Math.round(plW*dpr); plcv.height=Math.round(plH*dpr);
+    plcv.style.width=plW+"px"; plcv.style.height=plH+"px";
+    plctx.setTransform(dpr,0,0,dpr,0,0);
+    var n=Math.max(12, Math.min(26, Math.round(plW/62)));
+    pls=[]; for(var i=0;i<n;i++) pls.push(newPetal(true));
+  }
+  function drawPetals(){
+    if(!plctx) return;
+    plctx.clearRect(0,0,plW,plH);
+    for(var i=0;i<pls.length;i++){
+      var p=pls[i], sz=18*p.sc;
+      plctx.save();
+      plctx.translate(p.x,p.y); plctx.rotate(p.rot); plctx.globalAlpha=p.a;
+      plctx.drawImage(plSpr[p.ci], -sz/2, -sz/2, sz, sz*1.22);
+      plctx.restore();
+    }
+    plctx.globalAlpha=1;
+  }
+  function tickPetals(){
+    for(var i=0;i<pls.length;i++){
+      var p=pls[i];
+      p.y+=p.vy; p.ph+=0.012; p.x+=Math.sin(p.ph)*p.sw*0.6; p.rot+=p.rv;
+      if(p.y>plH+28 || p.x<-46 || p.x>plW+46) pls[i]=newPetal(false);
+    }
+    drawPetals();
+    plraf=requestAnimationFrame(tickPetals);
+  }
+  function ensurePetals(){
+    if(plcv) return;
+    for(var i=0;i<PLCOL.length;i++) plSpr.push(mkPetal(PLCOL[i]));
+    plcv=document.createElement("canvas"); plcv.id="petals";
+    plcv.setAttribute("aria-hidden","true"); document.body.appendChild(plcv);
+    plctx=plcv.getContext("2d"); resizePetals();
+    window.addEventListener("resize", resizePetals);
+  }
+  function startPetals(){ ensurePetals(); drawPetals(); if(reduce()) return; if(!plraf) plraf=requestAnimationFrame(tickPetals); }
+  function stopPetals(){ if(plraf){ cancelAnimationFrame(plraf); plraf=0; } if(plctx) plctx.clearRect(0,0,plW,plH); }
+
   /* ---------- 提示 ---------- */
   function toast(msg){
     var el = document.querySelector(".winter-toast");
@@ -2949,14 +3067,17 @@ body.quake .qk-hint{display:inline-flex}
     cur = t || "";
     document.body.classList.toggle("winter", cur==="winter");
     document.body.classList.toggle("halloween", cur==="halloween");
+    document.body.classList.toggle("girls", cur==="girls");
     if(cur==="winter") startSnow(); else stopSnow();
     if(cur==="halloween"){ startBats(); startEmbers(); } else { stopBats(); stopEmbers(); }
+    if(cur==="girls") startPetals(); else stopPetals();
     syncFab(); syncThemeUI();
     try { if(!noSave) sessionStorage.setItem(KEY, (cur || "none") + "@" + mdNow()); } catch(e){}
     if(!quiet){
       toast(cur==="winter" ? "❄ 新年模式已开启（Alt+S 关闭）"
         : cur==="halloween" ? "🎃 万圣节模式已开启（Alt+H 关闭）"
-        : "季节主题已关闭（Alt+S 新年 · Alt+H 万圣节）");
+        : cur==="girls" ? "🌸 四少女主题已开启（Alt+G 关闭）"
+        : "季节主题已关闭（Alt+S 新年 · Alt+H 万圣节 · Alt+G 四少女）");
     }
   }
   function autoTheme(){
@@ -2971,10 +3092,10 @@ body.quake .qk-hint{display:inline-flex}
     toast(on ? "🔧 调试角标已显示（Alt+S+E 再按一次隐藏）" : "调试角标已隐藏（Alt+S+E 可再显示）");
   }
 
-  var saved = null, q = null, preview = false, savedDay = null;
+  var saved = null, q = null, preview = false, savedDay = null, fromStore = false;
   try {
     var rawS = sessionStorage.getItem(KEY);
-    if(rawS){ var partsS = rawS.split("@"); saved = partsS[0] || null; savedDay = partsS[1] || ""; }
+    if(rawS){ var partsS = rawS.split("@"); saved = partsS[0] || null; savedDay = partsS[1] || ""; fromStore = true; }
   } catch(e){}
   try {
     var sp = new URLSearchParams(location.search);
@@ -2984,13 +3105,13 @@ body.quake .qk-hint{display:inline-flex}
     if(hw === "1") q = "halloween"; else if(hw === "0") q = "0";
   } catch(e){}
   if(q != null && q !== ""){
-    saved = (q==="none"||q==="0") ? "none" : (q==="halloween" ? "halloween" : (q==="winter" ? "winter" : null));
-    preview = true;
+    saved = (q==="none"||q==="0") ? "none" : (q==="halloween" ? "halloween" : (q==="winter" ? "winter" : (q==="girls" ? "girls" : null)));
+    preview = true; fromStore = false;
   }
   if(saved === "1") saved = "winter";
   if(saved === "0") saved = "none";
   /* 记忆只在“当天”有效：日期一变就作废，回到按日期自动判断 */
-  if(saved && savedDay !== String(mdNow())) saved = null;
+  if(fromStore && saved && savedDay !== String(mdNow())) saved = null;
 
   wFab = document.getElementById("winterFab");
   hFab = document.getElementById("hnFab");
@@ -3053,6 +3174,9 @@ body.quake .qk-hint{display:inline-flex}
       if(Date.now() - sAt < 430){ clearTimeout(sTimer); sAt = 0; toggleTools(); e.preventDefault(); }
     } else if(c === "KeyH" || k === "h"){
       setTheme(cur==="halloween" ? "" : "halloween", false);
+      e.preventDefault();
+    } else if(c === "KeyG" || k === "g"){
+      setTheme(cur==="girls" ? "" : "girls", false);
       e.preventDefault();
     }
   });
