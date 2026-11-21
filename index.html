@@ -1220,9 +1220,9 @@ body.halloween .th-btn{border-color:rgba(255,150,64,.42);color:#FFD7AC;backgroun
 body.winter .th-btn{border-color:rgba(170,205,255,.4);color:#DCEBFF;background:rgba(12,18,28,.7)}
 @media (max-width:700px){.theme-dock{left:12px;top:76px}.th-btn{padding:.4rem .66rem .42rem;font-size:.7rem}}
 
-/* ============ 四少女主题：拉娜 · 酒桶 · 石墨 · 方方 ============ */
+/* ============ 元老主题（原「四少女」）：拉娜 · 酒桶 · 石墨 · 方方 ============ */
 body.girls .th-btn{border-color:rgba(232,99,127,.44);color:#FFD6DE;background:rgba(26,12,16,.72)}
-.th-item[data-t="girls"] .sw{background:linear-gradient(135deg,#E8637F,#F0913F)}
+.th-item[data-t="girls"] .sw{width:14px;height:14px;border-radius:50%;background:url(assets/av-lana.webp) center 18%/cover no-repeat;box-shadow:0 0 0 1px rgba(232,99,127,.55),inset 0 0 0 1px rgba(255,255,255,.10)}
 body.girls{
   --bg:#0B0708;--bg-soft:#110B0C;
   --tea:#E8637F;--tea-deep:#BE3F58;
@@ -1252,11 +1252,37 @@ body.girls .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-e
              linear-gradient(180deg,rgba(11,7,8,.26) 0%,rgba(11,7,8,.04) 32%,rgba(11,7,8,.60) 82%,var(--bg) 100%)}
 
 
+/* 形象元素体系：四枚头像圆牌，贯穿全站 UI */
+.av{display:block;width:var(--av,22px);height:var(--av,22px);border-radius:50%;background-repeat:no-repeat;background-size:cover;background-position:center 16%;
+  border:1px solid rgba(232,99,127,.45);box-shadow:0 3px 10px rgba(0,0,0,.45);flex:none}
+.av-lana{background-image:url(assets/av-lana.webp);border-color:rgba(232,99,127,.62)}
+.av-jiutong{background-image:url(assets/av-jiutong.webp);border-color:rgba(196,190,188,.34)}
+.av-shimo{background-image:url(assets/av-shimo.webp);border-color:rgba(240,145,63,.55)}
+.av-fangfang{background-image:url(assets/av-fangfang.webp);border-color:rgba(168,36,74,.62)}
+.av + .av{margin-left:-6px}
+.crew{display:none}
+body.girls .brand{position:relative}
+body.girls .crew{display:flex;align-items:center;position:absolute;left:calc(100% + 18px);top:50%;transform:translateY(-50%);--av:24px}
+body.girls .crew .av{border-width:1px;box-shadow:0 2px 7px rgba(0,0,0,.5)}
+.hero-crew{display:none}
+body.girls .hero-crew{display:flex;align-items:center;margin-top:1.7rem;--av:30px;opacity:.95}
+body.girls .hero-crew .av + .av{margin-left:-8px}
+body.girls .hero-crew{--av:34px}
+.hero-crew .crew-cap{font-size:.58rem;letter-spacing:.24em;color:rgba(192,173,170,.62);margin-left:1.1rem;white-space:nowrap}
+body.girls .hero-crew .av{transition:transform .4s cubic-bezier(.2,.9,.3,1),box-shadow .4s ease}
+body.girls .hero-crew .av:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(232,99,127,.35)}
+.kav{display:none}
+body.girls .kav{display:block;width:24px;height:24px;border-radius:50%;background-repeat:no-repeat;background-size:cover;background-position:center 16%;
+  border:1px solid rgba(232,99,127,.42);flex:none}
+body.girls .kicker::before{display:none}
+body.girls .kicker{gap:.62rem}
+body.girls .feat h3{display:flex;align-items:center;gap:.55rem}
+body.girls .feat h3 .kav{width:20px;height:20px}
 .girls-stage{display:none}
 body.girls .girls-stage{display:block;position:relative;width:100%;margin-top:clamp(2.2rem,4vw,3.4rem)}
 body.girls .girls-stage::before{content:"";position:absolute;left:50%;bottom:0;width:min(1180px,100%);height:240px;transform:translateX(-50%);
   background:radial-gradient(58% 100% at 50% 100%,rgba(232,99,127,.11),rgba(240,145,63,.05) 46%,transparent 74%);pointer-events:none}
-body.girls .girls-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;pointer-events:none;opacity:.55;
+body.girls .girls-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;pointer-events:none;opacity:.62;z-index:2;
   background:linear-gradient(90deg,rgba(232,99,127,0) 2%,#E8637F 22%,#8E8B88 40%,#F0913F 62%,#A8244A 84%,rgba(168,36,74,0) 98%)}
 body.girls footer{padding-bottom:0}
 body.girls .foot-copy{margin-bottom:clamp(1.6rem,2.6vw,2.4rem)}
@@ -1266,7 +1292,7 @@ body.girls .gs-head em.r{background:linear-gradient(90deg,rgba(240,145,63,.30),r
 body.girls .gs-head b{font-size:.56rem;font-weight:600;letter-spacing:.34em;color:rgba(248,240,231,.46);white-space:nowrap}
 body.girls .gs-head b.n{font-variant-numeric:tabular-nums;letter-spacing:.18em;color:rgba(232,99,127,.72)}
 body.girls .gs-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:end;gap:clamp(10px,2vw,34px);max-width:1240px;margin:0 auto;padding:0 clamp(14px,3.4vw,44px)}
-body.girls .gs-col{position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;margin:0;padding-top:34px;opacity:0;transform:translateY(30px);
+body.girls .gs-col{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;margin:0;padding-top:34px;opacity:0;transform:translateY(30px);
   transition:opacity .85s ease,transform 1s cubic-bezier(.16,.9,.26,1)}
 body.girls .gs-col:nth-child(2){transition-delay:.09s}
 body.girls .gs-col:nth-child(3){transition-delay:.18s}
@@ -1280,11 +1306,13 @@ body.girls .gs-col img{display:block;width:var(--qw,240px);max-width:100%;height
   filter:drop-shadow(0 12px 24px rgba(0,0,0,.55)) drop-shadow(0 0 18px rgba(232,99,127,.10));
   transition:transform .6s cubic-bezier(.16,.9,.26,1),filter .5s ease}
 body.girls .gs-col:nth-child(1){--qw:324px}
-body.girls .gs-col:nth-child(2){--qw:287px;--qy:6px}
-body.girls .gs-col:nth-child(3){--qw:250px;--qy:-3px}
-body.girls .gs-col:nth-child(4){--qw:234px;--qy:8px}
-body.girls .gs-col img{transform:translateY(var(--qy,0px))}
-body.girls .gs-col:hover img{transform:translateY(calc(var(--qy,0px) - 16px)) scale(1.015);
+body.girls .gs-col:nth-child(2){--qw:287px}
+body.girls .gs-col:nth-child(3){--qw:250px}
+body.girls .gs-col:nth-child(4){--qw:234px}
+body.girls .gs-col img{transform:translateY(0);margin-bottom:-12px;
+  -webkit-mask-image:linear-gradient(180deg,#000 0 86%,rgba(0,0,0,.72) 95%,rgba(0,0,0,.28) 100%);
+  mask-image:linear-gradient(180deg,#000 0 86%,rgba(0,0,0,.72) 95%,rgba(0,0,0,.28) 100%)}
+body.girls .gs-col:hover img{transform:translateY(-16px) scale(1.015);
   filter:drop-shadow(0 20px 34px rgba(0,0,0,.6)) drop-shadow(0 0 26px rgba(232,99,127,.26))}
 body.girls .gs-col:hover figcaption{color:rgba(255,214,222,.9)}
 body.girls .gs-head b.cn{display:none;font-size:.56rem;letter-spacing:.18em}
@@ -1302,6 +1330,10 @@ body.girls .gs-head b.cn{display:none;font-size:.56rem;letter-spacing:.18em}
   body.girls .gs-head b.en{display:none}
   body.girls .gs-head b.cn{display:block}
   body.girls .gs-head b.n{font-size:.5rem}
+  body.girls .crew{--av:16px;left:calc(100% + 10px)}
+  body.girls .hero-crew{--av:26px}
+  body.girls .hero-crew .crew-cap{font-size:.52rem;letter-spacing:.18em;margin-left:.8rem}
+  body.girls .kav{width:20px;height:20px}
 }
 @media (prefers-reduced-motion:reduce){
   body.girls .gs-col{opacity:1;transform:none;transition:none}
@@ -1524,7 +1556,7 @@ body.quake .qk-hint{display:inline-flex}
     <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t=""><i class="sw"></i><span class="tt">原版主题</span><span class="ck">✓</span></button>
     <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t="halloween"><i class="sw"></i><span class="tt">万圣节</span><span class="ck">✓</span></button>
     <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t="winter"><i class="sw"></i><span class="tt">新年</span><span class="ck">✓</span></button>
-    <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t="girls"><i class="sw"></i><span class="tt">四少女</span><span class="ck">✓</span></button>
+    <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t="girls"><i class="sw"></i><span class="tt">元老</span><span class="ck">✓</span></button>
   </div>
 </div>
 <div class="boot" id="boot" aria-hidden="true">
@@ -1583,6 +1615,7 @@ body.quake .qk-hint{display:inline-flex}
         <span class="brand-name">乌龙茶的地盘</span><br>
         <span class="brand-en">OOLONG CRAFT</span>
       </span>
+      <span class="crew" aria-hidden="true"><i class="av av-lana"></i><i class="av av-jiutong"></i><i class="av av-shimo"></i><i class="av av-fangfang"></i></span>
     </a>
     <nav class="nav-links" aria-label="主导航">
       <button class="nav-god" id="navGod" type="button" aria-haspopup="dialog" aria-controls="sg">
@@ -1650,6 +1683,7 @@ body.quake .qk-hint{display:inline-flex}
       <a class="hl hl-rose" href="https://judiao417.github.io/toupiao/" target="_blank" rel="noopener">画廊 · 反馈 ↗</a>
       <a class="hl hl-jade" href="commands.html">指令大全 ↗</a>
     </div>
+    <div class="hero-crew" aria-hidden="true"><i class="av av-lana"></i><i class="av av-jiutong"></i><i class="av av-shimo"></i><i class="av av-fangfang"></i><span class="crew-cap">茶寮 · 四位元老</span></div>
   </div>
   <div class="scroll-hint">SCROLL</div>
 </section>
@@ -1670,7 +1704,7 @@ body.quake .qk-hint{display:inline-flex}
       <span class="tag">慢节奏 · 不打烊</span>
     </div>
     <div class="about-copy rv">
-      <span class="kicker">一间茶寮</span>
+      <span class="kicker"><i class="kav av-lana" aria-hidden="true"></i>一间茶寮</span>
       <h2 class="sec-title">一壶慢慢泡开的乌龙</h2>
       <p>乌龙茶的地盘是一个 Java 版 26.2 的社区服务器。比起人声鼎沸的大服，我们更想留一块安静的地方：种田、搭房、研究红石，或者只是盖一座自己满意的小房子。</p>
       <p>乌龙茶的名字，来自服主养的一只小黑猫。服主把这里当自家地盘打理，进来的每一位玩家，也都当这里是半个家。规矩不多，但互相尊重是底线。</p>
@@ -1687,28 +1721,28 @@ body.quake .qk-hint{display:inline-flex}
 <!-- ===== 玩法 ===== -->
 <section class="sec" id="play" style="padding-top:0">
   <div class="wrap">
-    <span class="kicker rv">三种泡法</span>
+    <span class="kicker rv"><i class="kav av-jiutong" aria-hidden="true"></i>三种泡法</span>
     <h2 class="sec-title rv">想怎么玩，都给你留了位置</h2>
     <p class="sec-lead rv">不用按照别人的玩法生活。挑一种喜欢的姿势入座，剩下的交给时间。</p>
     <div class="feat-grid">
       <article class="feat rv">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 3.5c.5-.5 1.3-.5 1.8 0 .6.6.6 1.5 0 2.1L8 14l-3 1 1-3 8.5-8.5z"/><path d="M3 21h18M5 21l1-5M19 21l-1-5"/></svg>
-        <h3>生存定居</h3>
+        <h3><i class="kav av-lana" aria-hidden="true"></i>生存定居</h3>
         <p>圈一块地，种一片田，把「家」从几根木头慢慢盖成一座村子。日出而作，日落而息。</p>
       </article>
       <article class="feat rv">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.8 2.8M16.2 16.2L19 19M19 5l-2.8 2.8M7.8 16.2L5 19"/></svg>
-        <h3>红石工坊</h3>
+        <h3><i class="kav av-jiutong" aria-hidden="true"></i>红石工坊</h3>
         <p>给爱折腾电路的玩家留的桌位：自动农场、电梯、刷物机。折腾本身就是乐趣，坏了重来也不亏。</p>
       </article>
       <article class="feat rv">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
-        <h3>建筑茶楼</h3>
+        <h3><i class="kav av-shimo" aria-hidden="true"></i>建筑茶楼</h3>
         <p>中式、欧式、像素画，来者不拒。好作品会挂进「纪念馆」，让路过的人都能看上一眼。</p>
       </article>
       <article class="feat rv">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></svg>
-        <h3>社区茶会</h3>
+        <h3><i class="kav av-fangfang" aria-hidden="true"></i>社区茶会</h3>
         <p>不定期小活动、主题周和集体项目。人多热闹，人少清静，怎么都舒服，来了就是茶友。</p>
       </article>
     </div>
@@ -1718,7 +1752,7 @@ body.quake .qk-hint{display:inline-flex}
 <!-- ===== 画廊 ===== -->
 <section class="sec" id="gallery" style="padding-top:0">
   <div class="wrap">
-    <span class="kicker rv">纪念馆</span>
+    <span class="kicker rv"><i class="kav av-shimo" aria-hidden="true"></i>纪念馆</span>
     <h2 class="sec-title rv">夜里亮灯的地方，都是有人安家的证据</h2>
     <div class="gal-switch rv" id="galSwitch" role="tablist" aria-label="纪念馆浏览方式">
       <button type="button" class="on" data-view="grid" role="tab" aria-selected="true">全部藏品</button>
@@ -1742,7 +1776,7 @@ body.quake .qk-hint{display:inline-flex}
     <div class="gal-grid" id="galGrid">
       <div class="gal-cta rv">
         <span class="pixel">YOUR BUILD</span>
-        <h3>下一张图，<br>会是你的作品吗？</h3>
+        <h3><i class="kav av-fangfang" aria-hidden="true"></i>下一张图，<br>会是你的作品吗？</h3>
         <p>把自己得意的建筑发给服主，挂进「纪念馆」，让全服都来喝茶围观。</p>
         <a class="btn btn-ghost" href="https://v.douyin.com/bYurGANvIxc/" target="_blank" rel="noopener">加入我们</a>
       </div>
@@ -1754,7 +1788,7 @@ body.quake .qk-hint{display:inline-flex}
 <section class="sec" id="join" style="padding-top:0">
   <div class="wrap join-grid">
     <div class="rv">
-      <span class="kicker">入座指南</span>
+      <span class="kicker"><i class="kav av-fangfang" aria-hidden="true"></i>入座指南</span>
       <h2 class="sec-title">四个步骤，坐到茶桌前</h2>
       <ol class="steps">
         <li>
@@ -1812,7 +1846,7 @@ body.quake .qk-hint{display:inline-flex}
 <!-- ===== FAQ ===== -->
 <section class="sec" id="faq" style="padding-top:0">
   <div class="wrap">
-    <span class="kicker rv">茶余问答</span>
+    <span class="kicker rv"><i class="kav av-lana" aria-hidden="true"></i>茶余问答</span>
     <h2 class="sec-title rv">进门前，先听几嘴家常</h2>
     <div class="faq rv">
       <details>
@@ -3137,8 +3171,8 @@ body.quake .qk-hint{display:inline-flex}
     if(!quiet){
       toast(cur==="winter" ? "❄ 新年模式已开启（Alt+S 关闭）"
         : cur==="halloween" ? "🎃 万圣节模式已开启（Alt+H 关闭）"
-        : cur==="girls" ? "🌸 四少女主题已开启（Alt+G 关闭）"
-        : "季节主题已关闭（Alt+S 新年 · Alt+H 万圣节 · Alt+G 四少女）");
+        : cur==="girls" ? "🌸 元老主题已开启（Alt+G 关闭）"
+        : "季节主题已关闭（Alt+S 新年 · Alt+H 万圣节 · Alt+G 元老）");
     }
   }
   function autoTheme(){
