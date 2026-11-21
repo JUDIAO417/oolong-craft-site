@@ -1819,6 +1819,155 @@ body.cyber .th-menu{background:rgba(4,10,20,.93);border-color:rgba(0,240,255,.30
 .th-item[data-t="cyber"] .sw{background:linear-gradient(120deg,#FF2E52 0 46%,#00F0FF 54% 100%);
   box-shadow:0 0 10px rgba(0,240,255,.7),0 0 16px rgba(255,46,82,.5);animation:ncBlink 3s steps(1,end) infinite}
 
+
+/* ---- 赛博 · 精致化 & 贝塞尔动效升级 ---- */
+body.cyber{
+  --ease-soft:cubic-bezier(.16,1,.3,1);
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-breathe:cubic-bezier(.45,0,.55,1);
+  --ease-snap:cubic-bezier(.68,0,.26,1);
+}
+@keyframes ncTube{
+  0%,100%{opacity:1}
+  36%{opacity:1}
+  39%{opacity:.20}
+  43%{opacity:.94}
+  45%{opacity:.46}
+  48%{opacity:1}
+  72%{opacity:.68}
+  77%{opacity:1}
+}
+@keyframes ncFlow{to{background-position:200% 0}}
+@keyframes ncSwapA{0%,14%{opacity:1}42%,74%{opacity:0}100%{opacity:1}}
+@keyframes ncSwapB{0%,14%{opacity:0}42%,74%{opacity:1}100%{opacity:0}}
+@keyframes ncBreathRB2{
+  0%,100%{box-shadow:0 0 0 1px rgba(190,244,255,.10) inset,0 6px 22px -8px rgba(255,46,82,.58),0 0 26px -6px rgba(255,46,82,.42)}
+  50%{box-shadow:0 0 0 1px rgba(190,244,255,.14) inset,0 6px 24px -6px rgba(0,240,255,.62),0 0 30px -4px rgba(0,240,255,.46)}
+}
+@keyframes ncBtnBreath{
+  0%,100%{box-shadow:0 0 18px rgba(255,46,82,.55),0 0 36px rgba(255,46,82,.26),inset 0 1px 0 rgba(255,255,255,.16)}
+  50%{box-shadow:0 0 24px rgba(25,167,255,.62),0 0 46px rgba(0,240,255,.30),inset 0 1px 0 rgba(255,255,255,.20)}
+}
+@keyframes ncSheen{
+  0%,56%{transform:translateX(0) skewX(-18deg);opacity:0}
+  58%{opacity:.85}
+  84%{transform:translateX(438%) skewX(-18deg);opacity:.18}
+  100%{transform:translateX(438%) skewX(-18deg);opacity:0}
+}
+@keyframes ncDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.30;transform:scale(.78)}}
+@keyframes ncTitleSweep{
+  0%,68%{background-position:132% 0;opacity:0}
+  71%{opacity:.8}
+  90%{opacity:.38}
+  100%{background-position:-34% 0;opacity:0}
+}
+@keyframes ncSwapFade{0%{opacity:0}22%{opacity:1}70%{opacity:.55}100%{opacity:0}}
+
+/* 灯管：玻璃高光 + 平滑掉电 */
+body.cyber .neon-rails i{will-change:opacity;transform:translateZ(0)}
+body.cyber .neon-rails i::before{content:"";position:absolute;left:50%;top:8%;bottom:8%;width:1px;transform:translateX(-50%);
+  background:linear-gradient(180deg,transparent,rgba(255,255,255,.92),transparent);opacity:.5;pointer-events:none}
+body.cyber .neon-rails i:nth-child(1){animation:ncTube 6.8s var(--ease-breathe) infinite}
+body.cyber .neon-rails i:nth-child(2){animation:ncTube 5.4s var(--ease-breathe) .7s infinite}
+body.cyber .neon-rails i:nth-child(3){animation:ncTube 7.6s var(--ease-breathe) 1.5s infinite}
+body.cyber .neon-rails i:nth-child(4){animation:ncTube 6.2s var(--ease-breathe) 2.2s infinite}
+
+/* 红蓝灯条：双层交叉淡入淡出（平滑换色，无硬切） */
+body.cyber .neon-rails i.rb{will-change:opacity}
+body.cyber .neon-rails i.rb::before{left:3%;right:3%;top:50%;bottom:auto;width:auto;height:1px;transform:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);opacity:.55}
+body.cyber .neon-rails i.rb::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(90deg,#19A7FF,#8AF0FF 62%,rgba(25,167,255,.14));
+  box-shadow:0 0 16px rgba(25,167,255,.85),0 0 40px rgba(0,240,255,.38);
+  opacity:0}
+body.cyber .neon-rails i.rb{animation:ncSwapA 4.6s var(--ease-breathe) infinite}
+body.cyber .neon-rails i.rb::after{animation:ncSwapB 4.6s var(--ease-breathe) infinite}
+body.cyber .neon-rails i.rb2{animation-delay:1.7s}
+body.cyber .neon-rails i.rb2::after{animation-delay:1.7s}
+
+/* 扫描光带：线性匀速（读作"扫描"），加一层极淡的深度呼吸 */
+body.cyber .cyber-scan{will-change:transform}
+
+/* 顶栏 / 页脚灯带：流光平移 + 平滑掉电 */
+body.cyber header::after{background-size:200% 100%;
+  animation:ncTube 7.2s var(--ease-breathe) infinite,ncFlow 13s linear infinite}
+body.cyber footer::after{background-size:200% 100%;
+  animation:ncTube 6.4s var(--ease-breathe) .5s infinite,ncFlow 16s linear infinite}
+
+/* 同步跑马灯：用贝塞尔缓入缓出的微微明灭 */
+body.cyber .ticker-track i{animation:ncBlink 3.4s var(--ease-breathe) infinite}
+
+/* 按钮：缓动统一 + 高光扫过 + 慢呼吸 */
+body.cyber .btn{transition:transform .5s var(--ease-soft),box-shadow .55s var(--ease-breathe),border-color .45s var(--ease-out),color .4s var(--ease-out),background .45s var(--ease-out)}
+body.cyber .btn::before{content:"";position:absolute;top:-20%;bottom:-20%;left:-46%;width:22%;pointer-events:none;z-index:1;mix-blend-mode:screen;
+  background:linear-gradient(100deg,transparent,rgba(210,250,255,.30),rgba(255,255,255,.16) 52%,transparent);
+  transform:skewX(-18deg);animation:ncSheen 5.8s var(--ease-soft) infinite}
+body.cyber .btn-ghost::before{background:linear-gradient(100deg,transparent,rgba(150,240,255,.16),transparent)}
+body.cyber .btn-primary{animation:ncBtnBreath 4.6s var(--ease-breathe) infinite}
+body.cyber .btn-primary:hover{transform:translateY(-3px) scale(1.012);
+  box-shadow:0 0 28px rgba(255,46,82,.70),0 0 58px rgba(25,167,255,.48),inset 0 1px 0 rgba(255,255,255,.22)}
+body.cyber .btn-ghost:hover{transform:translateY(-3px)}
+
+/* 星神按钮：平滑红蓝呼吸 */
+body.cyber .nav-god{animation:ncBreathRB2 4.8s var(--ease-breathe) infinite;
+  transition:transform .45s var(--ease-soft),box-shadow .5s var(--ease-breathe)}
+body.cyber .nav-god:hover{transform:translateY(-2px) scale(1.05)}
+
+/* 标题：一层斜向扫描高光掠过 */
+body.cyber h1{position:relative}
+body.cyber h1::after{content:"";position:absolute;inset:-12% -16%;pointer-events:none;mix-blend-mode:screen;z-index:1;
+  background:linear-gradient(104deg,transparent 44%,rgba(0,240,255,.14) 48.5%,rgba(255,255,255,.24) 50%,rgba(255,46,82,.16) 51.5%,transparent 58%);
+  background-size:260% 100%;background-repeat:no-repeat;background-position:132% 0;opacity:0;
+  animation:ncTitleSweep 7.6s var(--ease-soft) infinite}
+
+/* 卡片：渐变描边 + 贝塞尔位移，hover 有重量感 */
+body.cyber .feat,body.cyber .gal,body.cyber .note,body.cyber .gal-cta{
+  border:1px solid transparent;
+  background:
+    linear-gradient(158deg,rgba(10,20,38,.76),rgba(5,11,22,.58)) padding-box,
+    linear-gradient(148deg,rgba(0,240,255,.40),rgba(178,107,255,.16) 54%,rgba(255,46,82,.28)) border-box;
+  transition:transform .62s var(--ease-soft),box-shadow .55s var(--ease-out),background .55s var(--ease-out)}
+body.cyber .faq details{
+  border:1px solid transparent;
+  background:
+    linear-gradient(158deg,rgba(10,20,38,.74),rgba(5,11,22,.56)) padding-box,
+    linear-gradient(148deg,rgba(0,240,255,.30),rgba(255,46,82,.22)) border-box;
+  transition:box-shadow .5s var(--ease-out),background .5s var(--ease-out)}
+body.cyber .feat:hover,body.cyber .gal:hover,body.cyber .note:hover,body.cyber .gal-cta:hover{
+  transform:translateY(-9px) scale(1.006);
+  background:
+    linear-gradient(158deg,rgba(13,26,48,.80),rgba(6,13,26,.62)) padding-box,
+    linear-gradient(148deg,rgba(0,240,255,.72),rgba(178,107,255,.34) 54%,rgba(255,46,82,.52)) border-box}
+body.cyber .faq details[open]{
+  background:
+    linear-gradient(158deg,rgba(12,24,44,.78),rgba(6,13,26,.60)) padding-box,
+    linear-gradient(148deg,rgba(0,240,255,.62),rgba(255,46,82,.42)) border-box}
+body.cyber .gal .thumb img{transition:transform .85s var(--ease-soft)}
+body.cyber .gal .thumb:hover img{transform:scale(1.07)}
+
+/* 卡片角灯：柔和脉冲而不是硬闪 */
+body.cyber .feat::after{animation:ncDot 3.6s var(--ease-breathe) infinite}
+body.cyber .feat:nth-child(2)::after{animation-delay:.9s}
+body.cyber .feat:nth-child(3)::after{animation-delay:1.8s}
+body.cyber .feat:nth-child(4)::after{animation-delay:2.7s}
+
+/* 步骤 / 终端 / 图钉：微交互缓动 */
+body.cyber .dot{transition:transform .5s var(--ease-soft),box-shadow .5s var(--ease-out)}
+body.cyber .steps li:hover .dot{transform:scale(1.08) translateY(-1px);box-shadow:0 0 22px rgba(0,240,255,.55),inset 0 0 16px rgba(0,240,255,.22)}
+body.cyber .gm-pin i{transition:transform .45s var(--ease-soft),box-shadow .45s var(--ease-out)}
+body.cyber .gal-switch button{transition:color .3s var(--ease-out),background .35s var(--ease-out),box-shadow .4s var(--ease-out)}
+
+/* 主题坞：缓动统一 */
+body.cyber .th-btn{transition:border-color .4s var(--ease-out),box-shadow .45s var(--ease-out),color .35s var(--ease-out),transform .45s var(--ease-soft)}
+body.cyber .th-btn:hover{transform:translateY(-1px)}
+body.cyber .th-item{transition:background .3s var(--ease-out),color .3s var(--ease-out)}
+body.cyber .th-item[data-t="cyber"] .sw{animation:ncDot 3.2s var(--ease-breathe) infinite}
+
+/* 主题切换过场：一层霓虹扫光 */
+body.cyber.theme-swap::after{content:"";position:fixed;inset:0;z-index:220;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(0,240,255,.12) 40%,rgba(255,46,82,.12) 62%,transparent);
+  animation:ncSwapFade .72s var(--ease-soft) both}
+
 @media (max-width:700px){
   body.cyber .neon-rails i:nth-child(1){left:3%;height:16vh}
   body.cyber .neon-rails i:nth-child(2){right:2.5%;height:18vh}
@@ -1827,8 +1976,10 @@ body.cyber .th-menu{background:rgba(4,10,20,.93);border-color:rgba(0,240,255,.30
   body.cyber .neon-rails i.rb2{display:none}
 }
 @media (prefers-reduced-motion:reduce){
-  body.cyber .cyber-scan,body.cyber .neon-rails i,body.cyber header::after,body.cyber footer::after,
-  body.cyber .btn-primary,body.cyber .nav-god,body.cyber .feat::after,body.cyber .term .cursor{animation:none}
+  body.cyber .cyber-scan,body.cyber .neon-rails i,body.cyber .neon-rails i.rb::after,body.cyber header::after,body.cyber footer::after,
+  body.cyber .btn-primary,body.cyber .btn::before,body.cyber .nav-god,body.cyber .feat::after,body.cyber .term .cursor,
+  body.cyber h1::after,body.cyber .ticker-track i,body.cyber .th-item[data-t="cyber"] .sw{animation:none}
+  body.cyber.theme-swap::after{display:none}
 }
 
 </style>
@@ -3464,6 +3615,11 @@ body.cyber .th-menu{background:rgba(4,10,20,.93);border-color:rgba(0,240,255,.30
         : cur==="girls" ? "🌸 元老主题已开启（Alt+G 关闭）"
         : cur==="cyber" ? "⚡ 赛博朋克主题已开启（Alt+Y 关闭）"
         : "季节主题已关闭（Alt+S 新年 · Alt+H 万圣节 · Alt+G 元老 · Alt+Y 赛博）");
+      document.body.classList.remove("theme-swap");
+      void document.body.offsetWidth;
+      document.body.classList.add("theme-swap");
+      clearTimeout(document.body._swapT);
+      document.body._swapT = setTimeout(function(){ document.body.classList.remove("theme-swap"); }, 780);
     }
   }
   function autoTheme(){
