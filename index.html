@@ -1183,6 +1183,40 @@ body.halloween .hl.hl-jade{color:#9FE7C6}
   body.halloween .hn-web.c1{top:62px;left:-6px}
   body.halloween .hn-web.c2{top:62px;right:-6px}
 }
+/* ---------- 左上角主题坞 ---------- */
+.theme-dock{position:fixed;left:18px;top:86px;z-index:133;font-family:var(--sans);line-height:1}
+.th-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.46rem .8rem .48rem;border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);background:rgba(14,10,18,.66);color:var(--ink);
+  font-family:inherit;font-size:.74rem;font-weight:600;letter-spacing:.12em;cursor:pointer;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 22px rgba(0,0,0,.38);transition:border-color .25s,background .25s,transform .2s,box-shadow .25s}
+.th-btn:hover{transform:translateY(-1px);border-color:rgba(255,210,150,.42);background:rgba(20,14,26,.74)}
+.th-btn:active{transform:scale(.97)}
+.th-btn:focus-visible{outline:2px solid rgba(255,190,110,.55);outline-offset:2px}
+.th-btn svg{width:15px;height:15px;flex:none}
+.th-menu{position:absolute;left:0;top:calc(100% + 8px);min-width:142px;padding:6px;border-radius:12px;
+  border:1px solid rgba(255,255,255,.16);background:rgba(12,8,16,.84);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 18px 44px rgba(0,0,0,.55);
+  opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);transform-origin:top left;
+  transition:opacity .2s ease,transform .2s ease,visibility .2s}
+.th-menu.on{opacity:1;visibility:visible;transform:none}
+.th-item{display:flex;align-items:center;gap:.55rem;width:100%;padding:.46rem .55rem;border:0;border-radius:8px;
+  background:transparent;color:var(--ink);font-family:inherit;font-size:.78rem;letter-spacing:.04em;
+  text-align:left;cursor:pointer;transition:background .18s}
+.th-item:hover{background:rgba(255,255,255,.07)}
+.th-item.on{background:rgba(255,255,255,.1)}
+.th-item:focus-visible{outline:2px solid rgba(255,190,110,.5);outline-offset:1px}
+.th-item .sw{width:12px;height:12px;border-radius:3px;flex:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.th-item[data-t=""] .sw{background:#4ECB8D}
+.th-item[data-t="halloween"] .sw{background:linear-gradient(135deg,#FF8A32,#B98CFF)}
+.th-item[data-t="winter"] .sw{background:linear-gradient(135deg,#C6E6FF,#7FA8D8)}
+.th-item .tt{flex:1}
+.th-item .ck{width:12px;text-align:center;color:var(--tea);opacity:0}
+.th-item.on .ck{opacity:1}
+body.halloween .th-btn{border-color:rgba(255,150,64,.42);color:#FFD7AC;background:rgba(30,14,22,.7)}
+body.winter .th-btn{border-color:rgba(170,205,255,.4);color:#DCEBFF;background:rgba(12,18,28,.7)}
+@media (max-width:700px){.theme-dock{left:12px;top:76px}.th-btn{padding:.4rem .66rem .42rem;font-size:.7rem}}
+
 /* ============ 新年模式：飘雪 · 檐上积雪 · 整页雪景 ============ */
 #snowfall{position:fixed;inset:0;pointer-events:none;z-index:126;display:none;opacity:.95}
 body.winter #snowfall{display:block}
@@ -1375,6 +1409,17 @@ body.quake .qk-hint{display:inline-flex}
 </style>
 </head>
 <body>
+<div class="theme-dock" id="themeDock">
+  <button class="th-btn" id="thBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="thMenu" title="切换季节主题">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.4" y="4.2" width="6.8" height="6.8" rx="1.6" fill="#4ECB8D"/><rect x="9.8" y="3.2" width="6.8" height="6.8" rx="1.6" fill="#FF8A32"/><rect x="6" y="10.6" width="6.8" height="6.8" rx="1.6" fill="#9FBEFF"/></svg>
+    <span>主题</span>
+  </button>
+  <div class="th-menu" id="thMenu" role="menu" aria-label="季节主题">
+    <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t=""><i class="sw"></i><span class="tt">原版主题</span><span class="ck">✓</span></button>
+    <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t="halloween"><i class="sw"></i><span class="tt">万圣节</span><span class="ck">✓</span></button>
+    <button class="th-item" type="button" role="menuitemradio" aria-checked="false" data-t="winter"><i class="sw"></i><span class="tt">新年</span><span class="ck">✓</span></button>
+  </div>
+</div>
 <div class="boot" id="boot" aria-hidden="true">
   <div class="mono up"></div>
   <div class="mono dn"></div>
@@ -2880,7 +2925,17 @@ body.quake .qk-hint{display:inline-flex}
   }
 
   /* ---------- 主题切换 ---------- */
-  var wFab = null, hFab = null;
+  var wFab = null, hFab = null, thDock = null, thBtn = null, thMenu = null;
+  function syncThemeUI(){
+    if(!thMenu) return;
+    var items = thMenu.querySelectorAll(".th-item");
+    Array.prototype.forEach.call(items, function(it){
+      var on = (it.getAttribute("data-t") || "") === (cur || "");
+      it.classList.toggle("on", on);
+      it.setAttribute("aria-checked", on ? "true" : "false");
+    });
+    if(thBtn) thBtn.setAttribute("data-cur", cur || "");
+  }
   function syncFab(){
     if(wFab){ var w = cur==="winter"; wFab.classList.toggle("on", w); wFab.setAttribute("aria-pressed", w?"true":"false"); wFab.title = (w?"关闭":"开启")+"新年模式（Alt+S）"; }
     if(hFab){ var h = cur==="halloween"; hFab.classList.toggle("on", h); hFab.setAttribute("aria-pressed", h?"true":"false"); hFab.title = (h?"关闭":"开启")+"万圣节模式（Alt+H）"; }
@@ -2891,8 +2946,8 @@ body.quake .qk-hint{display:inline-flex}
     document.body.classList.toggle("halloween", cur==="halloween");
     if(cur==="winter") startSnow(); else stopSnow();
     if(cur==="halloween"){ startBats(); startEmbers(); } else { stopBats(); stopEmbers(); }
-    syncFab();
-    try { if(!noSave) sessionStorage.setItem(KEY, cur || "none"); } catch(e){}
+    syncFab(); syncThemeUI();
+    try { if(!noSave) sessionStorage.setItem(KEY, (cur || "none") + "@" + mdNow()); } catch(e){}
     if(!quiet){
       toast(cur==="winter" ? "❄ 新年模式已开启（Alt+S 关闭）"
         : cur==="halloween" ? "🎃 万圣节模式已开启（Alt+H 关闭）"
@@ -2911,8 +2966,11 @@ body.quake .qk-hint{display:inline-flex}
     toast(on ? "🔧 调试角标已显示（Alt+S+E 再按一次隐藏）" : "调试角标已隐藏（Alt+S+E 可再显示）");
   }
 
-  var saved = null, q = null, preview = false;
-  try { saved = sessionStorage.getItem(KEY); } catch(e){}
+  var saved = null, q = null, preview = false, savedDay = null;
+  try {
+    var rawS = sessionStorage.getItem(KEY);
+    if(rawS){ var partsS = rawS.split("@"); saved = partsS[0] || null; savedDay = partsS[1] || ""; }
+  } catch(e){}
   try {
     var sp = new URLSearchParams(location.search);
     q = sp.get("theme");
@@ -2926,13 +2984,52 @@ body.quake .qk-hint{display:inline-flex}
   }
   if(saved === "1") saved = "winter";
   if(saved === "0") saved = "none";
+  /* 记忆只在“当天”有效：日期一变就作废，回到按日期自动判断 */
+  if(saved && savedDay !== String(mdNow())) saved = null;
 
   wFab = document.getElementById("winterFab");
   hFab = document.getElementById("hnFab");
   if(wFab) wFab.addEventListener("click", function(){ setTheme(cur==="winter" ? "" : "winter", false); });
   if(hFab) hFab.addEventListener("click", function(){ setTheme(cur==="halloween" ? "" : "halloween", false); });
 
-  setTheme(saved ? (saved==="none" ? "" : saved) : autoTheme(), true, preview);
+  /* 左上角主题坞：点开选原版 / 万圣节 / 新年 */
+  thDock = document.getElementById("themeDock");
+  thBtn = document.getElementById("thBtn");
+  thMenu = document.getElementById("thMenu");
+  if(thBtn && thMenu){
+    var setOpen = function(v){
+      thMenu.classList.toggle("on", v);
+      thBtn.setAttribute("aria-expanded", v ? "true" : "false");
+    };
+    thBtn.addEventListener("click", function(e){
+      e.stopPropagation();
+      setOpen(!thMenu.classList.contains("on"));
+    });
+    thMenu.addEventListener("click", function(e){
+      e.stopPropagation();
+      var t = e.target.closest ? e.target.closest(".th-item") : null;
+      if(!t) return;
+      setTheme(t.getAttribute("data-t") || "", false);
+      setOpen(false);
+    });
+    document.addEventListener("click", function(){ setOpen(false); });
+    document.addEventListener("keydown", function(e){ if(e.key === "Escape") setOpen(false); });
+  }
+
+  setTheme(saved ? (saved==="none" ? "" : saved) : autoTheme(), true, true);
+
+  /* 跨天或改了系统日期：每 15 分钟重判一次，记忆过期即跟随日期 */
+  var bootMd = mdNow();
+  setInterval(function(){
+    var md = mdNow();
+    if(md === bootMd) return;
+    bootMd = md;
+    var raw = null;
+    try { raw = sessionStorage.getItem(KEY); } catch(e){}
+    if(raw && raw.split("@")[1] === String(md)) return;
+    try { sessionStorage.removeItem(KEY); } catch(e){}
+    setTheme(autoTheme(), true, true);
+  }, 900000);
 
   /* Alt+S 新年 / Alt+H 万圣节 / Alt+S+E 显示角标 */
   var sAt = 0, sTimer = 0;
