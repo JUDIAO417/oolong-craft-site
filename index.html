@@ -1070,7 +1070,7 @@ body.halloween .hn-scene{display:block}
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 4%,#000 96%,transparent 100%);
   mask-image:linear-gradient(90deg,transparent 0,#000 4%,#000 96%,transparent 100%)}
 .hn-scene::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,var(--bg) 0,rgba(8,4,15,.42) 9%,rgba(8,4,15,0) 32%,rgba(8,4,15,0) 82%,rgba(8,4,15,.5) 100%)}
+  background:linear-gradient(180deg,var(--bg) 0,rgba(8,4,15,.74) 7%,rgba(8,4,15,.3) 20%,rgba(8,4,15,0) 36%,rgba(8,4,15,0) 82%,rgba(8,4,15,.5) 100%)}
 /* 角落蛛网 */
 .hn-web{position:fixed;width:168px;height:168px;pointer-events:none;z-index:125;opacity:0;visibility:hidden;
   transition:opacity .5s ease,visibility .5s}
@@ -1653,7 +1653,7 @@ body.quake .qk-hint{display:inline-flex}
 
 <!-- ===== 万圣节模式：页脚墓园场景（页面自绘） ===== -->
 <div class="hn-scene" aria-hidden="true"><svg class="hn-svg" viewBox="0 0 1440 340" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><defs>
-<linearGradient id="hnSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#04020A"/><stop offset=".24" stop-color="#0D0619"/><stop offset=".54" stop-color="#1B0B2B"/><stop offset=".78" stop-color="#30123A"/><stop offset="1" stop-color="#421B3E"/></linearGradient>
+<linearGradient id="hnSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#04020A"/><stop offset=".24" stop-color="#0D0619"/><stop offset=".54" stop-color="#1B0B2B"/><stop offset=".78" stop-color="#30123A"/><stop offset="1" stop-color="#341436"/></linearGradient>
 <radialGradient id="hnSkyGlow" cx=".78" cy=".26" r=".6"><stop offset="0" stop-color="#A96BDB" stop-opacity=".26"/><stop offset=".42" stop-color="#7E43AC" stop-opacity=".11"/><stop offset="1" stop-color="#7E43AC" stop-opacity="0"/></radialGradient>
 <linearGradient id="hnFar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#31173F"/><stop offset="1" stop-color="#170C22"/></linearGradient>
 <linearGradient id="hnGround" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#241228"/><stop offset=".34" stop-color="#170C1B"/><stop offset=".72" stop-color="#100714"/><stop offset="1" stop-color="#0A040E"/></linearGradient>
@@ -2675,7 +2675,7 @@ body.quake .qk-hint{display:inline-flex}
       bctx.save();
       bctx.translate(b.x, b.y);
       bctx.scale(b.s, b.s);
-      bctx.globalAlpha = b.a * (b.y < H*0.55 ? 1 : 0.6);
+      bctx.globalAlpha = Math.max(0.17, b.a * (b.y < H*0.55 ? 1 : 0.72));
       bctx.fillStyle = "#07040D";
       for(var sd=-1; sd<=1; sd+=2){
         bctx.save();
