@@ -1030,6 +1030,93 @@ body.sg-warp > .ambient, body.sg-warp > .ambient *{animation:none!important}
 @media (max-width:1080px){.nav-god{font-size:.84rem;padding:.46rem .88rem}}
 @media (max-width:900px){.nav-god{font-size:.8rem;padding:.42rem .8rem}}
 @media (max-width:520px){.sg-card{padding:1.9rem 1.25rem 1.5rem}.sg-t{font-size:1.3rem}.sg-orb{width:92vw;height:56vh}}
+/* ============ 新年模式：飘雪 · 檐上积雪 · 整页雪景 ============ */
+#snowfall{position:fixed;inset:0;pointer-events:none;z-index:126;display:none;opacity:.95}
+body.winter #snowfall{display:block}
+body.winter .ambient::after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
+  background:
+    radial-gradient(ellipse 92% 46% at 50% -8%,rgba(198,226,248,.22),rgba(198,226,248,0) 62%),
+    linear-gradient(180deg,rgba(176,212,238,.12),rgba(204,228,246,.05) 48%,rgba(255,255,255,.12))}
+
+/* 按钮 / 胶囊：顶边挂一层雪 */
+/* 顶部薄雪：靠水平亮度起伏做出积雪的高低不平，边缘柔化 */
+body.winter .btn::before,
+body.winter .chip::before,
+body.winter .nav-god::before{
+  content:"";position:absolute;left:1px;right:1px;top:0;height:3px;pointer-events:none;z-index:3;
+  border-radius:4px 4px 70% 70%/3px 3px 100% 100%;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.9),rgba(240,251,255,.5)),
+    linear-gradient(90deg,rgba(255,255,255,.25),rgba(255,255,255,.9) 14%,rgba(255,255,255,.45) 32%,
+      rgba(255,255,255,.95) 52%,rgba(255,255,255,.5) 68%,rgba(255,255,255,.92) 86%,rgba(255,255,255,.3));
+  box-shadow:0 1px 3px rgba(206,232,255,.45);
+  filter:blur(.55px)}
+body.winter .chip::before{height:2px}
+body.winter .nav-god::before{left:2px;right:2px;top:0;height:3px}
+
+/* 卡片 / 缩略图：顶沿积雪 + 冷调阴影 */
+body.winter .gal::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;z-index:2;pointer-events:none;
+  border-radius:var(--r-lg) var(--r-lg) 46% 46%/var(--r-lg) var(--r-lg) 100% 100%;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.92) 0,rgba(244,252,255,.5) 62%,rgba(244,252,255,0) 100%),
+    linear-gradient(90deg,rgba(255,255,255,.35),rgba(255,255,255,.95) 16%,rgba(255,255,255,.55) 38%,
+      rgba(255,255,255,.98) 60%,rgba(255,255,255,.5) 78%,rgba(255,255,255,.9));
+  filter:blur(.5px)}
+body.winter .gal{box-shadow:0 16px 40px -20px rgba(130,172,205,.45)}
+
+/* 顶栏化雪线 / 页脚与首屏雪地 */
+body.winter header{border-bottom-color:rgba(214,238,255,.28)}
+body.winter header::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;pointer-events:none;z-index:3;
+  background:linear-gradient(90deg,rgba(255,255,255,.55),rgba(255,255,255,.92) 26%,rgba(255,255,255,.6) 52%,rgba(255,255,255,.95) 78%,rgba(255,255,255,.5));
+  filter:blur(1.4px)}
+body.winter header::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:7px;pointer-events:none;z-index:2;
+  background:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.5) 10%,rgba(255,255,255,.92) 32%,
+    rgba(255,255,255,.46) 58%,rgba(255,255,255,.88) 82%,rgba(255,255,255,0) 100%);
+  filter:blur(1.8px)}
+body.winter .hero::after{content:"";position:absolute;left:-2%;right:-2%;bottom:-8px;height:38px;pointer-events:none;z-index:-1;
+  background:linear-gradient(180deg,rgba(228,242,255,0),rgba(226,240,252,.16) 52%,rgba(226,240,252,.32));
+  filter:blur(7px)}
+body.winter .hero-bg{filter:saturate(.4) brightness(.82) contrast(1.08) hue-rotate(-20deg)}
+body.winter footer{position:relative;border-top-color:rgba(214,238,255,.32)}
+body.winter footer::before{content:"";position:absolute;left:0;right:0;top:-10px;height:22px;pointer-events:none;opacity:.55;
+  background:
+    radial-gradient(ellipse 18% 62% at 8% 100%,rgba(255,255,255,.72),rgba(255,255,255,0) 74%),
+    radial-gradient(ellipse 22% 88% at 26% 108%,rgba(255,255,255,.55),rgba(255,255,255,0) 76%),
+    radial-gradient(ellipse 20% 70% at 41% 96%,rgba(255,255,255,.8),rgba(255,255,255,0) 78%),
+    radial-gradient(ellipse 26% 96% at 58% 112%,rgba(255,255,255,.6),rgba(255,255,255,0) 76%),
+    radial-gradient(ellipse 18% 74% at 74% 100%,rgba(255,255,255,.78),rgba(255,255,255,0) 74%),
+    radial-gradient(ellipse 24% 92% at 90% 110%,rgba(255,255,255,.62),rgba(255,255,255,0) 78%);
+  filter:blur(3px)}
+
+/* 页脚雪景横幅（仅冬季显示） */
+.wn-scene{display:none;position:relative;z-index:2;height:clamp(150px,15vw,210px);margin-bottom:-2px;pointer-events:none;overflow:hidden}
+body.winter .wn-scene{display:block}
+.wn-scene img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 58%;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%)}
+.wn-scene::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,var(--bg) 0,rgba(10,14,12,.55) 12%,rgba(10,14,12,0) 34%,rgba(10,14,12,0) 82%,rgba(10,14,12,.5) 100%)}
+
+/* 悬浮雪花按钮（随时开关新年模式） */
+.winter-fab{position:fixed;left:1.4rem;bottom:1.4rem;z-index:130;display:inline-flex;align-items:center;gap:.45rem;
+  padding:.6rem .9rem .6rem .75rem;border-radius:999px;border:1px solid rgba(196,226,255,.3);
+  background:rgba(16,22,26,.8);-webkit-backdrop-filter:blur(14px) saturate(120%);backdrop-filter:blur(14px) saturate(120%);
+  color:#D9E9F6;font-family:var(--sans);font-size:.82rem;letter-spacing:.02em;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.42);transition:transform .2s,border-color .25s,background .25s,box-shadow .25s}
+.winter-fab:hover{transform:translateY(-2px);border-color:rgba(226,243,255,.6)}
+.winter-fab svg{width:15px;height:15px;flex:none}
+.winter-fab.on{color:#fff;border-color:rgba(226,243,255,.72);background:rgba(52,86,112,.62);
+  box-shadow:0 0 0 1px rgba(255,255,255,.14),0 10px 26px rgba(120,175,215,.28)}
+.winter-fab.on svg{filter:drop-shadow(0 0 6px rgba(200,232,255,.8))}
+
+/* 模式提示 */
+.winter-toast{position:fixed;left:50%;bottom:24px;z-index:250;transform:translate(-50%,10px);
+  padding:.55rem 1.05rem;border-radius:999px;white-space:nowrap;
+  background:rgba(12,18,16,.88);border:1px solid rgba(214,238,255,.36);color:#EAF6FF;
+  font-size:.8rem;letter-spacing:.02em;box-shadow:0 12px 30px -14px rgba(0,0,0,.9);
+  opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+.winter-toast.on{opacity:1;transform:translate(-50%,0)}
+
 @media (prefers-reduced-motion:reduce){.ng-fx .sp,.ng-fx .du,.nav-god{animation:none}}
 </style>
 </head>
@@ -1378,12 +1465,21 @@ body.sg-warp > .ambient, body.sg-warp > .ambient *{animation:none!important}
   .srv-empty{padding:1rem;color:var(--muted);font-size:.86rem;text-align:center}
   @media (max-width:640px){.srv-win{width:min(320px,calc(100vw - 2rem))}}
   </style>
-  <button class="srv-fab" id="srvFab" title="服务器状态"><span>服务器状态</span><span class="pcount" id="srvPc">v10</span></button>
+  <button class="winter-fab" id="winterFab" type="button" title="开启新年模式（Alt+S）" aria-pressed="false">
+  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <path d="M12 2.5v19M4.1 7l15.8 10M19.9 7L4.1 17M12 6.6l2.6-2.2M12 6.6L9.4 4.4M12 17.4l2.6 2.2M12 17.4l-2.6 2.2M7.6 9.6l-3.3.4M6.9 5.4l1.9 2.6M16.4 14.4l3.3-.4M17.1 18.6l-1.9-2.6"/>
+  </svg>
+  <span>雪景</span>
+</button>
+<button class="srv-fab" id="srvFab" title="服务器状态"><span>服务器状态</span><span class="pcount" id="srvPc">v10</span></button>
   <div class="srv-win" id="srvWin">
     <div class="srv-head" id="srvHead"><span class="t" style="visibility:hidden"></span><span class="lbl" style="visibility:hidden"></span><button class="srv-close" id="srvClose" aria-label="关闭">×</button></div>
     <div class="srv-body" id="srvBody"><iframe id="srvFrame" title="服务器状态" style="display:block;width:100%;height:400px;border:0;background:transparent"></iframe></div>
     <div class="srv-foot"><span class="ts" id="srvTs"></span><button class="srv-ref" id="srvRef">刷新</button></div>
   </div>
+
+<!-- ===== 新年模式：页脚雪景（仅冬季显示） ===== -->
+<div class="wn-scene" aria-hidden="true"><img src="assets/winter-scene.jpg" alt="" decoding="async"></div>
 
 <!-- ===== 页脚 ===== -->
 <footer>
@@ -2214,6 +2310,137 @@ body.sg-warp > .ambient, body.sg-warp > .ambient *{animation:none!important}
       el.style.cssText = css;
       fx.appendChild(el);
     }
+  });
+})();
+</script>
+
+<script>
+/* 新年模式：1 月 10 日 – 2 月 15 日自动开启；Alt+S 键盘切换；?snow=1 / ?snow=0 强制开关 */
+(function(){
+  var KEY="winterMode", cv=null, ctx=null, flakes=[], raf=0, W=0, H=0, dpr=1, dragging=false;
+  function mdNow(){ var d=new Date(); return (d.getMonth()+1)*100+d.getDate(); }
+  function autoOn(){ var md=mdNow(); return md>=110 && md<=215; }
+  function reduce(){ try{ return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } }
+
+  function newFlake(seed){
+    var big = Math.random() < 0.32;
+    var r = big ? (Math.random()*1.7 + 3.2) : (Math.random()*1.1 + 1.4);
+    return {
+      x: Math.random()*W,
+      y: seed ? Math.random()*H : -12,
+      r: r,
+      sp: r*0.5 + Math.random()*0.55 + 0.35,   /* 越大落得越快，整体很慢 */
+      ph: Math.random()*Math.PI*2,
+      amp: 0.7 + Math.random()*1.5,
+      a: 0.55 + Math.random()*0.4
+    };
+  }
+  function resize(){
+    if(!cv) return;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+    cv.style.width = W+"px"; cv.style.height = H+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    var n = Math.max(64, Math.min(150, Math.round(W/9)));
+    flakes = [];
+    for(var i=0;i<n;i++) flakes.push(newFlake(true));
+  }
+  function draw(){
+    if(!ctx) return;
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<flakes.length;i++){
+      var f = flakes[i];
+      /* 外圈柔和光晕（大雪花才有） */
+      if(f.r > 2.6){
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(222,240,255," + (f.a*0.2) + ")";
+        ctx.arc(f.x, f.y, f.r*2.1, 0, 6.2832);
+        ctx.fill();
+      }
+      /* 雪粒本体 */
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(255,255,255," + f.a + ")";
+      ctx.arc(f.x, f.y, f.r, 0, 6.2832);
+      ctx.fill();
+    }
+  }
+  function tick(){
+    for(var i=0;i<flakes.length;i++){
+      var f = flakes[i];
+      f.y += f.sp;
+      f.ph += 0.016;
+      f.x += Math.sin(f.ph) * f.amp;
+      if(f.y > H + 10 || f.x < -14 || f.x > W + 14) flakes[i] = newFlake(false);
+    }
+    draw();
+    raf = requestAnimationFrame(tick);
+  }
+  function ensureCanvas(){
+    if(cv) return;
+    cv = document.createElement("canvas");
+    cv.id = "snowfall";
+    cv.setAttribute("aria-hidden","true");
+    document.body.appendChild(cv);
+    ctx = cv.getContext("2d");
+    resize();
+    window.addEventListener("resize", resize);
+  }
+  function startSnow(){
+    ensureCanvas();
+    draw();
+    if(reduce()) return;
+    if(!raf) raf = requestAnimationFrame(tick);
+  }
+  function stopSnow(){
+    if(raf){ cancelAnimationFrame(raf); raf = 0; }
+    if(ctx) ctx.clearRect(0,0,W,H);
+  }
+  function toast(msg){
+    var el = document.querySelector(".winter-toast");
+    if(!el){ el = document.createElement("div"); el.className = "winter-toast"; document.body.appendChild(el); }
+    el.textContent = msg;
+    el.classList.add("on");
+    clearTimeout(el._t);
+    el._t = setTimeout(function(){ el.classList.remove("on"); }, 1900);
+  }
+  var fab = null;
+  function syncFab(){
+    if(!fab) return;
+    var on = document.body.classList.contains("winter");
+    fab.classList.toggle("on", on);
+    fab.setAttribute("aria-pressed", on ? "true" : "false");
+    fab.title = (on ? "关闭新年模式" : "开启新年模式") + "（Alt+S）";
+  }
+  function apply(on, quiet){
+    document.body.classList.toggle("winter", !!on);
+    if(on) startSnow(); else stopSnow();
+    syncFab();
+    if(!quiet) toast(on ? "❄ 新年模式已开启（雪花按钮或 Alt+S 可关闭）" : "新年模式已关闭（雪花按钮或 Alt+S 可再开）");
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch(e){}
+  var q = null;
+  try { q = new URLSearchParams(location.search).get("snow"); } catch(e){}
+  if(q === "1" || q === "0"){
+    saved = q;
+    try { localStorage.setItem(KEY, q); } catch(e){}
+  }
+  fab = document.getElementById("winterFab");
+  if(fab) fab.addEventListener("click", function(){
+    var on = !document.body.classList.contains("winter");
+    apply(on, false);
+    try { localStorage.setItem(KEY, on ? "1" : "0"); } catch(e){}
+  });
+  apply(saved ? (saved === "1") : autoOn(), true);
+
+  document.addEventListener("keydown", function(e){
+    if(!(e.altKey && (e.code === "KeyS" || e.key === "s" || e.key === "S"))) return;
+    e.preventDefault();
+    var on = !document.body.classList.contains("winter");
+    apply(on, false);
+    try { localStorage.setItem(KEY, on ? "1" : "0"); } catch(e){}
   });
 })();
 </script>
