@@ -2885,14 +2885,14 @@ body.quake .qk-hint{display:inline-flex}
     if(wFab){ var w = cur==="winter"; wFab.classList.toggle("on", w); wFab.setAttribute("aria-pressed", w?"true":"false"); wFab.title = (w?"关闭":"开启")+"新年模式（Alt+S）"; }
     if(hFab){ var h = cur==="halloween"; hFab.classList.toggle("on", h); hFab.setAttribute("aria-pressed", h?"true":"false"); hFab.title = (h?"关闭":"开启")+"万圣节模式（Alt+H）"; }
   }
-  function setTheme(t, quiet){
+  function setTheme(t, quiet, noSave){
     cur = t || "";
     document.body.classList.toggle("winter", cur==="winter");
     document.body.classList.toggle("halloween", cur==="halloween");
     if(cur==="winter") startSnow(); else stopSnow();
     if(cur==="halloween"){ startBats(); startEmbers(); } else { stopBats(); stopEmbers(); }
     syncFab();
-    try { localStorage.setItem(KEY, cur || "none"); } catch(e){}
+    try { if(!noSave) sessionStorage.setItem(KEY, cur || "none"); } catch(e){}
     if(!quiet){
       toast(cur==="winter" ? "❄ 新年模式已开启（Alt+S 关闭）"
         : cur==="halloween" ? "🎃 万圣节模式已开启（Alt+H 关闭）"
@@ -2911,8 +2911,8 @@ body.quake .qk-hint{display:inline-flex}
     toast(on ? "🔧 调试角标已显示（Alt+S+E 再按一次隐藏）" : "调试角标已隐藏（Alt+S+E 可再显示）");
   }
 
-  var saved = null, q = null;
-  try { saved = localStorage.getItem(KEY); } catch(e){}
+  var saved = null, q = null, preview = false;
+  try { saved = sessionStorage.getItem(KEY); } catch(e){}
   try {
     var sp = new URLSearchParams(location.search);
     q = sp.get("theme");
@@ -2922,6 +2922,7 @@ body.quake .qk-hint{display:inline-flex}
   } catch(e){}
   if(q != null && q !== ""){
     saved = (q==="none"||q==="0") ? "none" : (q==="halloween" ? "halloween" : (q==="winter" ? "winter" : null));
+    preview = true;
   }
   if(saved === "1") saved = "winter";
   if(saved === "0") saved = "none";
@@ -2931,7 +2932,7 @@ body.quake .qk-hint{display:inline-flex}
   if(wFab) wFab.addEventListener("click", function(){ setTheme(cur==="winter" ? "" : "winter", false); });
   if(hFab) hFab.addEventListener("click", function(){ setTheme(cur==="halloween" ? "" : "halloween", false); });
 
-  setTheme(saved ? (saved==="none" ? "" : saved) : autoTheme(), true);
+  setTheme(saved ? (saved==="none" ? "" : saved) : autoTheme(), true, preview);
 
   /* Alt+S 新年 / Alt+H 万圣节 / Alt+S+E 显示角标 */
   var sAt = 0, sTimer = 0;
