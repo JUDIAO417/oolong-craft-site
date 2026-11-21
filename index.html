@@ -1252,10 +1252,61 @@ body.girls .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-e
              linear-gradient(180deg,rgba(11,7,8,.26) 0%,rgba(11,7,8,.04) 32%,rgba(11,7,8,.60) 82%,var(--bg) 100%)}
 
 
-.girls-sign{display:none}
-body.girls .girls-sign{display:flex;align-items:center;gap:.5rem;margin-top:1.3rem;font-size:.66rem;letter-spacing:.28em;color:var(--muted)}
-body.girls .girls-sign i{width:7px;height:7px;border-radius:50%;display:block;background:currentColor;box-shadow:0 0 9px currentColor;opacity:.95}
-body.girls .girls-sign span{margin-left:.35rem;opacity:.85}
+.girls-stage{display:none}
+body.girls .girls-stage{display:block;position:relative;width:100%;margin-top:clamp(2.2rem,4vw,3.4rem)}
+body.girls .girls-stage::before{content:"";position:absolute;left:50%;bottom:0;width:min(1180px,100%);height:240px;transform:translateX(-50%);
+  background:radial-gradient(58% 100% at 50% 100%,rgba(232,99,127,.11),rgba(240,145,63,.05) 46%,transparent 74%);pointer-events:none}
+body.girls .girls-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;pointer-events:none;opacity:.55;
+  background:linear-gradient(90deg,rgba(232,99,127,0) 2%,#E8637F 22%,#8E8B88 40%,#F0913F 62%,#A8244A 84%,rgba(168,36,74,0) 98%)}
+body.girls footer{padding-bottom:0}
+body.girls .foot-copy{margin-bottom:clamp(1.6rem,2.6vw,2.4rem)}
+body.girls .gs-head{display:flex;align-items:center;gap:16px;max-width:1180px;margin:0 auto clamp(12px,1.6vw,18px);padding:0 clamp(20px,3vw,40px)}
+body.girls .gs-head em{flex:1;height:1px;background:linear-gradient(90deg,rgba(248,240,231,.10),rgba(232,99,127,.30));display:block}
+body.girls .gs-head em.r{background:linear-gradient(90deg,rgba(240,145,63,.30),rgba(248,240,231,.10))}
+body.girls .gs-head b{font-size:.56rem;font-weight:600;letter-spacing:.34em;color:rgba(248,240,231,.46);white-space:nowrap}
+body.girls .gs-head b.n{font-variant-numeric:tabular-nums;letter-spacing:.18em;color:rgba(232,99,127,.72)}
+body.girls .gs-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:end;gap:clamp(10px,2vw,34px);max-width:1240px;margin:0 auto;padding:0 clamp(14px,3.4vw,44px)}
+body.girls .gs-col{position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;margin:0;padding-top:34px;opacity:0;transform:translateY(30px);
+  transition:opacity .85s ease,transform 1s cubic-bezier(.16,.9,.26,1)}
+body.girls .gs-col:nth-child(2){transition-delay:.09s}
+body.girls .gs-col:nth-child(3){transition-delay:.18s}
+body.girls .gs-col:nth-child(4){transition-delay:.27s}
+body.girls .gs-grid.in .gs-col{opacity:1;transform:none}
+body.girls .gs-grid.in .gs-col img{transition-delay:0s}
+body.girls .gs-col figcaption{position:absolute;left:0;right:0;top:0;display:flex;justify-content:center;align-items:baseline;gap:.42em;font-size:.58rem;letter-spacing:.22em;
+  color:rgba(248,240,231,.42);transition:color .4s ease}
+body.girls .gs-col figcaption b{font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.12em;color:rgba(192,173,170,.34)}
+body.girls .gs-col img{display:block;width:var(--qw,240px);max-width:100%;height:auto;margin:auto auto 0;
+  filter:drop-shadow(0 12px 24px rgba(0,0,0,.55)) drop-shadow(0 0 18px rgba(232,99,127,.10));
+  transition:transform .6s cubic-bezier(.16,.9,.26,1),filter .5s ease}
+body.girls .gs-col:nth-child(1){--qw:324px}
+body.girls .gs-col:nth-child(2){--qw:287px;--qy:6px}
+body.girls .gs-col:nth-child(3){--qw:250px;--qy:-3px}
+body.girls .gs-col:nth-child(4){--qw:234px;--qy:8px}
+body.girls .gs-col img{transform:translateY(var(--qy,0px))}
+body.girls .gs-col:hover img{transform:translateY(calc(var(--qy,0px) - 16px)) scale(1.015);
+  filter:drop-shadow(0 20px 34px rgba(0,0,0,.6)) drop-shadow(0 0 26px rgba(232,99,127,.26))}
+body.girls .gs-col:hover figcaption{color:rgba(255,214,222,.9)}
+body.girls .gs-head b.cn{display:none;font-size:.56rem;letter-spacing:.18em}
+@media (max-width:720px){
+  body.girls .gs-grid{gap:0;padding:0 4px}
+  body.girls .gs-col{padding-top:76px}
+  body.girls .gs-col:nth-child(1){--qw:166px;z-index:1}
+  body.girls .gs-col:nth-child(2){--qw:150px;z-index:2}
+  body.girls .gs-col:nth-child(3){--qw:134px;z-index:3}
+  body.girls .gs-col:nth-child(4){--qw:126px;z-index:4}
+  body.girls .gs-col img{max-width:none}
+  body.girls .gs-col figcaption{font-size:.46rem;letter-spacing:.1em;gap:.24em}
+  body.girls .gs-col figcaption b{display:none}
+  body.girls .gs-head{padding:0 12px;gap:8px}
+  body.girls .gs-head b.en{display:none}
+  body.girls .gs-head b.cn{display:block}
+  body.girls .gs-head b.n{font-size:.5rem}
+}
+@media (prefers-reduced-motion:reduce){
+  body.girls .gs-col{opacity:1;transform:none;transition:none}
+  body.girls .gs-col:hover img{transform:none}
+}
 /* 四人签名色（拉娜玫红 · 酒桶炭灰 · 石墨晨橙 · 方方酒红）落到版式细节上 */
 #petals{position:fixed;inset:0;pointer-events:none;z-index:126;display:none;opacity:.9}
 body.girls #petals{display:block}
@@ -1599,7 +1650,6 @@ body.quake .qk-hint{display:inline-flex}
       <a class="hl hl-rose" href="https://judiao417.github.io/toupiao/" target="_blank" rel="noopener">画廊 · 反馈 ↗</a>
       <a class="hl hl-jade" href="commands.html">指令大全 ↗</a>
     </div>
-    <div class="girls-sign" aria-hidden="true"><i style="color:#E8637F"></i><i style="color:#8E8B88"></i><i style="color:#F0913F"></i><i style="color:#A8244A"></i><span>拉娜 · 酒桶 · 石墨 · 方方</span></div>
   </div>
   <div class="scroll-hint">SCROLL</div>
 </section>
@@ -1971,6 +2021,15 @@ body.quake .qk-hint{display:inline-flex}
     <div class="foot-copy">
       <span>© 2026 乌龙茶的地盘 · 玩家社区页面，与 Mojang 无关</span>
       <span>用爱发电 · 慢慢泡开</span>
+    </div>
+    <div class="girls-stage" aria-hidden="true">
+      <div class="gs-head"><b class="en">TEA HOUSE RESIDENTS</b><b class="cn">茶寮 · 四位常驻</b><em></em><b class="n">04</b></div>
+      <div class="gs-grid" id="gsGrid">
+        <figure class="gs-col"><figcaption><b>01</b>拉娜</figcaption><img src="assets/q-lana.webp" width="514" height="560" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="gs-col"><figcaption><b>02</b>酒桶</figcaption><img src="assets/q-jiutong.webp" width="482" height="560" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="gs-col"><figcaption><b>03</b>石墨</figcaption><img src="assets/q-shimo.webp" width="437" height="560" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="gs-col"><figcaption><b>04</b>方方</figcaption><img src="assets/q-fangfang.webp" width="498" height="560" alt="" loading="lazy" decoding="async"></figure>
+      </div>
     </div>
   </div>
 </footer>
@@ -3413,6 +3472,19 @@ body.quake .qk-hint{display:inline-flex}
       setTimeout(function(){ if(!QK.running) run(); }, 3200);
     }
   }catch(e){}
+})();
+</script>
+<script>
+/* 四少女探头带：进入视口后依次升起 */
+(function(){
+  var g=document.getElementById('gsGrid');
+  if(!g||!('IntersectionObserver' in window)){if(g)g.classList.add('in');return;}
+  var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(rm){g.classList.add('in');return;}
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){if(e.isIntersecting){g.classList.add('in');io.disconnect();}});
+  },{threshold:.2});
+  io.observe(g);
 })();
 </script>
 </body>
