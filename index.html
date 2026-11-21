@@ -1184,7 +1184,9 @@ body.halloween .hl.hl-jade{color:#9FE7C6}
   body.halloween .hn-web.c2{top:62px;right:-6px}
 }
 /* ---------- 左上角主题坞 ---------- */
-.theme-dock{position:fixed;left:18px;top:86px;z-index:133;font-family:var(--sans);line-height:1}
+.theme-dock{position:fixed;left:18px;top:86px;z-index:133;font-family:var(--sans);line-height:1;
+  transition:opacity .5s ease,transform .5s ease,visibility .5s}
+body.boot-on .theme-dock{opacity:0;visibility:hidden;transform:translateY(-8px);pointer-events:none}
 .th-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.46rem .8rem .48rem;border-radius:999px;
   border:1px solid rgba(255,255,255,.16);background:rgba(14,10,18,.66);color:var(--ink);
   font-family:inherit;font-size:.74rem;font-weight:600;letter-spacing:.12em;cursor:pointer;
@@ -2328,6 +2330,8 @@ body.quake .qk-hint{display:inline-flex}
   if(bootEl){
     if(prefersReduced){ bootEl.style.display = "none"; }
     else {
+      /* 开屏期间先收起左上角主题坞，等幕布撕开后再浮现 */
+      try { if(getComputedStyle(bootEl).display !== "none") document.body.classList.add("boot-on"); } catch(e){}
       var bUp = bootEl.querySelector(".up"), bDn = bootEl.querySelector(".dn");
       var bPath = document.getElementById("tearPath");
       var BW = bootEl.clientWidth || window.innerWidth;
@@ -2503,6 +2507,7 @@ body.quake .qk-hint{display:inline-flex}
         tapFX(x, y);
         bootEl.classList.add("split");
         setTimeout(function(){ bootEl.style.display = "none"; }, 1150);
+        setTimeout(function(){ document.body.classList.remove("boot-on"); }, 700);
       }
       bootEl.style.pointerEvents = "auto";
       bootEl.querySelector(".boot-hint").style.pointerEvents = "none";
