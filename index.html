@@ -2654,7 +2654,7 @@ body.quake .qk-hint{display:inline-flex}
     return { x: Math.random()*W, y: seed ? Math.random()*H : H + 30 + Math.random()*140,
       s: s, sp: 0.42 + Math.random()*0.95, ph: Math.random()*6.283,
       amp: 6 + Math.random()*22, fl: 1.6 + Math.random()*2.6,
-      a: 0.2 + Math.random()*0.32, dir: Math.random() < 0.5 ? -1 : 1 };
+      a: 0.44 + Math.random()*0.36, dir: Math.random() < 0.5 ? -1 : 1 };
   }
   function resizeBats(){
     if(!bcv) return;
@@ -2675,7 +2675,7 @@ body.quake .qk-hint{display:inline-flex}
       bctx.save();
       bctx.translate(b.x, b.y);
       bctx.scale(b.s, b.s);
-      bctx.globalAlpha = Math.max(0.17, b.a * (b.y < H*0.55 ? 1 : 0.72));
+      bctx.globalAlpha = b.a;
       bctx.fillStyle = "#07040D";
       for(var sd=-1; sd<=1; sd+=2){
         bctx.save();
