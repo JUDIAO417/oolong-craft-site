@@ -1242,7 +1242,7 @@ body.sg-warp > .ambient, body.sg-warp > .ambient *{animation:none!important}
         <span><i class="w"></i>水域</span>
         <span><i class="s"></i>浮空之地</span>
       </div>
-      <p class="gm-tip">鼠标移上去看名字，点一下直接开大图。地图只是导览示意，真实坐标还得进服自己找。</p>
+      <p class="gm-tip">鼠标移上去看名字，点一下直接开大图。图片仅供参考，不代表服务器真实坐标。</p>
     </div>
 
     <div class="gal-grid" id="galGrid">
@@ -1662,7 +1662,7 @@ body.sg-warp > .ambient, body.sg-warp > .ambient *{animation:none!important}
     var extra=0;
     (items||[]).forEach(function(m){
       var list=galList(m); if(!list.length) return;
-      var pos=MAP_POS[m.title] || MAP_FREE[(extra++)%MAP_FREE.length];
+      var pos=(typeof m.x==="number" && typeof m.y==="number") ? [m.x,m.y,(m.zone||"g")] : (MAP_POS[m.title] || MAP_FREE[(extra++)%MAP_FREE.length]);
       var urls=list.map(galImg);
       var b=document.createElement("button");
       b.type="button";
