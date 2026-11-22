@@ -73,6 +73,7 @@ body::before{
 @keyframes amb{0%,100%{opacity:0;transform:translateY(30px) scale(.95)}50%{opacity:1;transform:translateY(-24px) scale(1.05)}}
 @media (prefers-reduced-motion:reduce){.ambient{display:none}}
 .wrap{position:relative;z-index:1;max-width:var(--wrap);margin:0 auto;padding:0 24px}
+main{overflow-x:clip}  /* 防止整页出现横向溢出：fixed 特效层与装饰外扩不再把布局宽度撑大（移动端右侧被裁的根因） */
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 .pixel{font-family:var(--pixel);letter-spacing:.06em}
@@ -447,7 +448,7 @@ h2.sec-title{
 .faq .ans{padding:0 1.3rem 1.2rem;color:var(--muted);font-size:.93rem}
 
 /* ============ 页脚 ============ */
-footer{border-top:1px solid var(--glass-line);background:rgba(13,19,16,.55);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);padding:3.2rem 0 2.4rem;margin-top:2rem}
+footer{border-top:1px solid var(--glass-line);overflow-x:clip;background:rgba(13,19,16,.55);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);padding:3.2rem 0 2.4rem;margin-top:2rem}
 footer .wrap{width:100%;max-width:none;padding:0 24px;display:flex;flex-direction:column;align-items:center;text-align:center}  /* 底部栏铺满全宽，内容整体居中 */
 .foot{display:flex;flex-wrap:wrap;justify-content:center;gap:1.8rem;align-items:center}
 .foot .brand-name{font-size:1.05rem}
@@ -1316,8 +1317,12 @@ body.girls .gs-col:hover img{transform:translateY(-16px) scale(1.015);
   filter:drop-shadow(0 20px 34px rgba(0,0,0,.6)) drop-shadow(0 0 26px rgba(232,99,127,.26))}
 body.girls .gs-col:hover figcaption{color:rgba(255,214,222,.9)}
 body.girls .gs-head b.cn{display:none;font-size:.56rem;letter-spacing:.18em}
+@media (max-width:400px){
+  body.girls .gs-grid{zoom:.89}
+}
 @media (max-width:720px){
-  body.girls .gs-grid{gap:0;padding:0 4px}
+  body.girls .gs-grid{gap:0;padding:0 4px;zoom:.93}  /* 四人探头带整体收一档，避免最右角色被屏幕裁掉 */
+  @media (max-width:400px){body.girls .gs-grid{zoom:.89}}
   body.girls .gs-col{padding-top:76px}
   body.girls .gs-col:nth-child(1){--qw:166px;z-index:1}
   body.girls .gs-col:nth-child(2){--qw:150px;z-index:2}
@@ -1330,7 +1335,7 @@ body.girls .gs-head b.cn{display:none;font-size:.56rem;letter-spacing:.18em}
   body.girls .gs-head b.en{display:none}
   body.girls .gs-head b.cn{display:block}
   body.girls .gs-head b.n{font-size:.5rem}
-  body.girls .crew{--av:16px;left:calc(100% + 10px)}
+  body.girls .crew{display:none}  /* 窄屏顶栏放不下四个人像，收起避免整页横向溢出 */
   body.girls .hero-crew{--av:26px}
   body.girls .hero-crew .crew-cap{font-size:.52rem;letter-spacing:.18em;margin-left:.8rem}
   body.girls .kav{width:20px;height:20px}
@@ -1918,7 +1923,7 @@ body.cyber .nav-god:hover{transform:translateY(-2px) scale(1.05)}
 
 /* 标题：一层斜向扫描高光掠过 */
 body.cyber h1{position:relative}
-body.cyber h1::after{content:"";position:absolute;inset:-12% -16%;pointer-events:none;mix-blend-mode:screen;z-index:1;
+body.cyber h1::after{content:"";position:absolute;inset:-12% 0;pointer-events:none;mix-blend-mode:screen;z-index:1;
   background:linear-gradient(104deg,transparent 44%,rgba(0,240,255,.14) 48.5%,rgba(255,255,255,.24) 50%,rgba(255,46,82,.16) 51.5%,transparent 58%);
   background-size:260% 100%;background-repeat:no-repeat;background-position:132% 0;opacity:0;
   animation:ncTitleSweep 7.6s var(--ease-soft) infinite}
@@ -1977,6 +1982,11 @@ body.cyber.theme-swap::after{content:"";position:fixed;inset:0;z-index:220;point
   body.cyber .neon-rails i:nth-child(3),body.cyber .neon-rails i:nth-child(4){display:none}
   body.cyber .neon-rails i.rb{right:18px;top:108px;width:26px;height:4px}
   body.cyber .neon-rails i.rb2{display:none}
+  /* 移动端细节：kicker 不折行 / 状态浮标收窄，避免压住正文 */
+  .hero-kicker{font-size:.5rem;white-space:nowrap;gap:.55rem}
+  .hero-kicker::before{width:22px}
+  .srv-fab{padding:.5rem .78rem .5rem .62rem;font-size:.78rem;gap:.4rem;right:1rem;bottom:1rem}
+  .srv-fab .pcount{font-size:.62rem}
 }
 @media (prefers-reduced-motion:reduce){
   body.cyber .cyber-scan,body.cyber .neon-rails i,body.cyber .neon-rails i.rb::after,body.cyber header::after,body.cyber footer::after,
@@ -2348,6 +2358,11 @@ body.cyber.theme-swap::after{content:"";position:fixed;inset:0;z-index:220;point
   .srv-ref:hover{border-color:var(--tea)}
   .srv-empty{padding:1rem;color:var(--muted);font-size:.86rem;text-align:center}
   @media (max-width:640px){.srv-win{width:min(320px,calc(100vw - 2rem))}}
+  @media (max-width:700px){
+    .srv-fab{right:1rem;bottom:1rem;padding:.52rem .78rem .52rem .64rem;font-size:.78rem;gap:.4rem}
+    .srv-fab .pcount{font-size:.62rem}
+    .srv-win{right:1rem;bottom:4.6rem}
+  }
   </style>
   <button class="quake-fab" id="quakeFab" type="button" title="播放 5·12 纪念动画（测试）">测试·5·12</button>
 <button class="winter-fab" id="winterFab" type="button" title="开启新年模式（Alt+S）" aria-pressed="false">
