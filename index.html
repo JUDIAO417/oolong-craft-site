@@ -2436,9 +2436,11 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
 .sp-board::-webkit-scrollbar{width:6px}
 .sp-board::-webkit-scrollbar-thumb{background:var(--glass-line-strong);border-radius:99px}
 .sp-item{position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:.7rem;align-items:center;
+  --cols:auto 1fr auto;
   padding:.72rem .85rem;border-radius:13px;border:1px solid var(--glass-line);
   background:var(--glass-bg);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   overflow:hidden}
+.sp-item.noamt{grid-template-columns:auto 1fr}
 .sp-item .rk{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-family:var(--serif);font-weight:900;font-size:.8rem;color:var(--muted);flex:none;
   background:rgba(255,255,255,.07);border:1px solid var(--glass-line)}
@@ -3106,7 +3108,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
         <div class="sp-energy">
           <div class="sp-energy-top"><b id="spTotal">¥0</b><span id="spGoal">/ ¥500</span><em id="spPct">0%</em></div>
           <div class="sp-bar"><i id="spFill"></i></div>
-          <div class="sp-meta"><span>已有 <b id="spCount">0</b> 位茶友添过柴</span><span id="spLeftNote">还差 ¥500</span></div>
+          <div class="sp-meta"><span id="spCountWrap">已有 <b id="spCount">0</b> 位茶友添过柴</span><span id="spLeftNote">还差 ¥500</span></div>
         </div>
         <button class="sp-magnet sp-trigger" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a3 3 0 0 1 0 6h-1"/><path d="M4 8h13v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M8 2v3M12 2v3M16 2v3"/></svg>
@@ -4673,7 +4675,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
    ========================================================= */
 (function(){
   var DATA='sponsors.json';
-  var SP_FALLBACK={"target": 500, "list": [{"name": "龙井茶", "msg": "", "amount": 50, "time": "2026-11-23 11:41"}, {"name": "茶里", "msg": "壶一直热着，别熄火", "amount": 50, "time": "2026-11-22 21:10"}, {"name": "夜雨茶", "msg": "夜里也能摸黑挖点矿", "amount": 15, "time": "2026-11-21 23:44"}, {"name": "阿青", "msg": "只要服务器不倒就行", "amount": 10, "time": "2026-11-20 19:02"}]};
+  var SP_FALLBACK={"target": 500, "list": [{"name": "西湖龙井茶", "msg": "", "amount": 0, "time": "2026-11-25 12:05"}]};
   var modal=document.getElementById('spModal');
   if(!modal) return;
   /* QR fallback */
@@ -4719,6 +4721,10 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
     fill.style.width=pct.toFixed(2)+'%';
     fill.style.minWidth = total>0 ? '14px' : '0';
     countEl.textContent=count||0;
+    var wrapEl=document.getElementById('spCountWrap');
+    if(wrapEl){
+      wrapEl.textContent = count>0 ? ('已有 '+count+' 位茶友添过柴') : '还没有人添柴，第一把柴留给你';
+    }
     var left=goal-total;
     leftNote.textContent = left>0 ? ('还差 '+money(left)+' 达成目标') : '目标已达成，谢谢每一位添柴的人';
   }
@@ -4736,9 +4742,11 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
       var name=esc(clamp(raw,cfg.nameMax));
       var initial=esc(Array.from(String(raw))[0]||'茶');
       var msg=it&&it.msg ? '<span>'+esc(clamp(it.msg,cfg.msgMax))+'</span>' : '';
-      return '<li class="'+cls+'"><span class="rk">'+initial+'</span>'+
-             '<span class="who"><b>'+name+'</b>'+msg+'</span>'+
-             '<span class="amt">'+esc(money(it&&it.amount))+'</span></li>';
+      var amt=Number(it&&it.amount)||0;
+      var amtHtml=amt>0 ? '<span class="amt">'+esc(money(amt))+'</span>' : '';
+      var cls2=cls+(amt>0?'':' noamt');
+      return '<li class="'+cls2+'"><span class="rk">'+initial+'</span>'+
+             '<span class="who"><b>'+name+'</b>'+msg+'</span>'+amtHtml+'</li>';
     }).join('');
   }
   function loadBoard(){
@@ -4747,9 +4755,12 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
       .then(function(d){
         var list = Array.isArray(d) ? d : ((d && d.list) || []);
         if(!Array.isArray(d) && d && typeof d.target==='number' && d.target>0) cfg.target=d.target;
-        var total=0;
-        for(var i=0;i<list.length;i++) total += Number(list[i] && list[i].amount)||0;
-        paintProgress(total,cfg.target,list.length);
+        var total=0,paid=0;
+        for(var i=0;i<list.length;i++){
+          var a=Number(list[i] && list[i].amount)||0;
+          total+=a; if(a>0) paid++;
+        }
+        paintProgress(total,cfg.target,paid);
         renderBoard(list);
       })
       .catch(function(){
@@ -4757,8 +4768,9 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
         if(fb){
           var l2=Array.isArray(fb)?fb:(fb.list||[]), t2=0;
           if(!Array.isArray(fb)&&typeof fb.target==='number'&&fb.target>0) cfg.target=fb.target;
-          for(var j=0;j<l2.length;j++) t2 += Number(l2[j]&&l2[j].amount)||0;
-          paintProgress(t2,cfg.target,l2.length); renderBoard(l2); return;
+          var p2=0;
+          for(var j=0;j<l2.length;j++){ var b=Number(l2[j]&&l2[j].amount)||0; t2+=b; if(b>0) p2++; }
+          paintProgress(t2,cfg.target,p2); renderBoard(l2); return;
         }
         if(board) board.innerHTML='<li class="sp-empty">名单暂时读不到——本地双击打开 html 时会这样，放到服务器就正常。</li>';
         paintProgress(0,cfg.target,0);
