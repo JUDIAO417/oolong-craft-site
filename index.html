@@ -4351,6 +4351,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
   }
 
   setTheme(saved ? (saved==="none" ? "" : saved) : autoTheme(), true, true);
+  try { localStorage.setItem("siteThemePersist", cur || "none"); } catch(e){}
 
   /* 跨天或改了系统日期：每 15 分钟重判一次，记忆过期即跟随日期 */
   var bootMd = mdNow();

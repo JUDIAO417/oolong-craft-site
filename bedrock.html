@@ -568,14 +568,15 @@ img,a{-webkit-user-drag:none}
       });
   }
   function rtJson(path){
-    return viaApi(path).catch(function(){
-      return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path+"?ts="+Date.now(),{cache:"no-store"})
-        .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
-        .catch(function(){
-          return fetch("https://judiao417.github.io/oolong-craft-site/"+path+"?t="+Date.now(),{cache:"no-store"})
+    /* 本站（Pages 构建产物）优先，失败再走 API / raw 镜像 */
+    return fetch(path+"?t="+Date.now(),{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .catch(function(){
+        return viaApi(path).catch(function(){
+          return fetch("https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/main/"+path+"?ts="+Date.now(),{cache:"no-store"})
             .then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
         });
-    });
+      });
   }
   Promise.all([rtJson("bedrock.json"),rtJson("groups.json"),rtJson("videos.json")])
     .then(function(r){

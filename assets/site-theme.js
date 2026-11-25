@@ -15,8 +15,8 @@
     var m = location.search.match(/[?&]theme=([A-Za-z0-9_-]*)/);
     if(m) return norm(m[1]);
     var v = "";
-    try { v = sessionStorage.getItem(KEY) || ""; } catch(e){}
-    if(!v){ try { v = localStorage.getItem(PK) || ""; } catch(e){} }
+    try { v = localStorage.getItem(PK) || ""; } catch(e){}
+    if(!v){ try { v = sessionStorage.getItem(KEY) || ""; } catch(e){} }
     return norm(v);
   }
 
