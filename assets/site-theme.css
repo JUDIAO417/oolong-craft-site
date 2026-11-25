@@ -1,0 +1,319 @@
+/* ==========================================================================
+   站点季节主题共享层 —— 让子页（下载 / 玩家 / 命令）跟着主页的主题走
+   值全部与 index.html 同源，子页只换皮、不改结构。
+   引入顺序必须排在页面自己的 <style> 之后（放在 </head> 前）。
+   ========================================================================== */
+
+/* ---------- 1. 变量：与主页同源 ---------- */
+
+body.halloween{
+  --bg:#08040F;
+  --tea:#FF8A32;--tea-deep:#E0933A;--jade:#A6E37B;
+  --ink:#F5EFE4;--muted:#B2A4C0;--dim:#83718F;
+  --violet:#B98CFF;--aqua:#6FD9E6;--rose:#FF6FA8;
+  --glass-bg:rgba(150,110,190,.075);
+  --glass-line:rgba(190,152,255,.17);
+  --glass-line-strong:rgba(212,174,255,.32);
+}
+
+body.winter{
+  --bg:#0A1420;--bg-soft:#0D1A28;
+  --tea:#DCEBFF;--tea-deep:#A9CCE8;--jade:#9FE7FF;
+  --ink:#EFF6FF;--muted:#A7B8C9;--dim:#7A8C9E;
+  --glass-bg:rgba(178,214,244,.075);
+  --glass-bg-2:rgba(190,222,250,.12);
+  --glass-line:rgba(206,232,255,.20);
+  --glass-line-strong:rgba(226,241,255,.42);
+  --shadow-glass:0 16px 44px rgba(0,10,20,.5);
+}
+
+body.girls{
+  --bg:#0B0708;--bg-soft:#110B0C;
+  --tea:#E8637F;--tea-deep:#BE3F58;--jade:#F0913F;
+  --ink:#F8F0E7;--muted:#C0ADAA;--dim:#8E7A78;
+  --glass-line:rgba(232,99,127,.20);
+  --glass-line-strong:rgba(232,99,127,.44);
+}
+
+body.cyber{
+  --bg:#04060C;--bg-soft:#070A15;
+  --tea:#00F0FF;--tea-deep:#FF2E6B;--jade:#00FFB2;
+  --ink:#EAF6FF;--muted:#8FA9C2;--dim:#5B7290;
+  --glass-bg:rgba(9,18,34,.54);
+  --glass-bg-2:rgba(11,22,42,.76);
+  --glass-line:rgba(0,240,255,.17);
+  --glass-line-strong:rgba(0,240,255,.45);
+  --glass-hl:inset 0 1px 0 rgba(190,244,255,.10);
+  --shadow-glass:0 20px 50px rgba(0,0,0,.62);
+  --violet:#B26BFF;--aqua:#00F0FF;--rose:#FF3F88;--blue:#4E8CFF;
+}
+
+body.cosmos{
+  --bg:#040510;--bg-soft:#070A1C;
+  --tea:#A9BCFF;--tea-deep:#C9A7FF;--jade:#7FE3FF;
+  --ink:#E9EDFF;--muted:#9AA6CC;--dim:#5E6890;
+  --glass-bg:rgba(10,14,38,.50);
+  --glass-bg-2:rgba(12,17,44,.74);
+  --glass-line:rgba(158,178,255,.18);
+  --glass-line-strong:rgba(186,160,255,.42);
+  --glass-hl:inset 0 1px 0 rgba(224,232,255,.09);
+  --shadow-glass:0 20px 54px rgba(0,0,0,.66);
+  --violet:#A98CFF;--aqua:#63C8FF;--rose:#FF7AB6;--blue:#6E8CFF;
+}
+
+/* ---------- 2. 页面底色：重画 body 的径向渐变 ---------- */
+
+body.halloween{
+  background:
+    radial-gradient(1100px 650px at 84% -10%,rgba(170,120,225,.17),transparent 62%),
+    radial-gradient(900px 600px at -4% 30%,rgba(255,138,50,.09),transparent 58%),
+    radial-gradient(760px 520px at 55% 112%,rgba(190,150,255,.10),transparent 60%),
+    var(--bg);
+}
+
+body.winter{
+  background:
+    radial-gradient(1100px 650px at 86% -8%,rgba(170,214,255,.14),transparent 62%),
+    radial-gradient(900px 620px at -6% 34%,rgba(120,168,214,.10),transparent 58%),
+    radial-gradient(780px 520px at 54% 114%,rgba(206,232,255,.09),transparent 60%),
+    var(--bg);
+}
+
+body.girls{
+  background:
+    radial-gradient(1080px 640px at 88% -10%,rgba(232,99,127,.13),transparent 62%),
+    radial-gradient(900px 600px at -6% 32%,rgba(240,145,63,.09),transparent 58%),
+    radial-gradient(760px 520px at 55% 114%,rgba(168,36,74,.11),transparent 60%),
+    var(--bg);
+}
+
+body.cyber{
+  background:
+    radial-gradient(1200px 720px at 84% -14%,rgba(25,167,255,.17),transparent 62%),
+    radial-gradient(920px 620px at 4% 18%,rgba(255,46,82,.13),transparent 58%),
+    radial-gradient(840px 560px at 52% 108%,rgba(178,107,255,.12),transparent 62%),
+    var(--bg);
+}
+
+body.cosmos{
+  background:
+    radial-gradient(1240px 780px at 82% -12%,rgba(122,96,255,.22),transparent 64%),
+    radial-gradient(1040px 700px at 4% 20%,rgba(58,138,255,.16),transparent 60%),
+    radial-gradient(940px 640px at 56% 106%,rgba(255,122,182,.12),transparent 66%),
+    linear-gradient(180deg,#040510 0%,#060A1C 42%,#04050E 100%);
+}
+
+/* 网格底纹跟着换色（原版是灰绿，冷色主题下一眼就出戏） */
+body.cosmos::before{
+  background-image:
+    linear-gradient(rgba(150,170,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(150,170,255,.045) 1px,transparent 1px);
+}
+body.cyber::before{
+  background-image:
+    linear-gradient(rgba(0,240,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,240,255,.05) 1px,transparent 1px);
+}
+body.winter::before{
+  background-image:
+    linear-gradient(rgba(198,226,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(198,226,255,.045) 1px,transparent 1px);
+}
+body.halloween::before{
+  background-image:
+    linear-gradient(rgba(190,152,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(190,152,255,.045) 1px,transparent 1px);
+}
+body.girls::before{
+  background-image:
+    linear-gradient(rgba(232,99,127,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(232,99,127,.05) 1px,transparent 1px);
+}
+
+/* ---------- 3. 氛围光斑 ---------- */
+
+body.cosmos .ambient span:nth-child(1){background:radial-gradient(circle,rgba(110,140,255,.26),transparent 66%);filter:blur(96px)}
+body.cosmos .ambient span:nth-child(2){background:radial-gradient(circle,rgba(178,140,255,.20),transparent 66%);filter:blur(96px)}
+body.cosmos .ambient span:nth-child(3){background:radial-gradient(circle,rgba(255,140,190,.13),transparent 68%);filter:blur(96px)}
+
+body.cyber .ambient span:nth-child(1){background:radial-gradient(circle,rgba(0,240,255,.18),transparent 66%);filter:blur(92px)}
+body.cyber .ambient span:nth-child(2){background:radial-gradient(circle,rgba(255,46,107,.16),transparent 66%);filter:blur(92px)}
+body.cyber .ambient span:nth-child(3){background:radial-gradient(circle,rgba(178,107,255,.16),transparent 66%);filter:blur(92px)}
+
+body.girls .ambient span:nth-child(1){background:radial-gradient(circle,rgba(232,99,127,.24),transparent 66%);filter:blur(82px)}
+body.girls .ambient span:nth-child(2){background:radial-gradient(circle,rgba(240,145,63,.135),transparent 66%);filter:blur(82px)}
+body.girls .ambient span:nth-child(3){background:radial-gradient(circle,rgba(168,36,74,.20),transparent 66%);filter:blur(82px)}
+
+body.halloween .ambient span:nth-child(1){background:radial-gradient(circle,rgba(180,134,255,.20),transparent 66%);filter:blur(90px)}
+body.halloween .ambient span:nth-child(2){background:radial-gradient(circle,rgba(255,138,50,.13),transparent 66%);filter:blur(90px)}
+body.halloween .ambient span:nth-child(3){background:radial-gradient(circle,rgba(150,90,200,.18),transparent 66%);filter:blur(90px)}
+
+body.winter .ambient span:nth-child(1){background:radial-gradient(circle,rgba(198,232,255,.20),transparent 66%);filter:blur(88px)}
+body.winter .ambient span:nth-child(2){background:radial-gradient(circle,rgba(150,196,232,.16),transparent 66%);filter:blur(88px)}
+body.winter .ambient span:nth-child(3){background:radial-gradient(circle,rgba(226,241,255,.14),transparent 66%);filter:blur(88px)}
+
+/* ---------- 4. 顶栏玻璃 ---------- */
+
+body.cosmos header{background:rgba(6,8,22,.58);border-bottom-color:rgba(158,178,255,.20)}
+body.cosmos header.scrolled{background:rgba(5,7,20,.84);box-shadow:0 8px 30px rgba(0,0,0,.42)}
+body.cyber header{background:rgba(5,10,20,.60);border-bottom-color:rgba(0,240,255,.20)}
+body.cyber header.scrolled{background:rgba(4,8,18,.86);box-shadow:0 8px 30px rgba(0,10,20,.5)}
+body.winter header{background:rgba(10,20,32,.60);border-bottom-color:rgba(214,238,255,.26)}
+body.winter header.scrolled{background:rgba(8,18,30,.86)}
+body.halloween header{background:rgba(14,10,28,.60);border-bottom-color:rgba(255,150,60,.24)}
+body.halloween header.scrolled{background:rgba(12,8,24,.86)}
+body.girls header{background:rgba(18,10,12,.60);border-bottom-color:rgba(232,99,127,.24)}
+body.girls header.scrolled{background:rgba(15,8,10,.86)}
+
+/* ---------- 5. 主按钮 / 选中态（原写死暖橙，必须跟着换） ---------- */
+
+body.cosmos .btn-primary{
+  background:linear-gradient(135deg,rgba(169,188,255,.95),rgba(201,167,255,.86));
+  color:#0B0D20;
+  border-color:rgba(198,186,255,.5);
+  box-shadow:0 6px 20px rgba(120,140,255,.24),inset 0 1px 0 rgba(255,255,255,.35);
+}
+body.cyber .btn-primary{
+  background:linear-gradient(135deg,rgba(0,240,255,.92),rgba(255,46,107,.82));
+  color:#021018;border-color:rgba(0,240,255,.45);
+  box-shadow:0 6px 22px rgba(0,240,255,.22),inset 0 1px 0 rgba(255,255,255,.3);
+}
+body.winter .btn-primary{
+  background:linear-gradient(135deg,rgba(220,235,255,.95),rgba(169,204,232,.86));
+  color:#0A1622;border-color:rgba(226,241,255,.5);
+}
+body.halloween .btn-primary{
+  background:linear-gradient(135deg,rgba(255,138,50,.95),rgba(185,140,255,.85));
+  color:#160A18;border-color:rgba(212,174,255,.45);
+}
+body.girls .btn-primary{
+  background:linear-gradient(135deg,rgba(232,99,127,.95),rgba(240,145,63,.85));
+  color:#1A0809;border-color:rgba(240,145,63,.45);
+}
+
+body.cosmos .cat-chip.on{
+  background:linear-gradient(135deg,rgba(169,188,255,.92),rgba(201,167,255,.82));
+  color:#0B0D20;
+}
+body.cyber .cat-chip.on{
+  background:linear-gradient(135deg,rgba(0,240,255,.9),rgba(255,46,107,.78));color:#021018;
+}
+body.winter .cat-chip.on{
+  background:linear-gradient(135deg,rgba(220,235,255,.92),rgba(169,204,232,.84));color:#0A1622;
+}
+body.halloween .cat-chip.on{
+  background:linear-gradient(135deg,rgba(255,138,50,.9),rgba(185,140,255,.8));color:#160A18;
+}
+body.girls .cat-chip.on{
+  background:linear-gradient(135deg,rgba(232,99,127,.9),rgba(240,145,63,.8));color:#1A0809;
+}
+
+/* ---------- 6. 滚动条：星轨换成主题色 ---------- */
+
+body.cosmos ::-webkit-scrollbar-track,
+body.cosmos ::-webkit-scrollbar-track{
+  background:linear-gradient(90deg,#04050F,#080B1E 42%,#050612);
+}
+body.cosmos ::-webkit-scrollbar-thumb{
+  background-image:linear-gradient(180deg,#E4E8FF 0%,#A9BCFF 34%,#7FE3FF 72%,#C9A7FF 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),0 0 10px rgba(140,160,255,.3);
+}
+body.cosmos ::-webkit-scrollbar-corner{background:#04050F}
+body.cosmos{scrollbar-color:#A9BCFF rgba(4,5,15,.92)}
+
+body.cyber ::-webkit-scrollbar-track{background:linear-gradient(90deg,#04060C,#0A1120 42%,#050810)}
+body.cyber ::-webkit-scrollbar-thumb{
+  background-image:linear-gradient(180deg,#D5FBFF 0%,#00F0FF 36%,#B26BFF 72%,#FF2E6B 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 0 10px rgba(0,240,255,.32);
+}
+body.cyber ::-webkit-scrollbar-corner{background:#04060C}
+body.cyber{scrollbar-color:#00F0FF rgba(4,6,12,.92)}
+
+body.winter ::-webkit-scrollbar-track{background:linear-gradient(90deg,#0A1420,#0D1A28 42%,#081018)}
+body.winter ::-webkit-scrollbar-thumb{
+  background-image:linear-gradient(180deg,#FFFFFF 0%,#DCEBFF 36%,#A9CCE8 74%,#9FE7FF 100%);
+}
+body.winter ::-webkit-scrollbar-corner{background:#0A1420}
+body.winter{scrollbar-color:#DCEBFF rgba(10,20,32,.92)}
+
+/* ---------- 7. 星空特效层（由 site-theme.js 注入 .site-aura） ---------- */
+
+.site-aura{display:none}
+
+body.cosmos .site-aura,
+body.cyber .site-aura,
+body.winter .site-aura{
+  display:block;position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+}
+
+/* 星点 */
+body.cosmos .site-aura .stars,
+body.winter .site-aura .stars{
+  position:absolute;inset:-8%;opacity:.85;
+  background-image:
+    radial-gradient(1.1px 1.1px at 18px 26px,rgba(255,255,255,.9) 60%,transparent 100%),
+    radial-gradient(.9px .9px at 64px 78px,rgba(198,215,255,.75) 60%,transparent 100%),
+    radial-gradient(1.3px 1.3px at 118px 42px,rgba(255,246,224,.8) 60%,transparent 100%),
+    radial-gradient(.8px .8px at 152px 122px,rgba(178,204,255,.7) 60%,transparent 100%),
+    radial-gradient(1px 1px at 208px 14px,rgba(255,255,255,.8) 60%,transparent 100%);
+  background-size:240px 200px;
+  animation:siteAuraTwinkle 9s ease-in-out infinite;
+}
+body.cosmos .site-aura .stars.b{
+  background-position:120px 90px;background-size:290px 240px;
+  opacity:.6;animation-duration:13s;animation-delay:-4s;
+}
+@keyframes siteAuraTwinkle{0%,100%{opacity:.78}50%{opacity:.42}}
+
+/* 银河带 */
+body.cosmos .site-aura .milky{
+  position:absolute;left:-14%;right:-14%;top:4%;height:58vh;transform:rotate(-15deg);
+  background:linear-gradient(90deg,rgba(140,150,255,0) 0%,rgba(168,168,255,.12) 26%,rgba(236,238,255,.18) 48%,rgba(255,196,226,.12) 68%,rgba(140,150,255,0) 92%);
+  filter:blur(26px);mix-blend-mode:screen;opacity:.7;
+  animation:siteAuraMilky 34s ease-in-out infinite;
+}
+@keyframes siteAuraMilky{0%,100%{opacity:.6;transform:rotate(-15deg) translate3d(0,0,0)}
+  50%{opacity:.8;transform:rotate(-15deg) translate3d(0,-2.2%,0)}}
+
+/* 赛博网格线 */
+body.cyber .site-aura .grid{
+  position:absolute;inset:0;opacity:.28;
+  background-image:
+    linear-gradient(rgba(0,240,255,.10) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,240,255,.10) 1px,transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(120% 90% at 50% 0%,#000 24%,transparent 78%);
+  mask-image:radial-gradient(120% 90% at 50% 0%,#000 24%,transparent 78%);
+}
+
+/* 冬夜雪点（静态细雪，不抢戏） */
+body.winter .site-aura .snow{
+  position:absolute;inset:-10%;opacity:.55;
+  background-image:
+    radial-gradient(2px 2px at 22px 30px,rgba(255,255,255,.85) 60%,transparent 100%),
+    radial-gradient(1.4px 1.4px at 76px 96px,rgba(226,241,255,.75) 60%,transparent 100%),
+    radial-gradient(1.8px 1.8px at 132px 52px,rgba(255,255,255,.7) 60%,transparent 100%),
+    radial-gradient(1.2px 1.2px at 186px 138px,rgba(214,238,255,.7) 60%,transparent 100%);
+  background-size:230px 210px;
+  animation:siteAuraSnow 26s linear infinite;
+}
+@keyframes siteAuraSnow{0%{transform:translate3d(0,-2%,0)}100%{transform:translate3d(-2%,4%,0)}}
+
+@media (prefers-reduced-motion:reduce){
+  body.cosmos .site-aura .stars,body.cosmos .site-aura .stars.b,
+  body.cosmos .site-aura .milky,body.winter .site-aura .snow{animation:none}
+}
+
+/* ---------- 8. 主题切换过场（与主页同款扫光） ---------- */
+
+body.cosmos.theme-swap::after{
+  content:"";position:fixed;inset:0;z-index:140;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(140,160,255,.14) 46%,rgba(201,167,255,.12) 62%,transparent);
+  animation:siteSwap .72s cubic-bezier(.16,1,.3,1) both;
+}
+body.cyber.theme-swap::after{
+  content:"";position:fixed;inset:0;z-index:140;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(0,240,255,.12) 40%,rgba(255,46,107,.12) 62%,transparent);
+  animation:siteSwap .72s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes siteSwap{0%{opacity:0}30%{opacity:1}100%{opacity:0}}

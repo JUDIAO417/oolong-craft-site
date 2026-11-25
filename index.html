@@ -4273,6 +4273,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
     if(cur==="girls") startPetals(); else stopPetals();
     syncFab(); syncThemeUI();
     try { if(!noSave) sessionStorage.setItem(KEY, (cur || "none") + "@" + mdNow()); } catch(e){}
+    try { if(!noSave) localStorage.setItem("siteThemePersist", cur || "none"); } catch(e){}
     if(!quiet){
       toast(cur==="winter" ? "❄ 新年模式已开启（Alt+S 关闭）"
         : cur==="halloween" ? "🎃 万圣节模式已开启（Alt+H 关闭）"
