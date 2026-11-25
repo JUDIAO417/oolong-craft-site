@@ -1,2 +1,5 @@
 _shots/
 .tmp-tool-results/
+_backup/
+_opt/
+_proto/
