@@ -3118,7 +3118,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
       <div class="sp-side">
         <div class="sp-board-card">
           <div class="sp-board-head"><i></i>赞助名单</div>
-          <ul class="sp-board" id="spBoard"></ul>
+          <ul class="sp-board" id="spBoard"><li class="sp-empty">正在读取名单…</li></ul>
         </div>
       </div>
     </div>
@@ -4749,7 +4749,8 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
              '<span class="who"><b>'+name+'</b>'+msg+'</span>'+amtHtml+'</li>';
     }).join('');
   }
-  function loadBoard(){
+  function loadBoard(tries){
+    tries = tries || 0;
     return fetch(DATA+'?t='+Date.now(),{cache:'no-store'})
       .then(function(r){ if(!r.ok) throw 0; return r.json(); })
       .then(function(d){
@@ -4764,6 +4765,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
         renderBoard(list);
       })
       .catch(function(){
+        if(tries<2){ setTimeout(function(){ loadBoard(tries+1); },900); return; }
         var fb=(typeof SP_FALLBACK!=='undefined'&&SP_FALLBACK)?SP_FALLBACK:null;
         if(fb){
           var l2=Array.isArray(fb)?fb:(fb.list||[]), t2=0;
