@@ -2,6 +2,13 @@
   "target": 500,
   "list": [
     {
+      "name": "zxcvbnm",
+      "msg": "张某",
+      "amount": 10,
+      "time": "2026-11-26 22:35",
+      "tier": 3
+    },
+    {
       "name": "凝霜秋旭茶",
       "msg": "ShuangXu1108",
       "amount": 100,
