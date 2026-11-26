@@ -4912,10 +4912,11 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
     "  return s / 0.875;",
     "}",
     "float surf(float x, float t, float p, float asp){",
-    "  float base = -0.09 + p*1.31;",
-    "  float amp = 0.028 * clamp(p*3.2, 0.0, 1.0);",
-    "  float w = sin(x*asp*5.2 + t*1.5)*0.55 + sin(x*asp*10.5 - t*2.1)*0.3 + sin(x*asp*20.0 + t*3.3)*0.15;",
-    "  return base + w*amp + (fbm(vec2(x*asp*4.6, t*0.3)) - 0.5)*amp*2.1;",
+    "  float base = -0.06 + p*1.24;",
+    "  float amp = 0.042 * clamp(p*3.0, 0.0, 1.0);",
+    "  float w = sin(x*asp*6.4 + t*1.3)*0.52 + sin(x*asp*13.0 - t*1.9)*0.31 + sin(x*asp*26.0 + t*2.9)*0.17;",
+    "  float tongue = max(0.0, sin(x*asp*15.0 + t*2.2))*0.030*(0.35 + 0.85*p);",
+    "  return base + w*amp + (fbm(vec2(x*asp*5.2, t*0.34)) - 0.5)*amp*2.4 + tongue;",
     "}",
     "void main(){",
     "  vec2 uv = gl_FragCoord.xy / uRes;",
@@ -4924,9 +4925,9 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
     "  float y = 1.0 - uv.y;",
     "  float t = uT;",
     "  float sy = surf(x, t, uP, asp);",
-    "  float d = y - sy;",
-    "  if (d < -0.008) discard;",
-    "  float aa = smoothstep(-0.006, 0.002, d);",
+    "  float d = sy - y;",
+    "  if (d < -0.004) discard;",
+    "  float aa = smoothstep(-0.006, 0.004, d);",
     "  float big = fbm(vec2(x*asp*2.9, y*1.6 - t*0.5));",
     "  float fine = fbm(vec2(x*asp*9.0 + 3.0, y*2.3 - t*1.5));",
     "  float nx = sin(x*asp*9.0 + y*3.0 - t*1.1)*0.46 + sin(x*asp*19.0 - y*5.0 + t*0.7)*0.26 + (fine - 0.5)*0.55;",
@@ -4935,19 +4936,25 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
     "  vec3 R = reflect(vec3(0.0, 0.0, -1.0), N);",
     "  float upw = clamp(R.y*1.7 + 0.28, 0.0, 1.0);",
     "  vec3 env = mix(vec3(0.085, 0.052, 0.012), vec3(1.0, 0.88, 0.56), upw);",
-    "  vec3 base = mix(vec3(0.34, 0.215, 0.05), vec3(1.0, 0.85, 0.47), smoothstep(0.1, 0.92, big*0.72 + fine*0.55));",
-    "  vec3 col = mix(base, env, 0.52);",
+    "  vec3 base = mix(vec3(0.22, 0.135, 0.03), vec3(1.0, 0.85, 0.47), smoothstep(0.30, 1.02, big*0.72 + fine*0.55));",
+    "  vec3 col = mix(base, env, 0.50);",
     "  float ph = d*15.0 - t*1.9 + (fine - 0.5)*4.2 + sin(x*asp*5.0 - t*0.9)*1.8;",
     "  float rb = sin(ph);",
-    "  float near = exp(-d*3.2);",
+    "  float near = exp(-d*4.2);",
     "  col += vec3(1.0, 0.93, 0.70)*smoothstep(0.4, 1.0, rb)*near*0.3;",
     "  col -= vec3(0.06, 0.036, 0.01)*smoothstep(0.3, 1.0, -rb)*near*0.85;",
     "  vec3 L = normalize(vec3(-0.45, 0.6, 0.65));",
     "  vec3 Hd = normalize(L + vec3(0.0, 0.0, -1.0));",
-    "  col += vec3(1.0, 0.94, 0.76)*pow(max(dot(N, Hd), 0.0), 32.0)*1.5;",
-    "  col += vec3(1.0, 0.96, 0.82)*smoothstep(0.03, 0.0, d)*0.5;",
+    "  col += vec3(1.0, 0.94, 0.76)*pow(max(dot(N, Hd), 0.0), 32.0)*1.9;",
+    "  col *= 0.62 + 0.72*fbm(vec2(x*asp*28.0, y*1.4 - t*3.2));",
+    "  col *= 0.85;",
+    "  col *= 0.52 + 0.92*smoothstep(0.19, 0.015, d);",
+    "  col += vec3(1.0, 0.95, 0.80)*smoothstep(0.55, 0.95, sin(x*asp*4.0 + 1.1))*near*0.14;",
+    "  col += vec3(1.0, 0.96, 0.82)*smoothstep(0.018, 0.0, d)*0.55;",
     "  col *= mix(1.0, 0.62, smoothstep(0.35, 1.0, d));",
     "  col = mix(col, vec3(1.0, 0.985, 0.93), smoothstep(0.006, 0.0, d)*0.78);",
+    "  float blk = max(smoothstep(0.122, 0.184, d), smoothstep(0.90, 1.0, uP));",
+    "  col = mix(col, vec3(0.0), blk);",
     "  gl_FragColor = vec4(col*aa, aa);",
     "}"
   ].join(String.fromCharCode(10));
@@ -5002,19 +5009,19 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
     cv.height = Math.round(VH * scale);
     layer.classList.add("on");
     layer.setAttribute("aria-hidden", "false");
-    var DUR = 1180;
+    var DUR = 2600;
     var GL = mkGL(cv);
 
     function go(){
       if (black) black.classList.add("on");
-      setTimeout(function(){ window.location.href = GOAL; }, 900);
+      setTimeout(function(){ window.location.href = GOAL; }, 1150);
     }
     if (!GL){ setTimeout(go, 340); return; }
 
     var t0 = performance.now();
     function step(now){
       var el = now - t0;
-      var p = el < DUR ? ease(el / DUR) : 1;
+      var p = el < DUR ? Math.pow(el / DUR, 1.42) : 1;
       GL.draw(p, el / 1000);
       if (el < DUR) requestAnimationFrame(step);
       else go();
