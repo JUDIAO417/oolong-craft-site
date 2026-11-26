@@ -4739,7 +4739,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
    ========================================================= */
 (function(){
   var DATA='sponsors.json';
-  var SP_FALLBACK={"target": 500, "list": [{"name": "小张（xjaolingzi）", "msg": "", "amount": 10, "time": "2026-11-26 19:26"}, {"name": "西湖龙井茶", "msg": "", "amount": 0, "time": "2026-11-25 12:05"}]};
+  var SP_FALLBACK={"target": 500, "list": [{"name": "小张（xjaolingzi）", "msg": "", "amount": 10, "time": "2026-11-26 19:26", "tier": 3}, {"name": "西湖龙井茶", "msg": "", "amount": 0, "time": "2026-11-25 12:05"}]};
   var modal=document.getElementById('spModal');
   if(!modal) return;
   /* QR fallback */
@@ -4807,8 +4807,9 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
       var initial=esc(Array.from(String(raw))[0]||'茶');
       var msg=it&&it.msg ? '<span>'+esc(clamp(it.msg,cfg.msgMax))+'</span>' : '';
       var amt=Number(it&&it.amount)||0;
-      var amtHtml=amt>0 ? '<span class="amt">'+esc(money(amt))+'</span>' : '';
-      var cls2=cls+(amt>0?'':' noamt');
+      var tier=Number(it&&it.tier)||0;
+      var amtHtml = tier>0 ? ('<span class="amt">档位'+tier+'</span>') : (amt>0 ? '<span class="amt">'+esc(money(amt))+'</span>' : '');
+      var cls2=cls+((amt>0||tier>0)?'':' noamt');
       return '<li class="'+cls2+'"><span class="rk">'+initial+'</span>'+
              '<span class="who"><b>'+name+'</b>'+msg+'</span>'+amtHtml+'</li>';
     }).join('');
