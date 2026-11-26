@@ -67,7 +67,12 @@ h1{font-family:var(--serif);font-size:clamp(1.7rem,4vw,2.5rem);font-weight:900;m
 .fallback{position:absolute;inset:56px 0 0;display:none;align-items:center;justify-content:center;padding:1.6rem;text-align:center;background:
   radial-gradient(600px 300px at 50% 40%,rgba(120,140,255,.10),transparent 70%),rgba(5,7,10,.92)}
 .fallback.show{display:flex}
-.fb-card{max-width:520px}
+.fallback::before{content:"";position:absolute;inset:0;background-image:
+  linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:34px 34px;mask-image:radial-gradient(circle at 50% 45%,#000 20%,transparent 78%);
+  -webkit-mask-image:radial-gradient(circle at 50% 45%,#000 20%,transparent 78%)}
+.fb-card{position:relative;max-width:520px}
 .fb-id{font-family:var(--pixel);font-size:.5rem;letter-spacing:.16em;color:var(--dim);margin-bottom:.7rem}
 .fb-t{font-family:var(--serif);font-weight:900;font-size:1.2rem;margin:0 0 .55rem}
 .fb-p{color:var(--muted);font-size:.88rem;margin:0 0 1.1rem}
@@ -114,7 +119,7 @@ footer a:hover{color:var(--tea)}
       <div>
         <span class="kicker">LIVE MAP</span>
         <h1>实时地图</h1>
-        <p class="lead">主世界的地形、建筑和正在跑动的玩家，都在上面这张图上。缩放、旋转、点开玩家头像，自己逛。</p>
+        <p class="lead">主世界的地形、建筑、正在跑动的玩家，地图上都能看到。缩放、拖动、点开玩家头像，自己逛。</p>
       </div>
       <div class="tools">
         <a class="btn primary" id="openDirect" href="#" target="_blank" rel="noopener">新窗口打开地图 ↗</a>
@@ -133,9 +138,9 @@ footer a:hover{color:var(--tea)}
 
       <div class="fallback" id="fallback">
         <div class="fb-card">
-          <div class="fb-id">MAP · BLOCKED</div>
-          <h2 class="fb-t">这块画框被浏览器挡住了</h2>
-          <p class="fb-p">地图服务器只提供 <b>http</b> 访问，而本站跑在 <b>https</b> 上。按浏览器规则，https 页面不允许内嵌 http 网页，所以这里只能留一个画框。<br>点下面的按钮在新窗口打开，那边没有任何限制。</p>
+          <div class="fb-id">MAP · EXTERNAL</div>
+          <h2 class="fb-t">地图在另一个窗口打开</h2>
+          <p class="fb-p">实时地图跑在服务器自己的端口上，只认 <b>http</b>，而官网是 <b>https</b>——浏览器不允许 https 页面内嵌 http 网页，所以这一格只能留一张入口卡。<br>点开就是完整地图：缩放、拖动、看谁在线，都在那边。</p>
           <div class="fb-acts">
             <a class="btn primary" id="openDirect2" href="#" target="_blank" rel="noopener">在新窗口打开地图 ↗</a>
             <a class="btn" href="index.html">返回首页</a>
@@ -147,7 +152,7 @@ footer a:hover{color:var(--tea)}
   </div>
 
   <div class="wrap">
-    <p style="color:var(--dim);font-size:.82rem;margin:0 0 2rem">地图由服务器插件实时生成，加载可能比网页慢几秒；第一次进去转圈是正常的，等地图块渲染完就好。</p>
+    <p style="color:var(--dim);font-size:.82rem;margin:0 0 2rem">地图由服务器插件实时生成，比网页慢几秒是正常的；第一次进去转圈，等地图块渲染完就好。</p>
   </div>
 </main>
 
@@ -196,7 +201,7 @@ footer a:hover{color:var(--tea)}
   })();
 
   if(!canEmbed){
-    showFallback("本站是 https，地图是 http —— 只能新窗口打开");
+    showFallback("外链模式 · 点右上角在新窗口打开");
     return;
   }
 
