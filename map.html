@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>实时地图 · 乌龙茶的地盘</title>
+<meta name="description" content="乌龙茶的地盘服务器实时地图，在线查看主世界地形、玩家位置与建筑。">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&family=Press+Start+2P&display=swap">
+<style>
+:root{
+  --bg:#0A0E0C;--bg-soft:#0D1310;
+  --glass-bg:rgba(255,255,255,.05);--glass-bg-2:rgba(255,255,255,.085);
+  --glass-line:rgba(240,179,92,.16);--glass-line-strong:rgba(240,179,92,.38);
+  --glass-hl:inset 0 1px 0 rgba(255,255,255,.08);
+  --tea:#F0B35C;--tea-deep:#E0933A;--jade:#4ECB8D;--ink:#F2ECD9;--muted:#A9B5A6;--dim:#7C8A7F;
+  --serif:"Noto Serif SC",serif;--sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --pixel:"Press Start 2P",monospace;--wrap:1240px;
+  --r-lg:16px;--r-md:12px;--r-sm:9px;
+  --shadow-glass:0 14px 44px rgba(0,0,0,.30);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1100px 650px at 88% -8%,rgba(111,168,255,.10),transparent 60%),
+    radial-gradient(900px 620px at -8% 32%,rgba(240,179,92,.10),transparent 55%),
+    radial-gradient(760px 520px at 55% 115%,rgba(183,139,255,.09),transparent 60%),
+    var(--bg);
+  color:var(--ink);font-family:var(--sans);font-size:1rem;line-height:1.7;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.ambient span{position:absolute;border-radius:50%;filter:blur(70px);opacity:0;animation:amb 16s ease-in-out infinite}
+.ambient span:nth-child(1){width:380px;height:380px;top:-120px;left:8%;background:radial-gradient(circle,rgba(78,203,141,.20),transparent 65%)}
+.ambient span:nth-child(2){width:440px;height:440px;top:34%;right:-150px;background:radial-gradient(circle,rgba(183,139,255,.18),transparent 65%);animation-delay:-5s}
+.ambient span:nth-child(3){width:400px;height:400px;bottom:-150px;left:30%;background:radial-gradient(circle,rgba(95,212,232,.15),transparent 65%);animation-delay:-10s}
+@keyframes amb{0%,100%{opacity:0;transform:translateY(30px) scale(.95)}50%{opacity:1;transform:translateY(-24px) scale(.94)}}
+
+header{position:sticky;top:0;z-index:50;background:rgba(10,14,12,.60);-webkit-backdrop-filter:blur(18px) saturate(120%);backdrop-filter:blur(18px) saturate(120%);border-bottom:1px solid var(--glass-line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:66px;padding:0 22px}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:inherit}
+.brand svg{width:28px;height:28px}
+.brand-name{font-family:var(--serif);font-weight:900;font-size:1.05rem;line-height:1.1}
+.brand-en{font-family:var(--pixel);font-size:.5rem;color:var(--tea);margin-top:.28rem;letter-spacing:.14em;white-space:nowrap}
+.nav-right{display:flex;align-items:center;gap:.7rem}
+.nav-right a{color:var(--muted);text-decoration:none;font-size:.86rem;padding:.3rem .2rem}
+.nav-right a:hover{color:var(--ink)}
+.nav-right .cta{background:linear-gradient(135deg,rgba(247,183,92,.95),rgba(224,147,58,.85));color:#151006;font-weight:700;border-radius:999px;padding:.42rem 1rem;font-size:.84rem}
+
+.wrap{position:relative;z-index:1;max-width:var(--wrap);margin:0 auto;padding:0 20px}
+.hero{padding:2.6rem 0 1.2rem;display:flex;align-items:flex-end;justify-content:space-between;gap:1.2rem;flex-wrap:wrap}
+.kicker{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--pixel);font-size:.56rem;letter-spacing:.18em;color:var(--jade)}
+.kicker::before{content:"";width:26px;height:1px;background:currentColor;opacity:.6}
+h1{font-family:var(--serif);font-size:clamp(1.7rem,4vw,2.5rem);font-weight:900;margin:.7rem 0 .5rem;letter-spacing:.01em}
+.lead{color:var(--muted);font-size:.94rem;max-width:56ch;margin:0}
+.tools{display:flex;gap:.6rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.45rem;text-decoration:none;border-radius:999px;padding:.52rem 1rem;font-size:.85rem;border:1px solid var(--glass-line-strong);color:var(--ink);background:var(--glass-bg);cursor:pointer}
+.btn:hover{border-color:var(--tea);color:var(--tea)}
+.btn.primary{background:linear-gradient(135deg,rgba(247,183,92,.95),rgba(224,147,58,.85));color:#151006;font-weight:700;border-color:transparent}
+
+.map-shell{position:relative;margin:1.4rem 0 2.4rem;border:1px solid var(--glass-line-strong);border-radius:var(--r-lg);overflow:hidden;background:rgba(6,9,8,.72);box-shadow:var(--shadow-glass)}
+.map-bar{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;border-bottom:1px solid var(--glass-line);flex-wrap:wrap}
+.map-bar .t{font-family:var(--pixel);font-size:.55rem;letter-spacing:.14em;color:var(--jade)}
+.map-bar .sp{flex:1}
+.map-bar .hint{font-size:.76rem;color:var(--dim)}
+#mapFrame{display:block;width:100%;height:min(74vh,760px);min-height:480px;border:0;background:#05070a}
+.fallback{position:absolute;inset:56px 0 0;display:none;align-items:center;justify-content:center;padding:1.6rem;text-align:center;background:
+  radial-gradient(600px 300px at 50% 40%,rgba(120,140,255,.10),transparent 70%),rgba(5,7,10,.92)}
+.fallback.show{display:flex}
+.fb-card{max-width:520px}
+.fb-id{font-family:var(--pixel);font-size:.5rem;letter-spacing:.16em;color:var(--dim);margin-bottom:.7rem}
+.fb-t{font-family:var(--serif);font-weight:900;font-size:1.2rem;margin:0 0 .55rem}
+.fb-p{color:var(--muted);font-size:.88rem;margin:0 0 1.1rem}
+.fb-acts{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
+.code{font-family:var(--pixel);font-size:.62rem;color:var(--dim);background:rgba(255,255,255,.04);border:1px solid var(--glass-line);border-radius:8px;padding:.3rem .55rem;word-break:break-all}
+
+footer{border-top:1px solid var(--glass-line);padding:1.5rem 0 2.2rem;color:var(--dim);font-size:.82rem}
+footer a{color:var(--muted);text-decoration:none}
+footer a:hover{color:var(--tea)}
+
+@media (max-width:700px){
+  .nav{padding:0 14px}
+  .hero{padding:2rem 0 .8rem}
+  .nav-right a:not(.cta){display:none}
+  .nav-right a.keep{display:inline}
+  #mapFrame{height:68vh;min-height:380px}
+  .fallback{inset:52px 0 0}
+}
+</style>
+<link rel="stylesheet" href="assets/site-theme.css">
+<script src="assets/site-theme.js"></script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" fill="#1A211C" rx="6"/><rect x="5" y="10" width="20" height="14" fill="#F0B35C"/><rect x="5" y="10" width="20" height="4" fill="#E0933A"/><rect x="25" y="14" width="4" height="6" fill="#F0B35C"/><rect x="29" y="16" width="2" height="2" fill="#E0933A"/></svg>
+      <div><div class="brand-name">乌龙茶的地盘</div><div class="brand-en">OOLONG CRAFT</div></div>
+    </a>
+    <div class="nav-right">
+      <a class="keep" href="index.html">返回首页</a>
+      <a href="players.html">玩家</a>
+      <a href="commands.html">指令</a>
+      <a class="cta" href="download.html">下载客户端</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <span class="kicker">LIVE MAP</span>
+        <h1>实时地图</h1>
+        <p class="lead">主世界的地形、建筑和正在跑动的玩家，都在上面这张图上。缩放、旋转、点开玩家头像，自己逛。</p>
+      </div>
+      <div class="tools">
+        <a class="btn primary" id="openDirect" href="#" target="_blank" rel="noopener">新窗口打开地图 ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="map-shell">
+      <div class="map-bar">
+        <span class="t">WORLD · 主世界</span>
+        <span class="sp"></span>
+        <span class="hint" id="mapHint">加载中…</span>
+      </div>
+      <iframe id="mapFrame" title="乌龙茶的地盘 · 实时地图" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
+
+      <div class="fallback" id="fallback">
+        <div class="fb-card">
+          <div class="fb-id">MAP · BLOCKED</div>
+          <h2 class="fb-t">这块画框被浏览器挡住了</h2>
+          <p class="fb-p">地图服务器只提供 <b>http</b> 访问，而本站跑在 <b>https</b> 上。按浏览器规则，https 页面不允许内嵌 http 网页，所以这里只能留一个画框。<br>点下面的按钮在新窗口打开，那边没有任何限制。</p>
+          <div class="fb-acts">
+            <a class="btn primary" id="openDirect2" href="#" target="_blank" rel="noopener">在新窗口打开地图 ↗</a>
+            <a class="btn" href="index.html">返回首页</a>
+          </div>
+          <p class="fb-p" style="margin:1.1rem 0 0;font-size:.78rem;color:var(--dim)">地图地址：<span class="code" id="fbUrl"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <p style="color:var(--dim);font-size:.82rem;margin:0 0 2rem">地图由服务器插件实时生成，加载可能比网页慢几秒；第一次进去转圈是正常的，等地图块渲染完就好。</p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    乌龙茶的地盘 · OOLONG CRAFT —— 地图数据实时取自服务器，仅作参考。<br>
+    <a href="index.html">返回首页</a> · <a href="download.html">下载客户端</a> · <a href="players.html">玩家名单</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  /* ===== 地图地址 =====
+     默认用服务器直连的 http 地址：浏览器在 https 页面里会拦内嵌。
+     如果你以后有了 https 反代（例如 Cloudflare Worker 转发同一个端口），
+     把下面 MAP_HTTPS 填上那个地址，页面就会自动改成真内嵌。 */
+  var MAP_HTTP  = "http://mp1.i9idc.com:12090/?world=minecraft_overworld&zoom=4&x=4&z=84";
+  var MAP_HTTPS = "";
+
+  var src = MAP_HTTPS || MAP_HTTP;
+  document.getElementById("openDirect").href = src;
+  document.getElementById("openDirect2").href = src;
+  document.getElementById("fbUrl").textContent = src;
+
+  var frame = document.getElementById("mapFrame");
+  var fb = document.getElementById("fallback");
+  var hint = document.getElementById("mapHint");
+
+  function showFallback(msg){
+    fb.classList.add("show");
+    hint.textContent = msg || "已切换到新窗口打开";
+    frame.style.visibility = "hidden";
+  }
+  function showFrame(){
+    fb.classList.remove("show");
+    frame.style.visibility = "visible";
+  }
+
+  var canEmbed = (function(){
+    try{
+      var u = new URL(src);
+      if(location.protocol === "https:" && u.protocol === "http:") return false;
+      return true;
+    }catch(e){ return false; }
+  })();
+
+  if(!canEmbed){
+    showFallback("本站是 https，地图是 http —— 只能新窗口打开");
+    return;
+  }
+
+  var loaded = false;
+  frame.addEventListener("load", function(){ loaded = true; showFrame(); hint.textContent = "已加载"; });
+  /* 1.8 秒还没 load：多半是被拦或服务器没响应，给出退路 */
+  setTimeout(function(){
+    if(!loaded){ showFallback("地图没加载出来，点按钮在新窗口打开"); }
+  }, 1800);
+
+  try{ frame.src = src; }catch(e){ showFallback("地址无效"); }
+})();
+</script>
+</body>
+</html>

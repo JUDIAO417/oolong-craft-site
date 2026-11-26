@@ -2691,6 +2691,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
       <a href="#play">玩法</a>
       <a href="#gallery">纪念馆</a>
       <a href="players.html">玩家</a>
+      <a href="map.html">地图</a>
       <a href="#join">加入</a>
       <a href="#faq">问答</a>
     </nav>
@@ -2712,6 +2713,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
   <a href="#play">玩法</a>
   <a href="#gallery">纪念馆</a>
   <a href="players.html">玩家</a>
+  <a href="map.html">地图</a>
   <a href="#join">加入</a>
   <a href="#faq">问答</a>
   <a class="btn btn-primary" href="download.html">下载中心</a>
@@ -2990,12 +2992,6 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
   <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><ellipse cx="12" cy="13.4" rx="8.2" ry="7"/><path d="M6.2 10.2 Q12 12.6 17.8 10.2"/><path d="M9.4 11.6 L10.2 15.4 L7.6 15"/> <path d="M14.6 11.6 L13.8 15.4 L16.4 15"/><path d="M7.4 18.6 Q9.4 20.4 12 20.4 Q14.6 20.4 16.6 18.6"/><path d="M12 6.4 L11.6 3.6 L13.6 3.2 L13.4 6.2"/></svg>
   <span>南瓜灯</span>
 </button>
-<button class="srv-fab" id="srvFab" title="服务器状态"><span>服务器状态</span><span class="pcount" id="srvPc">v10</span></button>
-  <div class="srv-win" id="srvWin">
-    <div class="srv-head" id="srvHead"><span class="t" style="visibility:hidden"></span><span class="lbl" style="visibility:hidden"></span><button class="srv-close" id="srvClose" aria-label="关闭">×</button></div>
-    <div class="srv-body" id="srvBody"><iframe id="srvFrame" title="服务器状态" style="display:block;width:100%;height:400px;border:0;background:transparent"></iframe></div>
-    <div class="srv-foot"><span class="ts" id="srvTs"></span><button class="srv-ref" id="srvRef">刷新</button></div>
-  </div>
 
 <!-- ===== 万圣节模式：页脚墓园场景（页面自绘） ===== -->
 <div class="hn-scene" aria-hidden="true"><svg class="hn-svg" viewBox="0 0 1440 340" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><defs>
@@ -3471,53 +3467,6 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
     .then(function(m){ renderGal(m); })
     .catch(function(){ renderGal([]); });
 
-  /* ===== 服务器状态悬浮窗（后台生成 status.html，iframe 直接显示，零数据请求） ===== */
-  var srvWin=document.getElementById("srvWin"), srvFab=document.getElementById("srvFab"),
-      srvFrame=document.getElementById("srvFrame"), srvRef=document.getElementById("srvRef");
-  var SRV_PAGE="https://judiao417.github.io/oolong-craft-site/status.html";
-  var SRV_RAW="https://raw.githubusercontent.com/JUDIAO417/oolong-craft-site/status/status.html";
-  function loadSrv(){
-    var tried=false;
-    srvFrame.onload=function(){
-      if(tried) return;
-      try{
-        var t=srvFrame.contentDocument&&srvFrame.contentDocument.body?srvFrame.contentDocument.body.textContent:"";
-        if(t.indexOf("乌龙茶")<0&&(/404|page not found/i.test(t)||t.trim()==="")){
-          tried=true; srvFrame.src=SRV_RAW+"?r="+Date.now();
-        }
-      }catch(e){ tried=true; srvFrame.src=SRV_RAW+"?r="+Date.now(); }
-    };
-    tried=false;
-    srvFrame.src=SRV_PAGE+"?r="+Date.now();
-  }
-  function srvOpen(){ srvWin.classList.add("open"); loadSrv(); }
-  function srvClose(){ srvWin.classList.remove("open"); }
-  srvFab.addEventListener("click",function(){ srvWin.classList.contains("open")?srvClose():srvOpen(); });
-  var srvCloseBtn=document.getElementById("srvClose");
-  srvCloseBtn.addEventListener("click",srvClose);
-  srvCloseBtn.addEventListener("pointerup",function(e){ e.stopPropagation(); setTimeout(srvClose,0); });
-  srvRef.addEventListener("click",loadSrv);
-  /* 拖动窗口（桌面鼠标 + 手机触摸） */
-  (function(){
-    var hd=document.getElementById("srvHead"), sx=0, sy=0, ox=0, oy=0, drag=false;
-    hd.addEventListener("pointerdown",function(e){
-      if(e.target&&e.target.closest&&e.target.closest(".srv-close")) return;
-      drag=true; sx=e.clientX; sy=e.clientY;
-      var r=srvWin.getBoundingClientRect(); ox=r.left; oy=r.top;
-      hd.setPointerCapture(e.pointerId);
-    });
-    hd.addEventListener("pointermove",function(e){
-      if(!drag) return;
-      var nx=ox+(e.clientX-sx), ny=oy+(e.clientY-sy);
-      nx=Math.max(8,Math.min(window.innerWidth-8,Math.max(8,nx)));
-      ny=Math.max(8,Math.min(window.innerHeight-8,Math.max(8,ny)));
-      srvWin.style.left=nx+"px"; srvWin.style.top=ny+"px"; srvWin.style.right="auto"; srvWin.style.bottom="auto";
-    });
-    hd.addEventListener("pointerup",function(){ drag=false; });
-    hd.addEventListener("pointercancel",function(){ drag=false; });
-  })();
-  /* 按钮常显（状态由 status.html 内联显示，不依赖前端读取） */
-  srvFab.style.display="flex";
 
   /* 灯箱（支持多图浏览） */
   var lb = document.getElementById("lb");
@@ -4515,7 +4464,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
     Array.prototype.forEach.call(ms,function(m){ walk(m); });
     var fs=document.querySelectorAll("footer");
     Array.prototype.forEach.call(fs,function(f){ Array.prototype.forEach.call(f.children, walk); });
-    ["srvFab","winterFab","quakeFab"].forEach(function(id){
+    ["winterFab","quakeFab"].forEach(function(id){
       var e=document.getElementById(id);
       if(e&&isVis(e)&&out.indexOf(e)<0) out.push(e);
     });
