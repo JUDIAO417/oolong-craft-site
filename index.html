@@ -835,6 +835,41 @@ img,a{-webkit-user-drag:none}
 }
 .drawer .nav-god{display:flex;justify-content:center;margin:.5rem 0 .2rem}
 
+/* ============ 乌叶主页：液金入口按钮 ============ */
+.nav-leaf{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;
+  padding:.5rem 1.05rem;border-radius:999px;cursor:pointer;font-family:inherit;
+  font-size:.9rem;font-weight:700;letter-spacing:.06em;color:#20170A;white-space:nowrap;
+  border:1px solid rgba(255,231,158,.92);
+  background:linear-gradient(135deg,#FFF3D2 0%,#F5C976 34%,#DDA23E 62%,#A8711D 100%);
+  box-shadow:0 6px 18px -8px rgba(160,105,30,.7),0 0 20px -8px rgba(255,214,130,.6),0 0 0 1px rgba(255,248,226,.35) inset;
+  text-shadow:0 1px 0 rgba(255,250,232,.55);
+  animation:nlBreath 3.4s ease-in-out infinite;
+  transition:transform .25s cubic-bezier(.2,.9,.3,1),box-shadow .25s;
+}
+.nav-leaf:hover{transform:translateY(-1px) scale(1.045);
+  box-shadow:0 8px 24px -6px rgba(160,105,30,.82),0 0 30px -6px rgba(255,214,130,.8),0 0 0 1px rgba(255,250,236,.5) inset}
+.nav-leaf:focus-visible{outline:2px solid rgba(240,179,92,.95);outline-offset:3px}
+@keyframes nlBreath{
+  0%,100%{box-shadow:0 6px 18px -8px rgba(160,105,30,.7),0 0 20px -8px rgba(255,214,130,.6),0 0 0 1px rgba(255,248,226,.35) inset}
+  50%{box-shadow:0 6px 20px -6px rgba(160,105,30,.85),0 0 30px -6px rgba(255,214,130,.85),0 0 0 1px rgba(255,250,236,.5) inset}
+}
+.nav-leaf .nl-txt{position:relative;z-index:2}
+.nav-leaf .nl-fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;z-index:1}
+.nav-leaf .nl-fx::before{content:"";position:absolute;inset:-40% -10%;
+  background:linear-gradient(104deg,transparent 34%,rgba(255,255,246,.62) 50%,transparent 66%);
+  transform:translateX(-130%);animation:nlSheen 4.6s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes nlSheen{0%,58%{transform:translateX(-130%)}84%,100%{transform:translateX(130%)}}
+.drawer .nav-leaf{display:flex;justify-content:center;margin:.5rem 0 .2rem}
+@media (max-width:900px){ .nav-leaf{font-size:.84rem;padding:.46rem .92rem} }
+
+/* 液金洗屏层 */
+.gold-wash{position:fixed;inset:0;z-index:400;pointer-events:none;visibility:hidden}
+.gold-wash.on{visibility:visible}
+.gold-wash canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+.gw-black{position:absolute;inset:0;background:#050403;opacity:0;transition:opacity .85s linear}
+.gw-black.on{opacity:1}
+
 /* 星门遮罩：整页变暗 · 星光环绕 · 半透明卡片 */
 .sg{position:fixed;inset:0;z-index:300;display:none}
 .sg.on{display:block}
@@ -2689,6 +2724,10 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
         <span class="ng-fx" aria-hidden="true"></span>
         <span class="ng-txt">星神的世界</span>
       </button>
+      <button class="nav-leaf" id="navLeaf" type="button" aria-label="进入乌叶主页">
+        <span class="nl-fx" aria-hidden="true"></span>
+        <span class="nl-txt">乌叶主页</span>
+      </button>
       <a href="#about">关于</a>
       <a href="#play">玩法</a>
       <a href="#gallery">纪念馆</a>
@@ -2710,6 +2749,10 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
   <button class="nav-god" id="navGod2" type="button" aria-haspopup="dialog" aria-controls="sg">
     <span class="ng-fx" aria-hidden="true"></span>
     <span class="ng-txt">星神的世界</span>
+  </button>
+  <button class="nav-leaf" id="navLeaf2" type="button" aria-label="进入乌叶主页">
+    <span class="nl-fx" aria-hidden="true"></span>
+    <span class="nl-txt">乌叶主页</span>
   </button>
   <a href="#about">关于</a>
   <a href="#play">玩法</a>
@@ -4835,6 +4878,153 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
   loadBoard();
 })();
 
+</script>
+
+<!-- 液金洗屏：进入乌叶主页 -->
+<div class="gold-wash" id="goldWash" aria-hidden="true">
+  <canvas id="gwCanvas"></canvas>
+  <div class="gw-black"></div>
+</div>
+<script>
+(function(){
+  var GOAL = "https://judiao417.github.io/wuye-mc-hall/";
+  var layer = document.getElementById("goldWash");
+  var cv = document.getElementById("gwCanvas");
+  var black = layer ? layer.querySelector(".gw-black") : null;
+  var b1 = document.getElementById("navLeaf");
+  var b2 = document.getElementById("navLeaf2");
+  var busy = false;
+
+  var FS = [
+    "precision mediump float;",
+    "uniform vec2 uRes; uniform float uT; uniform float uP;",
+    "float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }",
+    "float noise(vec2 p){",
+    "  vec2 i = floor(p); vec2 f = fract(p);",
+    "  vec2 u = f*f*(3.0-2.0*f);",
+    "  return mix(mix(hash(i), hash(i+vec2(1.0,0.0)), u.x), mix(hash(i+vec2(0.0,1.0)), hash(i+vec2(1.0,1.0)), u.x), u.y);",
+    "}",
+    "float fbm(vec2 p){",
+    "  float s = 0.0, a = 0.5;",
+    "  s += a*noise(p); p *= 2.03; a *= 0.5;",
+    "  s += a*noise(p); p *= 2.03; a *= 0.5;",
+    "  s += a*noise(p);",
+    "  return s / 0.875;",
+    "}",
+    "float surf(float x, float t, float p, float asp){",
+    "  float base = -0.09 + p*1.31;",
+    "  float amp = 0.028 * clamp(p*3.2, 0.0, 1.0);",
+    "  float w = sin(x*asp*5.2 + t*1.5)*0.55 + sin(x*asp*10.5 - t*2.1)*0.3 + sin(x*asp*20.0 + t*3.3)*0.15;",
+    "  return base + w*amp + (fbm(vec2(x*asp*4.6, t*0.3)) - 0.5)*amp*2.1;",
+    "}",
+    "void main(){",
+    "  vec2 uv = gl_FragCoord.xy / uRes;",
+    "  float asp = uRes.x / uRes.y;",
+    "  float x = uv.x;",
+    "  float y = 1.0 - uv.y;",
+    "  float t = uT;",
+    "  float sy = surf(x, t, uP, asp);",
+    "  float d = y - sy;",
+    "  if (d < -0.008) discard;",
+    "  float aa = smoothstep(-0.006, 0.002, d);",
+    "  float big = fbm(vec2(x*asp*2.9, y*1.6 - t*0.5));",
+    "  float fine = fbm(vec2(x*asp*9.0 + 3.0, y*2.3 - t*1.5));",
+    "  float nx = sin(x*asp*9.0 + y*3.0 - t*1.1)*0.46 + sin(x*asp*19.0 - y*5.0 + t*0.7)*0.26 + (fine - 0.5)*0.55;",
+    "  float ny = cos(y*6.0 - t*0.85)*0.36 + sin(x*asp*6.0 + y*8.0 + t*0.6)*0.26 + (fine - 0.5)*0.55;",
+    "  vec3 N = normalize(vec3(nx*0.55, ny*0.55, 0.4));",
+    "  vec3 R = reflect(vec3(0.0, 0.0, -1.0), N);",
+    "  float upw = clamp(R.y*1.7 + 0.28, 0.0, 1.0);",
+    "  vec3 env = mix(vec3(0.085, 0.052, 0.012), vec3(1.0, 0.88, 0.56), upw);",
+    "  vec3 base = mix(vec3(0.34, 0.215, 0.05), vec3(1.0, 0.85, 0.47), smoothstep(0.1, 0.92, big*0.72 + fine*0.55));",
+    "  vec3 col = mix(base, env, 0.52);",
+    "  float ph = d*15.0 - t*1.9 + (fine - 0.5)*4.2 + sin(x*asp*5.0 - t*0.9)*1.8;",
+    "  float rb = sin(ph);",
+    "  float near = exp(-d*3.2);",
+    "  col += vec3(1.0, 0.93, 0.70)*smoothstep(0.4, 1.0, rb)*near*0.3;",
+    "  col -= vec3(0.06, 0.036, 0.01)*smoothstep(0.3, 1.0, -rb)*near*0.85;",
+    "  vec3 L = normalize(vec3(-0.45, 0.6, 0.65));",
+    "  vec3 Hd = normalize(L + vec3(0.0, 0.0, -1.0));",
+    "  col += vec3(1.0, 0.94, 0.76)*pow(max(dot(N, Hd), 0.0), 32.0)*1.5;",
+    "  col += vec3(1.0, 0.96, 0.82)*smoothstep(0.03, 0.0, d)*0.5;",
+    "  col *= mix(1.0, 0.62, smoothstep(0.35, 1.0, d));",
+    "  col = mix(col, vec3(1.0, 0.985, 0.93), smoothstep(0.006, 0.0, d)*0.78);",
+    "  gl_FragColor = vec4(col*aa, aa);",
+    "}"
+  ].join(String.fromCharCode(10));
+
+  function mkGL(canvas){
+    var gl = null;
+    try { gl = canvas.getContext("webgl", { alpha: true, antialias: false }); } catch(e) {}
+    if (!gl) return null;
+    function mk(t, src){
+      var sh = gl.createShader(t);
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) return null;
+      return sh;
+    }
+    var v = mk(gl.VERTEX_SHADER, "attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }");
+    var f = mk(gl.FRAGMENT_SHADER, FS);
+    if (!v || !f) return null;
+    var pr = gl.createProgram();
+    gl.attachShader(pr, v); gl.attachShader(pr, f); gl.linkProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+    gl.useProgram(pr);
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(pr, "a");
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    var uRes = gl.getUniformLocation(pr, "uRes");
+    var uT = gl.getUniformLocation(pr, "uT");
+    var uP = gl.getUniformLocation(pr, "uP");
+    gl.clearColor(0, 0, 0, 0);
+    return { draw: function(p, t){
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uT, t);
+      gl.uniform1f(uP, p);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }};
+  }
+
+  function ease(t){ return t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
+
+  function enter(){
+    if (busy || !layer || !cv) return;
+    busy = true;
+    var VW = window.innerWidth, VH = window.innerHeight;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var scale = (VW < 820) ? dpr * 0.85 : dpr;
+    cv.width = Math.round(VW * scale);
+    cv.height = Math.round(VH * scale);
+    layer.classList.add("on");
+    layer.setAttribute("aria-hidden", "false");
+    var DUR = 1180;
+    var GL = mkGL(cv);
+
+    function go(){
+      if (black) black.classList.add("on");
+      setTimeout(function(){ window.location.href = GOAL; }, 900);
+    }
+    if (!GL){ setTimeout(go, 340); return; }
+
+    var t0 = performance.now();
+    function step(now){
+      var el = now - t0;
+      var p = el < DUR ? ease(el / DUR) : 1;
+      GL.draw(p, el / 1000);
+      if (el < DUR) requestAnimationFrame(step);
+      else go();
+    }
+    requestAnimationFrame(step);
+  }
+
+  if (b1) b1.addEventListener("click", function(e){ e.preventDefault(); enter(); });
+  if (b2) b2.addEventListener("click", function(e){ e.preventDefault(); enter(); });
+})();
 </script>
 </body>
 </html>
