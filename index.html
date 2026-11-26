@@ -2707,9 +2707,48 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
   .sp-bar i::after,.sp-magnet::before,.sp-magnet::after,.sp-board-head i,
   .sp-scan,.sp-badge,.sp-wait .dot{animation:none}
 }
+
+/* ===== 移动端 / 低性能设备：轻量渲染（关闭实时模糊与混合模式，避免整页闪烁） ===== */
+@media (max-width:900px){
+  /* 玻璃与实时模糊全部停用 */
+  *,*::before,*::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  header{background:rgba(8,11,9,.94)!important}
+  .drawer{background:rgba(8,11,9,.97)!important}
+  footer{background:rgba(11,16,13,.96)!important}
+  /* 全屏氛围层：去掉 blur / blend / 遮罩，只留静态底色 */
+  .ambient,.ambient *,.cosmos-fx,.cosmos-fx *,.cyber-fx,.cyber-fx *{
+    filter:none!important;mix-blend-mode:normal!important;
+    -webkit-mask-image:none!important;mask-image:none!important;
+    will-change:auto!important;
+  }
+  .ambient::after,.ambient::before,
+  body.cosmos::before,
+  body.cosmos .cs-milky,body.cosmos .cs-nebula,body.cosmos .cs-vignette,
+  body.cosmos h1::after,
+  body.cosmos .cs-stars.b{display:none!important}
+  body.cosmos .cs-stars{animation:none!important;opacity:.9!important}
+  body.cosmos .cs-shoot i{display:none!important}
+  body.cosmos .hero-bg::after{opacity:.5!important}
+  /* 装饰动画降为静态，减少合成层重建 */
+  .cube,.twinkle,.sp-scan,.sp-badge,.sp-bar i::after{animation:none!important}
+}
+@media (max-width:900px) and (prefers-reduced-motion:no-preference){
+  /* 保留极少量必要动效 */
+  .boot .tap-hint{animation-duration:6s}
+}
+/* 低配设备（JS 打标）同样走轻量渲染 */
+html.perf-lite .ambient,html.perf-lite .ambient *,
+html.perf-lite .cosmos-fx,html.perf-lite .cosmos-fx *,
+html.perf-lite .cyber-fx,html.perf-lite .cyber-fx *{
+  filter:none!important;mix-blend-mode:normal!important;-webkit-mask-image:none!important;mask-image:none!important;will-change:auto!important;
+}
+html.perf-lite .ambient::after,html.perf-lite .ambient::before,html.perf-lite body.cosmos::before{display:none!important}
+html.perf-lite *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.perf-lite .cs-shoot i,html.perf-lite .cs-stars.b{display:none!important}
 </style>
 </head>
 <body>
+<script>(function(){try{var hc=navigator.hardwareConcurrency||8,dm=navigator.deviceMemory||8;if(hc<=4||dm<=4){document.documentElement.classList.add('perf-lite');}}catch(e){}})();</script>
 <div class="theme-dock" id="themeDock">
   <button class="th-btn" id="thBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="thMenu" title="切换季节主题">
     <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.4" y="4.2" width="6.8" height="6.8" rx="1.6" fill="#4ECB8D"/><rect x="9.8" y="3.2" width="6.8" height="6.8" rx="1.6" fill="#FF8A32"/><rect x="6" y="10.6" width="6.8" height="6.8" rx="1.6" fill="#9FBEFF"/></svg>
@@ -5113,6 +5152,10 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
 (function(){
   var btn = document.getElementById("navLeaf");
   if (!btn) return;
+  /* 手机 / 低配设备不做实时液态渲染，避免耗电与合成闪烁 */
+  if (window.matchMedia && window.matchMedia("(max-width:900px)").matches) return;
+  var hc = navigator.hardwareConcurrency || 8, dm = navigator.deviceMemory || 8;
+  if (hc <= 4 || dm <= 4) return;
   var cv = document.createElement("canvas");
   cv.className = "nl-lq";
   cv.setAttribute("aria-hidden", "true");
