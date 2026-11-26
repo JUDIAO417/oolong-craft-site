@@ -4739,7 +4739,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
    ========================================================= */
 (function(){
   var DATA='sponsors.json';
-  var SP_FALLBACK={"target": 500, "list": [{"name": "小张（xjaolingzi）", "msg": "", "amount": 10, "time": "2026-11-26 19:26", "tier": 3}, {"name": "西湖龙井茶", "msg": "", "amount": 0, "time": "2026-11-25 12:05"}]};
+  var SP_FALLBACK={"target": 500, "list": [{"name": "小张（xjaolingzi）", "msg": "", "amount": 10, "time": "2026-11-26 19:26", "tier": 3}, {"name": "西湖龙井茶", "msg": "", "amount": 0, "time": "2026-11-25 12:05"}], "tiers": {"1": 1, "2": 5, "3": 10, "4": 20, "5": 50, "6": 100}};
   var modal=document.getElementById('spModal');
   if(!modal) return;
   /* QR fallback */
@@ -4761,6 +4761,13 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
       pThx=document.getElementById('spPanelThanks'),
       doneBtn=document.getElementById('spDone');
 
+  var TIER_PRICE={1:1,2:5,3:10,4:20,5:50,6:100};   /* 档位一~六：1/5/10/20/50/100 元 */
+  function amtOf(it){
+    var a=Number(it&&it.amount)||0;
+    if(a>0) return a;
+    var t=Number(it&&it.tier)||0;
+    return TIER_PRICE[t]||0;
+  }
   var cfg={target:Number(sec&&sec.getAttribute('data-target'))||500,nameMax:16,msgMax:60};
   var lastFocus=null;
 
@@ -4806,7 +4813,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
       var name=esc(clamp(raw,cfg.nameMax));
       var initial=esc(Array.from(String(raw))[0]||'茶');
       var msg=it&&it.msg ? '<span>'+esc(clamp(it.msg,cfg.msgMax))+'</span>' : '';
-      var amt=Number(it&&it.amount)||0;
+      var amt=amtOf(it);
       var tier=Number(it&&it.tier)||0;
       var amtHtml = tier>0 ? ('<span class="amt">档位'+tier+'</span>') : (amt>0 ? '<span class="amt">'+esc(money(amt))+'</span>' : '');
       var cls2=cls+((amt>0||tier>0)?'':' noamt');
@@ -4823,7 +4830,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
         if(!Array.isArray(d) && d && typeof d.target==='number' && d.target>0) cfg.target=d.target;
         var total=0,paid=0;
         for(var i=0;i<list.length;i++){
-          var a=Number(list[i] && list[i].amount)||0;
+          var a=amtOf(list[i]);
           total+=a; if(a>0) paid++;
         }
         paintProgress(total,cfg.target,paid);
@@ -4836,7 +4843,7 @@ body.cosmos.theme-swap::after{content:"";position:fixed;inset:0;z-index:140;poin
           var l2=Array.isArray(fb)?fb:(fb.list||[]), t2=0;
           if(!Array.isArray(fb)&&typeof fb.target==='number'&&fb.target>0) cfg.target=fb.target;
           var p2=0;
-          for(var j=0;j<l2.length;j++){ var b=Number(l2[j]&&l2[j].amount)||0; t2+=b; if(b>0) p2++; }
+          for(var j=0;j<l2.length;j++){ var b=amtOf(l2[j]); t2+=b; if(b>0) p2++; }
           paintProgress(t2,cfg.target,p2); renderBoard(l2); return;
         }
         if(board) board.innerHTML='<li class="sp-empty">名单暂时读不到——本地双击打开 html 时会这样，放到服务器就正常。</li>';
